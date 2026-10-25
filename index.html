@@ -2,16 +2,47 @@
 <html lang="zh-HK" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- iPad / iOS Safari 加至主畫面 (PWA) 隱藏 Address Bar 必備設定 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="星光琴院">
+    <meta name="theme-color" content="#0f172a">
+
+    <!-- Web App Manifest (Data URI 內嵌，支援單一 HTML 檔案變 PWA Standalone 全螢幕) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"星光琴院 StarKeys — 互動鋼琴學堂","short_name":"星光琴院","display":"standalone","orientation":"any","background_color":"#020617","theme_color":"#0f172a","icons":[{"src":"data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%234f46e5%22/><text x=%2250%22 y=%2268%22 font-size=%2258%22 text-anchor=%22middle%22>🎹</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}'>
+    <link rel="apple-touch-icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="%234f46e5"/><text x="50" y="68" font-size="58" text-anchor="middle">🎹</text></svg>'>
+
     <title>星光琴院 StarKeys — 入門至初中階互動鋼琴學堂</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body {
+        html, body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang HK", "Microsoft JhengHei", sans-serif;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-text-size-adjust: 100%;
             touch-action: manipulation;
+            overscroll-behavior: none;
+            overflow: hidden;
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100dvh;
+        }
+
+        /* 鋼琴鍵盤與五線譜徹底禁用 Safari 雙擊放大 (Double-tap to zoom) */
+        #pianoKeyboard, .white-key, .black-key, #sheetCanvas {
+            touch-action: none !important;
+            -webkit-user-select: none !important;
+            -webkit-touch-callout: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+        .white-key *, .black-key * {
+            pointer-events: none;
         }
 
         html.light body { background-color: #f1f5f9; color: #0f172a; }
@@ -1247,10 +1278,7 @@
                         <div class="text-xs sm:text-sm font-black ${isLeftRange ? 'text-purple-700' : 'text-blue-600'} leading-none">${keyInfo.jianpu}</div>
                         <div class="text-[9px] font-bold text-slate-600">${keyInfo.note}</div>
                     `;
-                    keyEl.addEventListener('pointerdown', (e) => {
-                        e.preventDefault();
-                        handleUserPlayedNote(keyInfo.midi, 'virtual');
-                    });
+                    bindPianoKeyEvents(keyEl, keyInfo.midi, false);
                     keyboardContainer.appendChild(keyEl);
                     keyElements[keyInfo.midi] = keyEl;
                     whiteIndex++;
@@ -1265,15 +1293,40 @@
                         <div class="finger-bubble hidden mb-auto mt-1.5 w-5 h-5 rounded-full font-black text-[9px] items-center justify-center shadow"></div>
                         <div class="text-[8px] text-amber-300 font-bold leading-none">${keyInfo.jianpu}</div>
                     `;
-                    blackEl.addEventListener('pointerdown', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleUserPlayedNote(keyInfo.midi, 'virtual');
-                    });
+                    bindPianoKeyEvents(blackEl, keyInfo.midi, true);
                     keyboardContainer.appendChild(blackEl);
                     keyElements[keyInfo.midi] = blackEl;
                 }
             });
+        }
+
+        // 專為 Safari 防雙擊 Zoom 設計嘅琴鍵觸控綁定器
+        function bindPianoKeyEvents(el, midi, isBlack) {
+            let lastTouchTime = 0;
+            el.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // 關鍵：阻止 Safari 觸發雙擊放大 (Double-tap Zoom)
+                if (isBlack) e.stopPropagation();
+                lastTouchTime = Date.now();
+                el.classList.add('key-pressed');
+                handleUserPlayedNote(midi, 'virtual');
+            }, { passive: false });
+
+            el.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                el.classList.remove('key-pressed');
+            }, { passive: false });
+
+            el.addEventListener('pointerdown', (e) => {
+                if (e.pointerType === 'touch' || Date.now() - lastTouchTime < 450) return;
+                e.preventDefault();
+                if (isBlack) e.stopPropagation();
+                el.classList.add('key-pressed');
+                handleUserPlayedNote(midi, 'virtual');
+            });
+
+            el.addEventListener('pointerup', () => el.classList.remove('key-pressed'));
+            el.addEventListener('pointerleave', () => el.classList.remove('key-pressed'));
+            el.addEventListener('dblclick', (e) => e.preventDefault());
         }
 
         function updateKeyboardHighlights() {
@@ -2362,6 +2415,26 @@
                 trigger(e);
             });
         }
+
+        // 全局攔截 iOS / iPadOS Safari 雙擊放大 (Double-tap Zoom) 與雙指縮放手勢
+        let lastGlobalTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastGlobalTouchEnd <= 320) {
+                if (!e.target.closest('.overflow-y-auto, input, textarea, select')) {
+                    e.preventDefault();
+                }
+            }
+            lastGlobalTouchEnd = now;
+        }, { passive: false });
+
+        document.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('gesturestart', (e) => {
+            e.preventDefault();
+        }, { passive: false });
 
         let appInitialized = false;
         function initApp() {
