@@ -90,13 +90,29 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         body.immersive-mode #topStatsRow { display: none !important; }
+
+        /* Safari 頂部按鈕觸控修復：確保不會被橫向捲軸或系統手勢吞掉點擊 */
+        header, header button {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+        }
+        header button {
+            position: relative;
+            z-index: 40;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        header button * {
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] w-screen overflow-hidden flex flex-col justify-between select-none transition-colors duration-200">
 
-    <!-- 頂部導航列 -->
-    <header class="bg-slate-900/95 border-b border-slate-800 px-2.5 py-1.5 shrink-0 z-30 transition-colors duration-200">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-1.5">
+    <!-- 頂部導航列 (針對 Safari 優化觸控層級與排版) -->
+    <header class="relative bg-slate-900 border-b border-slate-800 px-2.5 py-1.5 shrink-0 z-40 transition-colors duration-200">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-1.5">
             <!-- 左：Logo + 學員檔案切換 -->
             <div class="flex items-center gap-1.5 shrink-0">
                 <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-amber-400 flex items-center justify-center shadow shrink-0">
@@ -107,7 +123,7 @@
                     <p class="text-[9px] text-amber-500 font-semibold">入門至初中階學堂</p>
                 </div>
 
-                <button id="openProfileModalBtn" class="theme-surface flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2 py-1 rounded-xl transition shrink-0">
+                <button type="button" id="openProfileModalBtn" class="theme-surface flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 px-2 py-1 rounded-xl transition shrink-0">
                     <span id="currentAvatar" class="text-base">🦊</span>
                     <div class="text-left leading-none">
                         <div class="flex items-center gap-1">
@@ -121,45 +137,45 @@
                 </button>
             </div>
 
-            <!-- 中：關卡選擇 + 簡譜庫 + 和弦室 + 模式切換 -->
-            <div class="flex items-center gap-1 min-w-0 flex-1 justify-center overflow-x-auto no-scrollbar py-0.5">
-                <button id="openCourseMapBtn" class="theme-surface flex items-center gap-1 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-500 dark:text-indigo-200 border border-indigo-500/40 font-bold text-[11px] px-2.5 py-1.5 rounded-xl transition min-w-0 max-w-[180px] sm:max-w-[210px] shrink-0">
+            <!-- 中：關卡選擇 + 簡譜庫 + 和弦室 + 模式切換 (移除會卡死 Safari 觸控的 overflow-x-auto) -->
+            <div class="flex flex-wrap items-center gap-1 justify-center py-0.5">
+                <button type="button" id="openCourseMapBtn" class="theme-surface flex items-center gap-1 bg-indigo-600/20 hover:bg-indigo-600/30 active:scale-95 text-indigo-500 dark:text-indigo-200 border border-indigo-500/40 font-bold text-[11px] px-2.5 py-1.5 rounded-xl transition max-w-[175px] sm:max-w-[210px] shrink-0">
                     <span class="shrink-0">🗺️</span>
                     <span id="currentStageBtnLabel" class="truncate">第 1 關：認識中央 C</span>
                     <span class="text-[9px] opacity-70 shrink-0">▼</span>
                 </button>
 
-                <button id="openCustomSongModalBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0">
+                <button type="button" id="openCustomSongModalBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0">
                     <span>✏️</span>
-                    <span class="hidden md:inline">簡譜庫</span>
+                    <span class="hidden sm:inline">簡譜庫</span>
                 </button>
 
-                <button id="openChordDojoBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-purple-400 border border-purple-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="和弦、琶音與音階特訓室">
+                <button type="button" id="openChordDojoBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-purple-400 border border-purple-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="和弦、琶音與音階特訓室">
                     <span>🎹</span>
-                    <span class="hidden lg:inline">和弦/音階</span>
+                    <span class="hidden md:inline">和弦/音階</span>
                 </button>
 
-                <button id="practiceModeBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換練習模式：跟彈等待 / 節奏推進 / 視奏考核">
+                <button type="button" id="practiceModeBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-cyan-400 border border-cyan-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換練習模式：跟彈等待 / 節奏推進 / 視奏考核">
                     <span id="practiceModeIcon">✋</span>
                     <span id="practiceModeText">跟彈模式</span>
                 </button>
 
-                <button id="handPracticeBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-blue-400 border border-blue-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換：雙手合奏 / 只練右手 / 只練左手">
+                <button type="button" id="handPracticeBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-blue-400 border border-blue-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換：雙手合奏 / 只練右手 / 只練左手">
                     <span>👐</span>
                     <span id="handPracticeText">雙手合奏</span>
                 </button>
 
-                <button id="tempoSelectBtn" class="theme-surface hidden sm:flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-amber-500 dark:text-amber-300 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換練習與示範速度">
+                <button type="button" id="tempoSelectBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-500 dark:text-amber-300 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換練習與示範速度">
                     <span>🐢</span>
                     <span id="tempoBtnText">1.0x 原速</span>
                 </button>
 
-                <button id="metronomeBtn" class="theme-surface hidden md:flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="開啟/關閉拍子機">
+                <button type="button" id="metronomeBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="開啟/關閉拍子機">
                     <span id="metronomeDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
                     <span>拍子</span>
                 </button>
 
-                <button id="loopToggleBtn" class="theme-surface hidden xl:flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="循環重複練習目前呢 8 粒音">
+                <button type="button" id="loopToggleBtn" class="theme-surface hidden lg:flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="循環重複練習目前呢 8 粒音">
                     <span>🔁</span>
                     <span id="loopBtnText">循環: 關</span>
                 </button>
@@ -172,25 +188,25 @@
                     <span id="detectedPitchText" class="text-[10px] font-mono text-slate-400">待機</span>
                 </div>
 
-                <button id="toggleMicBtn" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-xl shadow flex items-center gap-1 transition shrink-0">
+                <button type="button" id="toggleMicBtn" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-xl shadow flex items-center gap-1 transition shrink-0">
                     <span id="micBtnIcon">🎙️</span>
                     <span id="micBtnText">開 Mic</span>
                 </button>
 
-                <button id="demoPlayBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 text-amber-500 dark:text-amber-300 border border-slate-700 font-semibold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="聽電腦示範">
+                <button type="button" id="demoPlayBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-500 dark:text-amber-300 border border-slate-700 font-semibold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="聽電腦示範">
                     <span>▶️</span>
                     <span id="demoBtnText" class="hidden md:inline">示範</span>
                 </button>
 
-                <button id="resetSongBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="重頭開始">
-                    🔄
+                <button type="button" id="resetSongBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 border border-slate-700 font-semibold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="重頭開始">
+                    <span>🔄</span>
                 </button>
 
-                <button id="themeToggleBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換光亮 / 深色主題">
+                <button type="button" id="themeToggleBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-400 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換光亮 / 深色主題">
                     <span id="themeIcon">☀️</span>
                 </button>
 
-                <button id="fullscreenToggleBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 text-indigo-400 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換全螢幕模式">
+                <button type="button" id="fullscreenToggleBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 active:scale-95 text-indigo-400 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換全螢幕模式">
                     <span id="fullscreenIcon">⛶</span>
                 </button>
             </div>
@@ -530,7 +546,7 @@
         </div>
     </div>
 
-    <script type="module">
+    <script>
         // 全局應用狀態
         const state = {
             theme: 'dark',
@@ -1773,7 +1789,11 @@
                             const barWidth = Math.min(noteSpacing * 0.82, dur * 34);
                             ctx.fillStyle = isDone ? 'rgba(16, 185, 129, 0.28)' : (isTarget ? (isLeft ? 'rgba(168, 85, 247, 0.38)' : 'rgba(59, 130, 246, 0.38)') : 'rgba(148, 163, 184, 0.18)');
                             ctx.beginPath();
-                            ctx.roundRect(x + 6, y - 7, barWidth, 14, 6);
+                            if (typeof ctx.roundRect === 'function') {
+                                ctx.roundRect(x + 6, y - 7, barWidth, 14, 6);
+                            } else {
+                                ctx.rect(x + 6, y - 7, barWidth, 14);
+                            }
                             ctx.fill();
                         }
 
@@ -2319,7 +2339,35 @@
             playNextDemoStep();
         }
 
-        window.onload = function () {
+        // 針對 Safari (macOS / iPadOS) 嘅可靠按鈕點擊綁定器：同時處理 pointerup / touchend / click 並防止連點兩次
+        function bindSafariButton(id, handler) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            let lastTriggered = 0;
+            const trigger = (e) => {
+                const now = Date.now();
+                if (now - lastTriggered < 280) return;
+                lastTriggered = now;
+                handler(e);
+            };
+            el.addEventListener('pointerup', (e) => {
+                if (e.button && e.button !== 0) return;
+                trigger(e);
+            });
+            el.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                trigger(e);
+            }, { passive: false });
+            el.addEventListener('click', (e) => {
+                trigger(e);
+            });
+        }
+
+        let appInitialized = false;
+        function initApp() {
+            if (appInitialized) return;
+            appInitialized = true;
+
             loadFromLocalStorage();
             applyTheme(state.theme);
             buildVirtualKeyboard();
@@ -2329,21 +2377,21 @@
             renderSheetMusicLoop();
             initWebMIDI();
 
-            document.getElementById('themeToggleBtn').addEventListener('click', () => applyTheme(state.theme === 'dark' ? 'light' : 'dark'));
-            document.getElementById('fullscreenToggleBtn').addEventListener('click', toggleFullScreenMode);
-            document.getElementById('toggleMicBtn').addEventListener('click', toggleMicrophone);
-            document.getElementById('resetSongBtn').addEventListener('click', () => loadSong(state.currentSongKey));
-            document.getElementById('demoPlayBtn').addEventListener('click', toggleDemoPlay);
-            document.getElementById('metronomeBtn').addEventListener('click', toggleMetronome);
+            bindSafariButton('themeToggleBtn', () => applyTheme(state.theme === 'dark' ? 'light' : 'dark'));
+            bindSafariButton('fullscreenToggleBtn', toggleFullScreenMode);
+            bindSafariButton('toggleMicBtn', toggleMicrophone);
+            bindSafariButton('resetSongBtn', () => loadSong(state.currentSongKey));
+            bindSafariButton('demoPlayBtn', toggleDemoPlay);
+            bindSafariButton('metronomeBtn', toggleMetronome);
 
-            document.getElementById('openChordDojoBtn').addEventListener('click', () => {
+            bindSafariButton('openChordDojoBtn', () => {
                 renderChordDojoModal();
                 document.getElementById('chordDojoModal').classList.remove('hidden');
                 document.getElementById('chordDojoModal').classList.add('flex');
             });
-            document.getElementById('closeChordDojoBtn').addEventListener('click', () => document.getElementById('chordDojoModal').classList.add('hidden'));
+            bindSafariButton('closeChordDojoBtn', () => document.getElementById('chordDojoModal').classList.add('hidden'));
 
-            document.getElementById('practiceModeBtn').addEventListener('click', () => {
+            bindSafariButton('practiceModeBtn', () => {
                 const modes = ['wait', 'flow', 'sight'];
                 const modeIcons = { wait: '✋', flow: '⏱️', sight: '👁️' };
                 const modeTexts = { wait: '跟彈模式', flow: '節奏跟拍', sight: '視奏盲彈' };
@@ -2356,7 +2404,7 @@
                 restartFlowModeTimer();
             });
 
-            document.getElementById('handPracticeBtn').addEventListener('click', () => {
+            bindSafariButton('handPracticeBtn', () => {
                 const hands = ['both', 'R', 'L'];
                 const handLabels = { both: '雙手合奏', R: '只練右手(R)', L: '只練左手(L)' };
                 const nextIdx = (hands.indexOf(state.handMode) + 1) % hands.length;
@@ -2379,20 +2427,20 @@
                 updateInstructionUI('INIT');
                 updateKeyboardHighlights();
             };
-            document.getElementById('transposeDownBtn').addEventListener('click', () => {
+            bindSafariButton('transposeDownBtn', () => {
                 if (state.transposeSemitones > -4) {
                     state.transposeSemitones--;
                     updateTransposeUI();
                 }
             });
-            document.getElementById('transposeUpBtn').addEventListener('click', () => {
+            bindSafariButton('transposeUpBtn', () => {
                 if (state.transposeSemitones < 4) {
                     state.transposeSemitones++;
                     updateTransposeUI();
                 }
             });
 
-            document.getElementById('tempoSelectBtn').addEventListener('click', () => {
+            bindSafariButton('tempoSelectBtn', () => {
                 const speeds = [1.0, 0.6, 0.8];
                 const labels = { 1.0: '1.0x 原速', 0.6: '0.6x 慢練', 0.8: '0.8x 中速' };
                 const nextIdx = (speeds.indexOf(state.tempoMultiplier) + 1) % speeds.length;
@@ -2404,29 +2452,29 @@
                 }
             });
 
-            document.getElementById('loopToggleBtn').addEventListener('click', () => {
+            bindSafariButton('loopToggleBtn', () => {
                 state.loopPhraseActive = !state.loopPhraseActive;
                 state.loopStartIdx = state.currentNoteIndex;
                 const loopTxt = document.getElementById('loopBtnText');
                 loopTxt.textContent = state.loopPhraseActive ? '循環: 開(8音)' : '循環: 關';
             });
 
-            document.getElementById('replayStageBtn').addEventListener('click', () => loadSong(state.currentSongKey));
-            document.getElementById('nextStageBtn').addEventListener('click', () => {
+            bindSafariButton('replayStageBtn', () => loadSong(state.currentSongKey));
+            bindSafariButton('nextStageBtn', () => {
                 const cur = SONGS[state.currentSongKey];
                 const nextEntry = Object.entries(SONGS).find(([, s]) => s.isCampaign && s.order === (cur.order || 1) + 1);
                 if (nextEntry) loadSong(nextEntry[0]);
                 else loadSong(state.currentSongKey);
             });
 
-            document.getElementById('openCourseMapBtn').addEventListener('click', () => {
+            bindSafariButton('openCourseMapBtn', () => {
                 renderCourseMapModal();
                 document.getElementById('courseMapModal').classList.remove('hidden');
                 document.getElementById('courseMapModal').classList.add('flex');
             });
-            document.getElementById('closeCourseMapBtn').addEventListener('click', () => document.getElementById('courseMapModal').classList.add('hidden'));
+            bindSafariButton('closeCourseMapBtn', () => document.getElementById('courseMapModal').classList.add('hidden'));
 
-            document.getElementById('unlockAllStagesBtn').addEventListener('click', () => {
+            bindSafariButton('unlockAllStagesBtn', () => {
                 const prof = state.profiles[state.activeProfileId];
                 if (prof) {
                     prof.unlockedStageOrder = 12;
@@ -2435,40 +2483,40 @@
                 }
             });
 
-            document.getElementById('openCustomSongModalBtn').addEventListener('click', () => {
+            bindSafariButton('openCustomSongModalBtn', () => {
                 renderSavedCustomSongsList();
                 document.getElementById('customSongModal').classList.remove('hidden');
                 document.getElementById('customSongModal').classList.add('flex');
             });
-            document.getElementById('closeCustomSongBtn').addEventListener('click', () => document.getElementById('customSongModal').classList.add('hidden'));
-            document.getElementById('newCustomSongResetBtn').addEventListener('click', () => {
+            bindSafariButton('closeCustomSongBtn', () => document.getElementById('customSongModal').classList.add('hidden'));
+            bindSafariButton('newCustomSongResetBtn', () => {
                 state.editingCustomSongKey = null;
                 document.getElementById('customSongTitleInput').value = '';
                 document.getElementById('customSongNotesInput').value = '';
                 document.getElementById('customFormModeBadge').textContent = '✨ 建立新簡譜';
             });
 
-            document.getElementById('fillSampleCanonBtn').addEventListener('click', () => {
+            bindSafariButton('fillSampleCanonBtn', () => {
                 document.getElementById('customSongTitleInput').value = '帕海貝爾《卡農 Canon》雙手精華';
                 document.getElementById('customSongNotesInput').value = BUILTIN_CUSTOM_PRESETS.custom_preset_canon_full.rawJianpu;
             });
-            document.getElementById('fillSampleEliseBtn').addEventListener('click', () => {
+            bindSafariButton('fillSampleEliseBtn', () => {
                 document.getElementById('customSongTitleInput').value = '貝多芬《致愛麗絲》主題';
                 document.getElementById('customSongNotesInput').value = BUILTIN_CUSTOM_PRESETS.custom_preset_elise_full.rawJianpu;
             });
 
-            document.getElementById('saveOnlyCustomSongBtn').addEventListener('click', () => saveCustomSongFromForm(false));
-            document.getElementById('saveAndPlayCustomSongBtn').addEventListener('click', () => saveCustomSongFromForm(true));
+            bindSafariButton('saveOnlyCustomSongBtn', () => saveCustomSongFromForm(false));
+            bindSafariButton('saveAndPlayCustomSongBtn', () => saveCustomSongFromForm(true));
 
-            document.getElementById('openProfileModalBtn').addEventListener('click', () => {
+            bindSafariButton('openProfileModalBtn', () => {
                 renderProfileModal();
                 document.getElementById('profileModal').classList.remove('hidden');
                 document.getElementById('profileModal').classList.add('flex');
             });
-            document.getElementById('closeProfileModalBtn').addEventListener('click', () => document.getElementById('profileModal').classList.add('hidden'));
-            document.getElementById('cancelEditProfileBtn').addEventListener('click', () => document.getElementById('editProfilePanel').classList.add('hidden'));
+            bindSafariButton('closeProfileModalBtn', () => document.getElementById('profileModal').classList.add('hidden'));
+            bindSafariButton('cancelEditProfileBtn', () => document.getElementById('editProfilePanel').classList.add('hidden'));
 
-            document.getElementById('saveEditProfileBtn').addEventListener('click', () => {
+            bindSafariButton('saveEditProfileBtn', () => {
                 const prof = state.profiles[state.editingProfileId];
                 if (!prof) return;
                 const newName = document.getElementById('editProfileNameInput').value.trim();
@@ -2480,7 +2528,7 @@
                 renderProfileModal();
             });
 
-            document.getElementById('resetProfileProgressBtn').addEventListener('click', () => {
+            bindSafariButton('resetProfileProgressBtn', () => {
                 const prof = state.profiles[state.editingProfileId];
                 if (!prof) return;
                 prof.xp = 0;
@@ -2495,7 +2543,7 @@
                 renderProfileModal();
             });
 
-            document.getElementById('deleteProfileBtn').addEventListener('click', () => {
+            bindSafariButton('deleteProfileBtn', () => {
                 const keys = Object.keys(state.profiles);
                 if (keys.length <= 1) return;
                 delete state.profiles[state.editingProfileId];
@@ -2508,7 +2556,7 @@
                 renderProfileModal();
             });
 
-            document.getElementById('createProfileBtn').addEventListener('click', () => {
+            bindSafariButton('createProfileBtn', () => {
                 const nameInput = document.getElementById('newProfileNameInput');
                 const name = nameInput.value.trim();
                 if (!name) return;
@@ -2532,7 +2580,14 @@
                 updateProfileHeaderUI();
                 renderProfileModal();
             });
-        };
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+        window.addEventListener('load', initApp);
     </script>
 </body>
 </html>
