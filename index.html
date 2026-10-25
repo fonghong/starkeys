@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="zh-HK" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>星光琴院 StarKeys - 互動鋼琴闖關學堂</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow-x: hidden;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .white-key {
+            background: linear-gradient(to bottom, #ffffff 0%, #f3f4f6 92%, #d1d5db 100%);
+            box-shadow: inset 0 -4px 0 #cbd5e1, 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            transition: all 0.08s ease;
+        }
+        .white-key:active, .white-key.key-active {
+            transform: translateY(2px);
+            box-shadow: inset 0 -1px 0 #94a3b8;
+        }
+        .black-key {
+            background: linear-gradient(to bottom, #334155 0%, #0f172a 85%, #020617 100%);
+            box-shadow: inset 0 -4px 0 #020617, 0 6px 8px -1px rgba(0, 0, 0, 0.6);
+            transition: all 0.08s ease;
+        }
+        .black-key:active, .black-key.key-active {
+            transform: translateY(2px);
+            box-shadow: inset 0 -1px 0 #000000;
+        }
+        @keyframes targetPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7), inset 0 -4px 0 #1d4ed8; }
+            50% { box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5), inset 0 -4px 0 #1d4ed8; }
+        }
+        .key-target-white {
+            background: linear-gradient(to bottom, #eff6ff 0%, #93c5fd 40%, #3b82f6 100%) !important;
+            animation: targetPulse 1.5s infinite;
+        }
+        .key-target-black {
+            background: linear-gradient(to bottom, #60a5fa 0%, #2563eb 70%, #1e40af 100%) !important;
+            animation: targetPulse 1.5s infinite;
+        }
+        .key-correct {
+            background: linear-gradient(to bottom, #bbf7d0 0%, #4ade80 35%, #16a34a 100%) !important;
+            box-shadow: 0 0 25px 5px rgba(34, 197, 94, 0.75), inset 0 -2px 0 #15803d !important;
+            transform: translateY(2px);
+        }
+        .key-wrong {
+            background: linear-gradient(to bottom, #fecaca 0%, #f87171 35%, #dc2626 100%) !important;
+            box-shadow: 0 0 25px 5px rgba(239, 68, 68, 0.8), inset 0 -2px 0 #b91c1c !important;
+            transform: translateY(2px);
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .animate-shake { animation: shake 0.35s ease-in-out; }
+        @keyframes popScale {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+        .animate-pop { animation: popScale 0.25s ease-out; }
+
+        html.light body { background-color: #f1f5f9 !important; color: #0f172a !important; }
+        html.light header, html.light section { background-color: rgba(255, 255, 255, 0.96) !important; border-color: #cbd5e1 !important; }
+        html.light #instructionCard, html.light #scoreCardPanel { background-color: #ffffff !important; border-color: #cbd5e1 !important; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06) !important; }
+        html.light #sheetContainerBox { background-color: #fffdf9 !important; border-color: #94a3b8 !important; box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.04), 0 6px 16px rgba(15, 23, 42, 0.07) !important; }
+        html.light .theme-surface { background-color: #f8fafc !important; border-color: #cbd5e1 !important; color: #1e293b !important; }
+        html.light .theme-modal { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+        html.light .theme-text-main { color: #0f172a !important; }
+        html.light .theme-text-sub { color: #475569 !important; }
+        html.light .theme-badge-overlay { background-color: rgba(255, 255, 255, 0.92) !important; border-color: #cbd5e1 !important; color: #1e293b !important; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-[100dvh] max-h-[100dvh] w-screen overflow-hidden flex flex-col justify-between select-none">
+
+    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-2 sm:px-4 py-1.5 shrink-0 z-30">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-1.5 sm:gap-2 flex-nowrap">
+            
+            <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 shrink-0">
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 via-indigo-500 to-blue-600 flex items-center justify-center shadow-md shadow-indigo-500/20">
+                        <span class="text-base">🌟</span>
+                    </div>
+                    <div class="hidden xl:block">
+                        <h1 class="theme-text-main font-extrabold text-xs tracking-tight text-white leading-none">星光琴院 StarKeys</h1>
+                        <p class="theme-text-sub text-[9px] text-slate-400 mt-0.5">互動鋼琴闖關學堂</p>
+                    </div>
+                </div>
+
+                <button id="openProfileModalBtn" class="theme-surface flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-800 border border-slate-700 hover:border-blue-500/50 rounded-xl px-2 py-1 transition shadow-sm group shrink-0">
+                    <div id="headerAvatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-sm sm:text-base shrink-0">🦊</div>
+                    <div class="text-left">
+                        <div class="flex items-center gap-1">
+                            <span id="headerPlayerName" class="theme-text-main text-[11px] font-bold text-white group-hover:text-blue-400 transition max-w-[60px] sm:max-w-[80px] truncate">樂樂</span>
+                            <span id="headerLevelBadge" class="px-1 py-0.2 bg-amber-500/20 text-amber-500 dark:text-amber-300 border border-amber-400/40 rounded text-[9px] font-extrabold">Lv.1</span>
+                            <span id="headerTotalStars" class="text-[10px] font-bold text-amber-500 dark:text-yellow-400">⭐0</span>
+                        </div>
+                        <div class="flex items-center gap-1 mt-0.5">
+                            <div class="w-12 sm:w-16 h-1 bg-slate-950/40 rounded-full overflow-hidden border border-slate-700/50">
+                                <div id="headerXpBar" class="h-full bg-gradient-to-r from-amber-400 to-orange-500 w-0 transition-all duration-300"></div>
+                            </div>
+                            <span id="headerXpText" class="theme-text-sub text-[8px] text-slate-400 font-mono hidden sm:inline">0/100</span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-1 sm:gap-1.5 min-w-0 flex-1 justify-center">
+                <button id="openCourseMapBtn" class="flex items-center gap-1 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-[11px] sm:text-xs px-2.5 py-1.5 rounded-xl shadow-md shadow-indigo-600/20 transition min-w-0 max-w-[165px] sm:max-w-[230px]">
+                    <span class="shrink-0">🗺️</span>
+                    <span id="currentStageBtnLabel" class="truncate">第 1 關：中央 C</span>
+                    <span class="text-[9px] opacity-80 shrink-0">▼</span>
+                </button>
+
+                <button id="openCustomSongModalBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40 font-bold text-[11px] sm:text-xs px-2.5 py-1.5 rounded-xl transition shrink-0">
+                    <span>✏️</span>
+                    <span class="hidden md:inline">自訂簡譜庫</span>
+                    <span class="md:hidden">簡譜</span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                <div class="theme-surface hidden lg:flex items-center gap-1.5 bg-slate-950/90 border border-slate-800 px-2 py-1 rounded-xl">
+                    <span id="micDot" class="w-2 h-2 rounded-full bg-slate-500 shrink-0"></span>
+                    <span id="micStatusLabel" class="theme-text-sub text-[10px] font-medium text-slate-400 whitespace-nowrap">Mic 未開</span>
+                    <div class="w-10 h-1.5 bg-slate-700/40 rounded-full overflow-hidden">
+                        <div id="volumeMeter" class="h-full bg-gradient-to-r from-emerald-400 to-blue-500 w-0 transition-all duration-75"></div>
+                    </div>
+                    <div id="detectedPitchText" class="theme-text-main text-[10px] font-bold text-slate-300 font-mono min-w-[34px] text-right">--</div>
+                </div>
+
+                <button id="toggleMicBtn" class="flex items-center gap-1 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold text-[11px] sm:text-xs px-2.5 py-1.5 rounded-xl shadow-md shadow-blue-600/25 transition shrink-0">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                    </svg>
+                    <span id="toggleMicBtnText" class="whitespace-nowrap">開 Mic</span>
+                </button>
+
+                <button id="demoPlayBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-[11px] sm:text-xs px-2 py-1.5 rounded-xl border border-slate-700 transition shrink-0" title="聽電腦示範彈一次">
+                    <svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                    </svg>
+                    <span id="demoPlayBtnText" class="hidden sm:inline whitespace-nowrap">示範</span>
+                </button>
+
+                <button id="resetSongBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded-xl border border-slate-700 transition shrink-0" title="重頭開始">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </button>
+
+                <button id="themeToggleBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換光亮紙本 / 深色護眼模式">
+                    <span id="themeIcon">☀️</span>
+                    <span id="themeLabel" class="hidden md:inline">光亮</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 min-h-0 flex flex-col justify-between max-w-7xl w-full mx-auto px-2.5 sm:px-5 py-1.5 gap-1.5 overflow-hidden">
+        
+        <div class="grid grid-cols-12 gap-2 items-center shrink-0">
+            <div id="instructionCard" class="col-span-12 md:col-span-7 bg-slate-900/90 border border-slate-800 rounded-2xl px-3 py-2 flex items-center justify-between gap-2 shadow-lg transition-colors duration-200">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div id="targetJianpuBadge" class="w-11 h-11 rounded-xl bg-blue-600/20 border-2 border-blue-500 flex flex-col items-center justify-center shrink-0">
+                        <span class="text-[9px] text-blue-500 dark:text-blue-300 font-semibold leading-none">簡譜</span>
+                        <span id="targetJianpuNum" class="text-xl font-black text-blue-600 dark:text-blue-400 leading-tight">1</span>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span id="feedbackBadge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30">等待彈奏</span>
+                            <span id="lyricHint" class="theme-text-sub text-[11px] text-slate-400 font-medium truncate">請彈奏發光嘅藍色琴鍵</span>
+                        </div>
+                        <h2 id="mainInstructionText" class="theme-text-main text-xs sm:text-sm font-bold text-white mt-0.5 truncate">
+                            請彈 <span class="text-blue-500">C4 (Do / 1)</span> · 用右手 <span class="text-amber-500">第 1 指 (大拇指)</span>
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="theme-surface flex items-center gap-1.5 bg-slate-950/80 border border-slate-800/80 px-2.5 py-1.5 rounded-xl shrink-0">
+                    <div class="text-right hidden sm:block">
+                        <div class="theme-text-sub text-[9px] text-slate-400">建議指法</div>
+                        <div id="fingerNameDisplay" class="text-[11px] font-bold text-amber-500 dark:text-amber-400">第 1 指 (大拇指)</div>
+                    </div>
+                    <div id="fingerBadgeCircle" class="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-600 dark:text-amber-300 flex items-center justify-center font-black text-sm">1</div>
+                </div>
+            </div>
+
+            <div id="scoreCardPanel" class="col-span-12 md:col-span-5 bg-slate-900/90 border border-slate-800 rounded-2xl px-3 py-2 flex flex-col justify-center shadow-lg">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                    <div class="flex items-center gap-1.5">
+                        <div class="theme-surface flex items-center gap-1 bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800">
+                            <span class="theme-text-sub text-[10px] text-slate-400">分</span>
+                            <span id="scoreDisplay" class="text-sm font-black text-amber-500 dark:text-amber-400 font-mono">0</span>
+                        </div>
+                        <div id="comboBadge" class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-orange-500/10 border border-orange-500/30 text-orange-500 dark:text-orange-400 text-[11px] font-extrabold">
+                            <span>🔥x</span>
+                            <span id="comboCountText">0</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-[11px]">
+                        <span class="theme-text-main">準確率: <strong id="accuracyValue" class="text-emerald-500 dark:text-emerald-400">100%</strong> <span class="theme-text-sub text-[9px] text-slate-500">(≥80%過關)</span></span>
+                        <label class="theme-text-sub hidden lg:flex items-center gap-1 text-[10px] text-slate-400 cursor-pointer" title="調校收音靈敏度">
+                            <span>Mic</span>
+                            <input id="micSensitivity" type="range" min="1" max="10" value="6" class="w-12 accent-blue-500 cursor-pointer">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <span id="currentSongTitleText" class="theme-text-sub text-[10px] text-slate-300 font-semibold truncate max-w-[140px]">第 1 關：認識中央 C</span>
+                    <div class="flex-1 h-1.5 bg-slate-700/30 rounded-full overflow-hidden">
+                        <div id="progressBar" class="h-full bg-gradient-to-r from-blue-500 via-indigo-400 to-emerald-400 w-0 transition-all duration-300"></div>
+                    </div>
+                    <span id="progressCounter" class="text-[10px] text-blue-500 dark:text-blue-400 font-bold shrink-0">0 / 12</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="sheetContainerBox" class="relative bg-slate-900 border-2 border-slate-700 rounded-2xl overflow-hidden shadow-xl flex-1 min-h-[135px] w-full transition-colors duration-200">
+            <div class="absolute top-2 left-3 z-10 flex items-center gap-2 pointer-events-none">
+                <span class="theme-badge-overlay px-2 py-0.5 rounded-md bg-slate-950/85 border border-slate-700 text-[10px] text-slate-200 font-semibold shadow-sm">
+                    🎼 高清五線譜 + 簡譜 (1-7) + 指法
+                </span>
+            </div>
+
+            <div class="theme-badge-overlay absolute top-2 right-3 z-10 hidden sm:flex items-center gap-2.5 bg-slate-950/85 border border-slate-700 px-2.5 py-0.5 rounded-md text-[10px] pointer-events-none shadow-sm">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>目標音</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>彈啱</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>彈錯</span>
+                <span class="flex items-center gap-1 text-amber-500 font-semibold">🟡 圓圈=手指(1~5)</span>
+            </div>
+
+            <canvas id="sheetCanvas" class="w-full h-full block"></canvas>
+        </div>
+    </main>
+
+    <section class="bg-slate-900 border-t border-slate-800 pt-1.5 pb-2 px-2 sm:px-5 shrink-0 select-none">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between gap-2 mb-1 px-1">
+                <div class="flex items-center gap-1.5 text-[11px] text-slate-400 truncate">
+                    <span class="inline-block w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
+                    <span class="truncate">對住真琴彈，或直接撳下面虛擬琴鍵 / 鍵盤 <kbd class="px-1 py-0.2 bg-slate-800 rounded text-slate-300 border border-slate-700">A</kbd>~<kbd class="px-1 py-0.2 bg-slate-800 rounded text-slate-300 border border-slate-700">K</kbd> 闖關！</span>
+                </div>
+                <div class="flex items-center gap-2.5 text-[11px] shrink-0">
+                    <label class="flex items-center gap-1 text-slate-300 cursor-pointer">
+                        <input type="checkbox" id="playSynthToggle" checked class="rounded accent-blue-500">
+                        <span>撳鍵發聲</span>
+                    </label>
+                    <span id="midiStatusBadge" class="hidden sm:inline-block px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[10px]">USB MIDI: 偵測中</span>
+                </div>
+            </div>
+
+            <div class="relative w-full overflow-x-auto no-scrollbar">
+                <div id="pianoContainer" class="relative mx-auto h-32 sm:h-36 md:h-40 min-w-[640px] max-w-5xl bg-slate-950 p-1.5 rounded-2xl border-t-4 border-slate-800 shadow-2xl flex"></div>
+            </div>
+        </div>
+    </section>
+
+    <div id="completeModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="theme-modal bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-6 text-center shadow-2xl transform transition-all">
+            <div id="modalStarsContainer" class="flex items-center justify-center gap-2 text-4xl mb-2"><span>⭐</span><span>⭐</span><span>⭐</span></div>
+            <h3 id="modalResultHeading" class="text-2xl font-extrabold text-white">恭喜過關！</h3>
+            <p id="completeSongTitle" class="text-sm text-slate-400 mt-0.5">第 1 關：認識中央 C</p>
+
+            <div id="modalLevelUpBanner" class="hidden mt-3 py-1.5 px-3 rounded-xl bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 border border-amber-400/50 text-amber-300 font-extrabold text-xs animate-bounce">
+                🎉 恭喜升 Level！你而家係 <span id="modalNewLevelText">Lv.2 節奏小達人</span>！
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2 my-4 bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+                <div><div class="text-[11px] text-slate-400">準確率</div><div id="modalAccuracy" class="text-xl font-black text-emerald-400 mt-0.5">96%</div></div>
+                <div><div class="text-[11px] text-slate-400">關卡得分</div><div id="modalScore" class="text-xl font-black text-amber-400 mt-0.5">1,450</div></div>
+                <div><div class="text-[11px] text-slate-400">獲得經驗</div><div id="modalXpEarned" class="text-xl font-black text-blue-400 mt-0.5">+65 XP</div></div>
+            </div>
+
+            <div id="modalWeaknessBox" class="text-left bg-slate-950/90 border border-slate-800 rounded-2xl p-3.5 mb-5 text-xs">
+                <div id="modalWeaknessTitle" class="font-bold text-slate-200 mb-1">💡 導師小評語：</div>
+                <p id="modalWeaknessDetail" class="text-slate-400 leading-relaxed">手勢好穩定！全部音符都好準確！</p>
+            </div>
+
+            <div class="flex gap-3">
+                <button id="modalReplayBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-4 rounded-xl border border-slate-700 transition">🔄 再練一次刷分</button>
+                <button id="modalNextSongBtn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-blue-600/30 transition">下一關挑戰 →</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="courseMapModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="theme-modal bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50">
+                <div>
+                    <h3 class="text-lg font-extrabold text-white">🗺️ 鋼琴闖關課程地圖</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">每關準確率達 80% 即可拎星過關，解鎖下一關挑戰！</p>
+                </div>
+                <button id="closeCourseMapBtn" class="text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800 border border-slate-700">✕</button>
+            </div>
+            <div id="courseStagesList" class="p-4 sm:p-5 overflow-y-auto space-y-2.5 flex-1"></div>
+        </div>
+    </div>
+
+    <div id="customSongModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="theme-modal bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-3.5 border-b border-slate-800 bg-slate-950/50">
+                <div>
+                    <h3 class="text-base sm:text-lg font-extrabold text-white">✏️ 自訂數字簡譜工作坊 & 全首名曲庫</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">內置 5 首完整經典全首名曲，亦可自訂輸入隨時練習或 Edit 修改！</p>
+                </div>
+                <button id="closeCustomSongModalBtn" class="text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800 border border-slate-700">✕</button>
+            </div>
+
+            <div class="p-5 overflow-y-auto grid grid-cols-1 md:grid-cols-12 gap-5 text-xs sm:text-sm">
+                <div class="md:col-span-7 space-y-3.5">
+                    <div class="flex items-center justify-between">
+                        <span id="customFormModeBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold">➕ 建立新簡譜</span>
+                        <button id="cancelEditCustomBtn" type="button" class="hidden text-xs text-slate-400 hover:text-white underline">取消編輯</button>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-300 font-bold mb-1">樂曲名稱</label>
+                        <input id="customSongTitleInput" type="text" placeholder="例如：自訂彈奏練習" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="text-slate-300 font-bold">數字簡譜序列 (空格分開)</label>
+                            <div class="flex gap-1.5 flex-wrap">
+                                <button id="presetHbdBtn" type="button" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-amber-300 px-2 py-1 rounded border border-slate-700">🎂 生日快樂</button>
+                                <button id="presetTwinkleBtn" type="button" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-blue-300 px-2 py-1 rounded border border-slate-700">⭐ 小星星</button>
+                                <button id="presetLondonBtn" type="button" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-emerald-300 px-2 py-1 rounded border border-slate-700">🌉 倫敦鐵橋</button>
+                            </div>
+                        </div>
+                        <textarea id="customSongNotesInput" rows="4" placeholder="例如：5 5 6 5 1' 7" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white font-mono text-sm focus:outline-none focus:border-blue-500"></textarea>
+                        
+                        <div class="mt-2 bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 text-[11px] text-slate-400 space-y-0.5">
+                            <div class="font-bold text-slate-300">💡 簡譜輸入法：</div>
+                            <div>• 中音 <code class="text-blue-300">1 2 3 4 5 6 7</code> ｜ 高音 <code class="text-blue-300">1' 2'</code> ｜ 低音 <code class="text-blue-300">5. 6.</code></div>
+                        </div>
+                    </div>
+
+                    <div id="customSongErrorMsg" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl px-3 py-2"></div>
+
+                    <div class="flex gap-2 pt-1">
+                        <button id="playCustomNowBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-emerald-600/20 transition">💾 儲存並即刻開始練習！</button>
+                    </div>
+                </div>
+
+                <div class="md:col-span-5 flex flex-col bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-extrabold text-slate-200">📂 已儲存曲庫 (含 5 首全首名曲)</span>
+                        <span id="savedCustomCountBadge" class="text-[11px] text-emerald-400 font-bold">5 首</span>
+                    </div>
+                    <div id="savedCustomSongsList" class="space-y-2 overflow-y-auto max-h-64 pr-1 flex-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="profileModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="theme-modal bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50">
+                <div>
+                    <h3 class="text-lg font-extrabold text-white">👦👧 小朋友學習檔案 & 練習成績紀錄</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">支援多個小朋友獨立儲分、升 Level 同埋重溫每次練習成績紀錄</p>
+                </div>
+                <button id="closeProfileModalBtn" class="text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800 border border-slate-700">✕</button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-5 flex-1">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">切換或編輯小朋友學員</div>
+                    </div>
+                    <div id="profilesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+                </div>
+
+                <div id="editProfileSection" class="hidden bg-slate-950/90 border-2 border-amber-500/50 rounded-2xl p-4">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <div class="text-xs font-extrabold text-amber-400 flex items-center gap-1.5">
+                            <span>✏️</span> 編輯學員資料：<span id="editingProfileNameTitle" class="text-white"></span>
+                        </div>
+                        <button id="cancelEditProfileBtn" type="button" class="text-xs text-slate-400 hover:text-white underline">取消編輯</button>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <select id="editProfileAvatar" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-lg cursor-pointer">
+                            <option value="🦊">🦊 小狐狸</option><option value="🐼">🐼 熊貓仔</option><option value="🦁">🦁 小獅子</option><option value="🐰">🐰 小白兔</option><option value="🐨">🐨 樹熊仔</option><option value="🦄">🦄 獨角獸</option><option value="🐸">🐸 小青蛙</option>
+                        </select>
+                        <input id="editProfileNameInput" type="text" placeholder="修改小朋友名字" class="flex-1 min-w-[150px] bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500">
+                        <button id="saveEditProfileBtn" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition">儲存修改</button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4">
+                    <div class="text-xs font-bold text-slate-300 mb-2.5">➕ 新增小朋友 Profile</div>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <select id="newProfileAvatar" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-lg cursor-pointer">
+                            <option value="🦊">🦊 小狐狸</option><option value="🐼">🐼 熊貓仔</option><option value="🦁">🦁 小獅子</option><option value="🐰">🐰 小白兔</option><option value="🐨">🐨 樹熊仔</option><option value="🦄">🦄 獨角獸</option><option value="🐸">🐸 小青蛙</option>
+                        </select>
+                        <input id="newProfileName" type="text" placeholder="輸入小朋友名" class="flex-1 min-w-[160px] bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-blue-500">
+                        <button id="createProfileBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition">建立學員</button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">📊 最近練習成績紀錄 (<span id="historyOwnerName" class="text-blue-400">小樂手</span>)</span>
+                        <span id="cloudSyncStatus" class="text-[11px] text-emerald-400">☁️ 雲端同步正常</span>
+                    </div>
+                    <div id="practiceHistoryList" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const state = {
+            theme: 'dark',
+            activeProfileId: 'kid_default',
+            profiles: {
+                'kid_default': { id: 'kid_default', name: '樂樂', avatar: '🦊', xp: 0, level: 1, unlockedStageOrder: 1, stageProgress: {}, history: [] }
+            },
+            currentSongKey: 'stage1_middleC',
+            currentNoteIndex: 0,
+            smoothScrollIndex: 0,
+            totalAttempts: 0,
+            correctHits: 0,
+            currentScore: 0,
+            combo: 0,
+            maxCombo: 0,
+            mistakesByMidi: {},
+            wrongMidiNote: null,
+            correctMidiNote: null,
+            sameNoteReleased: true,
+            isMicListening: false,
+            isDemoPlaying: false,
+            noteStates: [],
+            correctTimer: null,
+            wrongTimer: null,
+            lastNoteTriggerTime: 0,
+            previousRms: 0,
+            editingCustomSongKey: null
+        };
+
+        const FINGER_NAMES = { 1: '第 1 指 (大拇指)', 2: '第 2 指 (食指)', 3: '第 3 指 (中指)', 4: '第 4 指 (無名指)', 5: '第 5 指 (尾指)' };
+        const LEVEL_TITLES = ["琴鍵小新手", "節奏小精靈", "五指探險家", "旋律小達人", "音階小高手", "鋼琴小明星", "閃耀演奏家", "小小莫札特"];
+
+        const PIANO_KEYS = [
+            { midi: 53, note: 'F3', jianpu: '4̣', solfege: 'Fa', isBlack: false, keyShortcut: '' },
+            { midi: 54, note: 'F#3', jianpu: '#4̣', solfege: 'Fi', isBlack: true, keyShortcut: '' },
+            { midi: 55, note: 'G3', jianpu: '5̣', solfege: 'Sol', isBlack: false, keyShortcut: '' },
+            { midi: 56, note: 'G#3', jianpu: '#5̣', solfege: 'Si', isBlack: true, keyShortcut: '' },
+            { midi: 57, note: 'A3', jianpu: '6̣', solfege: 'La', isBlack: false, keyShortcut: '' },
+            { midi: 58, note: 'A#3', jianpu: '#6̣', solfege: 'Li', isBlack: true, keyShortcut: '' },
+            { midi: 59, note: 'B3', jianpu: '7̣', solfege: 'Ti', isBlack: false, keyShortcut: '' },
+            { midi: 60, note: 'C4', jianpu: '1', solfege: 'Do', isBlack: false, keyShortcut: 'A', isMiddleC: true },
+            { midi: 61, note: 'C#4', jianpu: '#1', solfege: 'Di', isBlack: true, keyShortcut: 'W' },
+            { midi: 62, note: 'D4', jianpu: '2', solfege: 'Re', isBlack: false, keyShortcut: 'S' },
+            { midi: 63, note: 'D#4', jianpu: '#2', solfege: 'Ri', isBlack: true, keyShortcut: 'E' },
+            { midi: 64, note: 'E4', jianpu: '3', solfege: 'Mi', isBlack: false, keyShortcut: 'D' },
+            { midi: 65, note: 'F4', jianpu: '4', solfege: 'Fa', isBlack: false, keyShortcut: 'F' },
+            { midi: 66, note: 'F#4', jianpu: '#4', solfege: 'Fi', isBlack: true, keyShortcut: 'T' },
+            { midi: 67, note: 'G4', jianpu: '5', solfege: 'Sol', isBlack: false, keyShortcut: 'G' },
+            { midi: 68, note: 'G#4', jianpu: '#5', solfege: 'Si', isBlack: true, keyShortcut: 'Y' },
+            { midi: 69, note: 'A4', jianpu: '6', solfege: 'La', isBlack: false, keyShortcut: 'H' },
+            { midi: 70, note: 'A#4', jianpu: '#6', solfege: 'Li', isBlack: true, keyShortcut: 'U' },
+            { midi: 71, note: 'B4', jianpu: '7', solfege: 'Ti', isBlack: false, keyShortcut: 'J' },
+            { midi: 72, note: 'C5', jianpu: '1̇', solfege: 'Do+', isBlack: false, keyShortcut: 'K' },
+            { midi: 73, note: 'C#5', jianpu: '#1̇', solfege: 'Di+', isBlack: true, keyShortcut: 'O' },
+            { midi: 74, note: 'D5', jianpu: '2̇', solfege: 'Re+', isBlack: false, keyShortcut: 'L' },
+            { midi: 75, note: 'D#5', jianpu: '#2̇', solfege: 'Ri+', isBlack: true, keyShortcut: 'P' },
+            { midi: 76, note: 'E5', jianpu: '3̇', solfege: 'Mi+', isBlack: false, keyShortcut: ';' }
+        ];
+
+        const MIDI_MAP = {};
+        PIANO_KEYS.forEach(k => { MIDI_MAP[k.midi] = k; });
+
+        const SONGS = {
+            stage1_middleC: {
+                order: 1, title: "第 1 關：認識中央 C 與三指行路", goal: "🎯 學習目標：搵出中央 C (1)，用大拇指、食指、中指彈出 1-2-3", xpReward: 50,
+                notes: [
+                    { midi: 60, finger: 1, lyric: "Do" }, { midi: 62, finger: 2, lyric: "Re" }, { midi: 64, finger: 3, lyric: "Mi" },
+                    { midi: 62, finger: 2, lyric: "Re" }, { midi: 60, finger: 1, lyric: "Do" }, { midi: 60, finger: 1, lyric: "Do" },
+                    { midi: 62, finger: 2, lyric: "Re" }, { midi: 64, finger: 3, lyric: "Mi" }, { midi: 64, finger: 3, lyric: "Mi" },
+                    { midi: 62, finger: 2, lyric: "Re" }, { midi: 60, finger: 1, lyric: "Do" }
+                ]
+            },
+            stage2_maryLamb: {
+                order: 2, title: "第 2 關：瑪莉有隻小綿羊 (五指入門)", goal: "🎯 學習目標：加入第 5 指 (尾指 Sol)，訓練手指獨立性", xpReward: 65,
+                notes: [
+                    { midi: 64, finger: 3, lyric: "Ma" }, { midi: 62, finger: 2, lyric: "ry" }, { midi: 60, finger: 1, lyric: "had" },
+                    { midi: 62, finger: 2, lyric: "a" }, { midi: 64, finger: 3, lyric: "lit" }, { midi: 64, finger: 3, lyric: "tle" },
+                    { midi: 64, finger: 3, lyric: "lamb" }, { midi: 62, finger: 2, lyric: "lit" }, { midi: 62, finger: 2, lyric: "tle" },
+                    { midi: 62, finger: 2, lyric: "lamb" }, { midi: 64, finger: 3, lyric: "lit" }, { midi: 67, finger: 5, lyric: "tle" }, { midi: 67, finger: 5, lyric: "lamb" }
+                ]
+            },
+            stage3_jingleBells: {
+                order: 3, title: "第 3 關：聖誕鈴聲 (同音連打特訓)", goal: "🎯 學習目標：穩定連彈同一個音，訓練大跳音程", xpReward: 75,
+                notes: [
+                    { midi: 64, finger: 3, lyric: "Jin" }, { midi: 64, finger: 3, lyric: "gle" }, { midi: 64, finger: 3, lyric: "bells" },
+                    { midi: 64, finger: 3, lyric: "Jin" }, { midi: 64, finger: 3, lyric: "gle" }, { midi: 64, finger: 3, lyric: "bells" },
+                    { midi: 64, finger: 3, lyric: "Jin" }, { midi: 67, finger: 5, lyric: "gle" }, { midi: 60, finger: 1, lyric: "all" },
+                    { midi: 62, finger: 2, lyric: "the" }, { midi: 64, finger: 3, lyric: "way!" }
+                ]
+            },
+            stage4_odeToJoy: {
+                order: 4, title: "第 4 關：歡樂頌 (五指完整連奏)", goal: "🎯 學習目標：最經典嘅 1~5 指連貫練習，強化無名指", xpReward: 90,
+                notes: [
+                    { midi: 64, finger: 3, lyric: "Mi" }, { midi: 64, finger: 3, lyric: "Mi" }, { midi: 65, finger: 4, lyric: "Fa" },
+                    { midi: 67, finger: 5, lyric: "Sol" }, { midi: 67, finger: 5, lyric: "Sol" }, { midi: 65, finger: 4, lyric: "Fa" },
+                    { midi: 64, finger: 3, lyric: "Mi" }, { midi: 62, finger: 2, lyric: "Re" }, { midi: 60, finger: 1, lyric: "Do" },
+                    { midi: 60, finger: 1, lyric: "Do" }, { midi: 62, finger: 2, lyric: "Re" }, { midi: 64, finger: 3, lyric: "Mi" },
+                    { midi: 64, finger: 3, lyric: "Mi" }, { midi: 62, finger: 2, lyric: "Re" }, { midi: 62, finger: 2, lyric: "Re" }
+                ]
+            },
+            stage5_twinkle: {
+                order: 5, title: "第 5 關：小星星 (跨越五度與高音 La)", goal: "🎯 學習目標：由 Do (1) 跨去 Sol (5) 再伸展去 La (6)", xpReward: 100,
+                notes: [
+                    { midi: 60, finger: 1, lyric: "一" }, { midi: 60, finger: 1, lyric: "閃" }, { midi: 67, finger: 4, lyric: "一" },
+                    { midi: 67, finger: 4, lyric: "閃" }, { midi: 69, finger: 5, lyric: "亮" }, { midi: 69, finger: 5, lyric: "晶" },
+                    { midi: 67, finger: 4, lyric: "晶" }, { midi: 65, finger: 3, lyric: "滿" }, { midi: 65, finger: 3, lyric: "天" },
+                    { midi: 64, finger: 2, lyric: "都" }, { midi: 64, finger: 2, lyric: "是" }, { midi: 62, finger: 1, lyric: "小" },
+                    { midi: 62, finger: 1, lyric: "星" }, { midi: 60, finger: 1, lyric: "星" }
+                ]
+            },
+            stage6_scaleBoss: {
+                order: 6, title: "第 6 關：C大調音階 (穿指大魔王)", goal: "🎯 終極挑戰：彈完 Mi 之後大拇指穿過去彈 Fa，直上高音 Do！", xpReward: 130,
+                notes: [
+                    { midi: 60, finger: 1, lyric: "Do" }, { midi: 62, finger: 2, lyric: "Re" }, { midi: 64, finger: 3, lyric: "Mi" },
+                    { midi: 65, finger: 1, lyric: "Fa" }, { midi: 67, finger: 2, lyric: "Sol" }, { midi: 69, finger: 3, lyric: "La" },
+                    { midi: 71, finger: 4, lyric: "Ti" }, { midi: 72, finger: 5, lyric: "Do+" }, { midi: 71, finger: 4, lyric: "Ti" },
+                    { midi: 69, finger: 3, lyric: "La" }, { midi: 67, finger: 2, lyric: "Sol" }, { midi: 65, finger: 1, lyric: "Fa" },
+                    { midi: 64, finger: 3, lyric: "Mi" }, { midi: 62, finger: 2, lyric: "Re" }, { midi: 60, finger: 1, lyric: "Do" }
+                ]
+            }
+        };
+
+        const BUILTIN_CUSTOM_PRESETS = {
+            preset_hbd: {
+                order: 99, isCustom: true, title: "🎂 生日快樂歌 (Happy Birthday - 全首)",
+                rawNotation: "5 5 6 5 1' 7 5 5 6 5 2' 1' 5 5 5' 3' 1' 7 6 4' 4' 3' 1' 2' 1'",
+                goal: "🎂 經典生日快樂歌全首完整練習", xpReward: 90,
+                notes: [
+                    { midi: 67, finger: 1, lyric: "祝" }, { midi: 67, finger: 1, lyric: "你" }, { midi: 69, finger: 2, lyric: "生" }, { midi: 67, finger: 1, lyric: "日" }, { midi: 72, finger: 4, lyric: "快" }, { midi: 71, finger: 3, lyric: "樂" },
+                    { midi: 67, finger: 1, lyric: "祝" }, { midi: 67, finger: 1, lyric: "你" }, { midi: 69, finger: 2, lyric: "生" }, { midi: 67, finger: 1, lyric: "日" }, { midi: 74, finger: 5, lyric: "快" }, { midi: 72, finger: 4, lyric: "樂" },
+                    { midi: 67, finger: 1, lyric: "祝" }, { midi: 67, finger: 1, lyric: "你" }, { midi: 79, finger: 5, lyric: "生" }, { midi: 76, finger: 4, lyric: "日" }, { midi: 72, finger: 3, lyric: "快" }, { midi: 71, finger: 2, lyric: "樂" }, { midi: 69, finger: 1, lyric: "啊" },
+                    { midi: 77, finger: 5, lyric: "祝" }, { midi: 77, finger: 5, lyric: "你" }, { midi: 76, finger: 4, lyric: "生" }, { midi: 72, finger: 2, lyric: "日" }, { midi: 74, finger: 3, lyric: "快" }, { midi: 72, finger: 1, lyric: "樂" }
+                ]
+            },
+            preset_twinkle: {
+                order: 99, isCustom: true, title: "⭐ 小星星 (Twinkle Twinkle - 全首)",
+                rawNotation: "1 1 5 5 6 6 5 4 4 3 3 2 2 1 5 5 4 4 3 3 2 5 5 4 4 3 3 2 1 1 5 5 6 6 5 4 4 3 3 2 2 1",
+                goal: "⭐ 莫札特小星星變奏曲完整版", xpReward: 95,
+                notes: [
+                    { midi: 60, finger: 1, lyric: "一" }, { midi: 60, finger: 1, lyric: "閃" }, { midi: 67, finger: 5, lyric: "一" }, { midi: 67, finger: 5, lyric: "閃" }, { midi: 69, finger: 5, lyric: "亮" }, { midi: 69, finger: 5, lyric: "晶" }, { midi: 67, finger: 4, lyric: "晶" },
+                    { midi: 65, finger: 3, lyric: "滿" }, { midi: 65, finger: 3, lyric: "天" }, { midi: 64, finger: 2, lyric: "都" }, { midi: 64, finger: 2, lyric: "是" }, { midi: 62, finger: 1, lyric: "小" }, { midi: 62, finger: 1, lyric: "星" }, { midi: 60, finger: 1, lyric: "星" },
+                    { midi: 67, finger: 5, lyric: "掛" }, { midi: 67, finger: 5, lyric: "在" }, { midi: 65, finger: 4, lyric: "天" }, { midi: 65, finger: 4, lyric: "空" }, { midi: 64, finger: 3, lyric: "放" }, { midi: 64, finger: 3, lyric: "光" }, { midi: 62, finger: 2, lyric: "明" },
+                    { midi: 67, finger: 5, lyric: "像" }, { midi: 67, finger: 5, lyric: "許" }, { midi: 65, finger: 4, lyric: "多" }, { midi: 65, finger: 4, lyric: "小" }, { midi: 64, finger: 3, lyric: "眼" }, { midi: 64, finger: 3, lyric: "睛" }, { midi: 62, finger: 2, lyric: "眨" },
+                    { midi: 60, finger: 1, lyric: "一" }, { midi: 60, finger: 1, lyric: "閃" }, { midi: 67, finger: 5, lyric: "一" }, { midi: 67, finger: 5, lyric: "閃" }, { midi: 69, finger: 5, lyric: "亮" }, { midi: 69, finger: 5, lyric: "晶" }, { midi: 67, finger: 4, lyric: "晶" }
+                ]
+            },
+            preset_london: {
+                order: 99, isCustom: true, title: "🌉 倫敦鐵橋垮下來 (London Bridge - 全首)",
+                rawNotation: "5 6 5 4 3 4 5 2 3 4 3 4 5 5 6 5 4 3 4 5 2 5 3 1",
+                goal: "🌉 經典英倫兒歌全首練習", xpReward: 85,
+                notes: [
+                    { midi: 67, finger: 5, lyric: "倫" }, { midi: 69, finger: 5, lyric: "敦" }, { midi: 67, finger: 4, lyric: "鐵" }, { midi: 65, finger: 3, lyric: "橋" }, { midi: 64, finger: 2, lyric: "垮" }, { midi: 65, finger: 3, lyric: "下" }, { midi: 67, finger: 4, lyric: "來" },
+                    { midi: 62, finger: 1, lyric: "垮" }, { midi: 64, finger: 2, lyric: "下" }, { midi: 65, finger: 3, lyric: "來" }, { midi: 64, finger: 2, lyric: "垮" }, { midi: 65, finger: 3, lyric: "下" }, { midi: 67, finger: 4, lyric: "來" },
+                    { midi: 67, finger: 5, lyric: "倫" }, { midi: 69, finger: 5, lyric: "敦" }, { midi: 67, finger: 4, lyric: "鐵" }, { midi: 65, finger: 3, lyric: "橋" }, { midi: 64, finger: 2, lyric: "垮" }, { midi: 65, finger: 3, lyric: "下" }, { midi: 67, finger: 4, lyric: "來" },
+                    { midi: 62, finger: 1, lyric: "我" }, { midi: 67, finger: 5, lyric: "的" }, { midi: 64, finger: 2, lyric: "好" }, { midi: 60, finger: 1, lyric: "朋" }
+                ]
+            },
+            preset_jingle: {
+                order: 99, isCustom: true, title: "🔔 聖誕鈴聲副歌 (Jingle Bells - 全首)",
+                rawNotation: "3 3 3 3 3 3 3 5 1 2 3 4 4 4 4 4 3 3 3 3 2 2 3 2 5",
+                goal: "🔔 歡樂聖誕鈴聲副歌全段", xpReward: 85,
+                notes: [
+                    { midi: 64, finger: 3, lyric: "金" }, { midi: 64, finger: 3, lyric: "金" }, { midi: 64, finger: 3, lyric: "鈴" },
+                    { midi: 64, finger: 3, lyric: "金" }, { midi: 64, finger: 3, lyric: "金" }, { midi: 64, finger: 3, lyric: "鈴" },
+                    { midi: 64, finger: 3, lyric: "鈴" }, { midi: 67, finger: 5, lyric: "聲" }, { midi: 60, finger: 1, lyric: "響" }, { midi: 62, finger: 2, lyric: "連" }, { midi: 64, finger: 3, lyric: "天" },
+                    { midi: 65, finger: 4, lyric: "多" }, { midi: 65, finger: 4, lyric: "麼" }, { midi: 65, finger: 4, lyric: "高" }, { midi: 65, finger: 4, lyric: "興" }, { midi: 64, finger: 3, lyric: "快" },
+                    { midi: 62, finger: 2, lyric: "乘" }, { midi: 62, finger: 2, lyric: "坐" }, { midi: 64, finger: 3, lyric: "雪" }, { midi: 62, finger: 2, lyric: "橇" }, { midi: 67, finger: 5, lyric: "行" }
+                ]
+            },
+            preset_joy: {
+                order: 99, isCustom: true, title: "🎶 貝多芬歡樂頌 (Ode to Joy - 全首)",
+                rawNotation: "3 3 4 5 5 4 3 2 1 1 2 3 3 2 2 3 3 4 5 5 4 3 2 1 1 2 3 2 1 1",
+                goal: "🎶 貝多芬古典名曲歡樂頌完整版", xpReward: 100,
+                notes: [
+                    { midi: 64, finger: 3, lyric: "Mi" }, { midi: 64, finger: 3, lyric: "Mi" }, { midi: 65, finger: 4, lyric: "Fa" }, { midi: 67, finger: 5, lyric: "Sol" }, { midi: 67, finger: 5, lyric: "Sol" }, { midi: 65, finger: 4, lyric: "Fa" }, { midi: 64, finger: 3, lyric: "Mi" }, { midi: 62, finger: 2, lyric: "Re" },
+                    { midi: 60, finger: 1, lyric: "Do" }, { midi: 60, finger: 1, lyric: "Do" }, { midi: 62, finger: 2, lyric: "Re" }, { midi: 64, finger: 3, lyric: "Mi" }, { midi: 64, finger: 3, lyric: "Mi" }, { midi: 62, finger: 2, lyric: "Re" }, { midi: 62, finger: 2, lyric: "Re" },
+                    { midi: 64, finger: 3, lyric: "Mi" }, { midi: 64, finger: 3, lyric: "Mi" }, { midi: 65, finger: 4, lyric: "Fa" }, { midi: 67, finger: 5, lyric: "Sol" }, { midi: 67, finger: 5, lyric: "Sol" }, { midi: 65, finger: 4, lyric: "Fa" }, { midi: 64, finger: 3, lyric: "Mi" }, { midi: 62, finger: 2, lyric: "Re" },
+                    { midi: 60, finger: 1, lyric: "Do" }, { midi: 60, finger: 1, lyric: "Do" }, { midi: 62, finger: 2, lyric: "Re" }, { midi: 64, finger: 3, lyric: "Mi" }, { midi: 62, finger: 2, lyric: "Re" }, { midi: 60, finger: 1, lyric: "Do" }, { midi: 60, finger: 1, lyric: "Do" }
+                ]
+            }
+        };
+
+        Object.assign(SONGS, BUILTIN_CUSTOM_PRESETS);
+
+        const LOCAL_STORAGE_PROFILES_KEY = 'starkeys_profiles_v3';
+        const LOCAL_STORAGE_ACTIVE_PROFILE_KEY = 'starkeys_active_profile_id_v3';
+        const LOCAL_STORAGE_CUSTOM_SONGS_KEY = 'starkeys_custom_songs_v3';
+
+        let editingProfileId = null;
+
+        function loadFromLocalStorage() {
+            try {
+                const savedProfiles = localStorage.getItem(LOCAL_STORAGE_PROFILES_KEY);
+                if (savedProfiles) {
+                    const parsed = JSON.parse(savedProfiles);
+                    if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+                        state.profiles = parsed;
+                    }
+                }
+                const savedActiveId = localStorage.getItem(LOCAL_STORAGE_ACTIVE_PROFILE_KEY);
+                if (savedActiveId && state.profiles[savedActiveId]) {
+                    state.activeProfileId = savedActiveId;
+                }
+                const savedCustomSongs = localStorage.getItem(LOCAL_STORAGE_CUSTOM_SONGS_KEY);
+                if (savedCustomSongs) {
+                    const parsedCustom = JSON.parse(savedCustomSongs);
+                    if (parsedCustom && typeof parsedCustom === 'object') {
+                        Object.entries(parsedCustom).forEach(([k, songData]) => { SONGS[k] = songData; });
+                    }
+                }
+            } catch (e) {
+                console.warn("Load storage warning:", e);
+            }
+        }
+
+        function saveProfilesToLocalStorage() {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_PROFILES_KEY, JSON.stringify(state.profiles));
+                localStorage.setItem(LOCAL_STORAGE_ACTIVE_PROFILE_KEY, state.activeProfileId);
+            } catch (e) {}
+        }
+
+        function saveCustomSongsToLocalStorage() {
+            try {
+                const customOnly = {};
+                Object.entries(SONGS).forEach(([k, s]) => { if (s.isCustom) customOnly[k] = s; });
+                localStorage.setItem(LOCAL_STORAGE_CUSTOM_SONGS_KEY, JSON.stringify(customOnly));
+            } catch (e) {}
+        }
+
+        function applyTheme(theme) {
+            state.theme = theme;
+            const htmlEl = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            const label = document.getElementById('themeLabel');
+
+            if (theme === 'light') {
+                htmlEl.classList.remove('dark');
+                htmlEl.classList.add('light');
+                if (icon) icon.textContent = '🌙';
+                if (label) label.textContent = '深色';
+            } else {
+                htmlEl.classList.remove('light');
+                htmlEl.classList.add('dark');
+                if (icon) icon.textContent = '☀️';
+                if (label) label.textContent = '光亮';
+            }
+        }
+
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pianoflow-academy-app';
+
+        async function initCloudStorage() {
+            try {
+                if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+                    document.getElementById('cloudSyncStatus').textContent = '⚡ 本機記憶體模式';
+                    return;
+                }
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    currentUser = user;
+                    if (user) subscribeToProfilesAndSongs(user.uid);
+                });
+            } catch (err) {
+                document.getElementById('cloudSyncStatus').textContent = '⚡ 單機模式';
+            }
+        }
+
+        function subscribeToProfilesAndSongs(uid) {
+            if (!db || !uid) return;
+            const profilesCol = collection(db, 'artifacts', appId, 'users', uid, 'profiles');
+            onSnapshot(profilesCol, (snapshot) => {
+                if (!snapshot.empty) {
+                    snapshot.forEach(docSnap => {
+                        const data = docSnap.data();
+                        if (data && data.id) {
+                            state.profiles[data.id] = {
+                                ...data,
+                                stageProgress: typeof data.stageProgress === 'string' ? JSON.parse(data.stageProgress) : (data.stageProgress || {}),
+                                history: typeof data.history === 'string' ? JSON.parse(data.history) : (data.history || [])
+                            };
+                        }
+                    });
+                    if (!state.profiles[state.activeProfileId]) state.activeProfileId = Object.keys(state.profiles)[0];
+                    saveProfilesToLocalStorage();
+                    updateProfileHeaderUI();
+                    renderProfilesModalContent();
+                } else {
+                    saveProfileToCloud(state.profiles[state.activeProfileId]);
+                }
+            }, () => {});
+
+            const customSongsCol = collection(db, 'artifacts', appId, 'users', uid, 'customSongs');
+            onSnapshot(customSongsCol, (snapshot) => {
+                snapshot.forEach(docSnap => {
+                    const songData = docSnap.data();
+                    if (songData && songData.key) {
+                        const parsedNotes = typeof songData.notes === 'string' ? JSON.parse(songData.notes) : songData.notes;
+                        SONGS[songData.key] = {
+                            order: 99, isCustom: true, title: songData.title,
+                            rawNotation: songData.rawNotation || '', goal: songData.goal || "🎵 自訂簡譜練習曲", xpReward: 70, notes: parsedNotes
+                        };
+                    }
+                });
+                saveCustomSongsToLocalStorage();
+                populateSongSelectDropdown();
+                renderSavedCustomSongsList();
+            }, () => {});
+        }
+
+        async function saveProfileToCloud(profileObj) {
+            saveProfilesToLocalStorage();
+            if (!db || !currentUser || !profileObj) return;
+            try {
+                const profileDoc = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', profileObj.id);
+                await setDoc(profileDoc, {
+                    id: profileObj.id, name: profileObj.name, avatar: profileObj.avatar,
+                    xp: profileObj.xp, level: profileObj.level, unlockedStageOrder: profileObj.unlockedStageOrder || 1,
+                    stageProgress: JSON.stringify(profileObj.stageProgress || {}),
+                    history: JSON.stringify((profileObj.history || []).slice(0, 30))
+                });
+            } catch (e) {}
+        }
+
+        async function saveCustomSongToCloud(songKey, songObj) {
+            saveCustomSongsToLocalStorage();
+            if (!db || !currentUser) return;
+            try {
+                const songDoc = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'customSongs', songKey);
+                await setDoc(songDoc, { key: songKey, title: songObj.title, rawNotation: songObj.rawNotation || '', goal: songObj.goal, notes: JSON.stringify(songObj.notes) });
+            } catch (e) {}
+        }
+
+        async function deleteCustomSongFromCloud(songKey) {
+            saveCustomSongsToLocalStorage();
+            if (!db || !currentUser) return;
+            try {
+                const songDoc = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'customSongs', songKey);
+                await deleteDoc(songDoc);
+            } catch (e) {}
+        }
+
+        const pianoContainer = document.getElementById('pianoContainer');
+        const keyElements = {};
+
+        function buildVirtualKeyboard() {
+            pianoContainer.innerHTML = '';
+            const whiteKeys = PIANO_KEYS.filter(k => !k.isBlack);
+            const totalWhite = whiteKeys.length;
+            let whiteIndex = 0;
+
+            PIANO_KEYS.forEach((keyObj) => {
+                if (!keyObj.isBlack) {
+                    const btn = document.createElement('div');
+                    btn.className = 'white-key relative flex-1 h-full mx-[1px] rounded-b-xl flex flex-col justify-end items-center pb-2 cursor-pointer select-none';
+                    btn.dataset.midi = keyObj.midi;
+
+                    const fingerBubble = document.createElement('div');
+                    fingerBubble.className = 'finger-bubble hidden mb-auto mt-2.5 w-7 h-7 rounded-full bg-amber-400 text-slate-950 font-black text-xs items-center justify-center shadow-md border-2 border-white';
+                    btn.appendChild(fingerBubble);
+
+                    const jianpuTag = document.createElement('span');
+                    jianpuTag.className = 'text-xs font-extrabold text-slate-700 leading-none mb-0.5';
+                    jianpuTag.textContent = keyObj.jianpu;
+                    btn.appendChild(jianpuTag);
+
+                    const noteTag = document.createElement('span');
+                    noteTag.className = `text-[10px] font-bold ${keyObj.isMiddleC ? 'text-blue-600 bg-blue-100 px-1 rounded' : 'text-slate-500'}`;
+                    noteTag.textContent = keyObj.isMiddleC ? 'C4(中央C)' : keyObj.note;
+                    btn.appendChild(noteTag);
+
+                    if (keyObj.keyShortcut) {
+                        const kbdTag = document.createElement('span');
+                        kbdTag.className = 'text-[9px] text-slate-400 mt-0.5 font-mono hidden sm:block';
+                        kbdTag.textContent = `[${keyObj.keyShortcut}]`;
+                        btn.appendChild(kbdTag);
+                    }
+
+                    const triggerKey = (e) => { e.preventDefault(); handleUserPlayedNote(keyObj.midi, 'virtual'); };
+                    btn.addEventListener('mousedown', triggerKey);
+                    btn.addEventListener('touchstart', triggerKey, { passive: false });
+
+                    pianoContainer.appendChild(btn);
+                    keyElements[keyObj.midi] = btn;
+                    keyObj.whiteIndex = whiteIndex;
+                    whiteIndex++;
+                }
+            });
+
+            let currentWhiteIdx = -1;
+            PIANO_KEYS.forEach((keyObj) => {
+                if (!keyObj.isBlack) {
+                    currentWhiteIdx++;
+                } else {
+                    const btn = document.createElement('div');
+                    const whiteWidthPercent = 100 / totalWhite;
+                    const blackWidthPercent = whiteWidthPercent * 0.64;
+                    const leftPercent = (currentWhiteIdx + 1) * whiteWidthPercent - (blackWidthPercent / 2);
+
+                    btn.className = 'black-key absolute top-2 h-[58%] z-20 rounded-b-lg flex flex-col justify-end items-center pb-1.5 cursor-pointer select-none';
+                    btn.style.width = `${blackWidthPercent}%`;
+                    btn.style.left = `${leftPercent}%`;
+                    btn.dataset.midi = keyObj.midi;
+
+                    const fingerBubble = document.createElement('div');
+                    fingerBubble.className = 'finger-bubble hidden mb-auto mt-1.5 w-6 h-6 rounded-full bg-amber-400 text-slate-950 font-black text-[11px] items-center justify-center shadow';
+                    btn.appendChild(fingerBubble);
+
+                    const noteTag = document.createElement('span');
+                    noteTag.className = 'text-[9px] font-semibold text-slate-300';
+                    noteTag.textContent = keyObj.note;
+                    btn.appendChild(noteTag);
+
+                    const triggerKey = (e) => { e.preventDefault(); e.stopPropagation(); handleUserPlayedNote(keyObj.midi, 'virtual'); };
+                    btn.addEventListener('mousedown', triggerKey);
+                    btn.addEventListener('touchstart', triggerKey, { passive: false });
+
+                    pianoContainer.appendChild(btn);
+                    keyElements[keyObj.midi] = btn;
+                }
+            });
+        }
+
+        function updateKeyboardHighlights() {
+            const song = SONGS[state.currentSongKey];
+            const targetNoteObj = song ? song.notes[state.currentNoteIndex] : null;
+
+            PIANO_KEYS.forEach(k => {
+                const el = keyElements[k.midi];
+                if (!el) return;
+
+                el.classList.remove('key-target-white', 'key-target-black', 'key-correct', 'key-wrong');
+                const bubble = el.querySelector('.finger-bubble');
+                if (bubble) { bubble.classList.add('hidden'); bubble.classList.remove('flex'); }
+
+                if (state.correctMidiNote === k.midi) {
+                    el.classList.add('key-correct');
+                } else if (state.wrongMidiNote === k.midi) {
+                    el.classList.add('key-wrong');
+                }
+
+                if (targetNoteObj && targetNoteObj.midi === k.midi && state.correctMidiNote !== k.midi) {
+                    el.classList.add(k.isBlack ? 'key-target-black' : 'key-target-white');
+                    if (bubble) {
+                        bubble.textContent = targetNoteObj.finger;
+                        bubble.classList.remove('hidden');
+                        bubble.classList.add('flex');
+                    }
+                }
+            });
+        }
+
+        let synthAudioCtx = null;
+        function ensureAudioCtx() {
+            if (!synthAudioCtx) synthAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (synthAudioCtx.state === 'suspended') synthAudioCtx.resume();
+        }
+
+        function playPianoTone(midiNote, duration = 0.55) {
+            if (!document.getElementById('playSynthToggle').checked && !state.isDemoPlaying) return;
+            ensureAudioCtx();
+            const now = synthAudioCtx.currentTime;
+            const freq = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const osc1 = synthAudioCtx.createOscillator();
+            const osc2 = synthAudioCtx.createOscillator();
+            const gainNode = synthAudioCtx.createGain();
+
+            osc1.type = 'triangle'; osc1.frequency.setValueAtTime(freq, now);
+            osc2.type = 'sine'; osc2.frequency.setValueAtTime(freq * 2, now);
+            const osc2Gain = synthAudioCtx.createGain();
+            osc2Gain.gain.setValueAtTime(0.18, now);
+
+            gainNode.gain.setValueAtTime(0.001, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.45, now + 0.015);
+            gainNode.gain.exponentialRampToValueAtTime(0.0008, now + duration);
+
+            osc1.connect(gainNode); osc2.connect(osc2Gain); osc2Gain.connect(gainNode);
+            gainNode.connect(synthAudioCtx.destination);
+            osc1.start(now); osc2.start(now);
+            osc1.stop(now + duration); osc2.stop(now + duration);
+        }
+
+        function playVictoryFanfare(passed) {
+            if (!document.getElementById('playSynthToggle').checked) return;
+            const notes = passed ? [60, 64, 67, 72] : [64, 62, 60];
+            notes.forEach((m, idx) => { setTimeout(() => playPianoTone(m, 0.45), idx * 110); });
+        }
+
+        function handleUserPlayedNote(playedMidi, source = 'mic') {
+            const song = SONGS[state.currentSongKey];
+            if (!song || state.currentNoteIndex >= song.notes.length) return;
+            if (source !== 'mic') playPianoTone(playedMidi);
+
+            const expectedNote = song.notes[state.currentNoteIndex];
+            state.totalAttempts++;
+
+            if (playedMidi === expectedNote.midi) {
+                state.correctHits++;
+                state.combo++;
+                if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+
+                const comboMultiplier = Math.min(4, 1 + Math.floor(state.combo / 4) * 0.5);
+                state.currentScore += Math.round(100 * comboMultiplier);
+
+                state.noteStates[state.currentNoteIndex] = 'correct';
+                state.wrongMidiNote = null;
+                state.correctMidiNote = playedMidi;
+                state.sameNoteReleased = false;
+
+                clearTimeout(state.correctTimer);
+                state.correctTimer = setTimeout(() => { state.correctMidiNote = null; updateKeyboardHighlights(); }, 260);
+
+                state.currentNoteIndex++;
+                updateInstructionUI('CORRECT', playedMidi, expectedNote.midi);
+                updateKeyboardHighlights();
+
+                if (state.currentNoteIndex >= song.notes.length) setTimeout(finishStageAndEvaluate, 420);
+            } else {
+                state.combo = 0;
+                state.mistakesByMidi[expectedNote.midi] = (state.mistakesByMidi[expectedNote.midi] || 0) + 1;
+                state.wrongMidiNote = playedMidi;
+                clearTimeout(state.wrongTimer);
+                state.wrongTimer = setTimeout(() => { state.wrongMidiNote = null; updateKeyboardHighlights(); }, 650);
+                updateInstructionUI('WRONG', playedMidi, expectedNote.midi);
+                updateKeyboardHighlights();
+            }
+        }
+
+        function updateInstructionUI(status, playedMidi, expectedMidi) {
+            const song = SONGS[state.currentSongKey];
+            const total = song.notes.length;
+            const currentIdx = Math.min(state.currentNoteIndex, total - 1);
+            const currentTarget = song.notes[currentIdx];
+            const targetKeyInfo = MIDI_MAP[currentTarget.midi] || MIDI_MAP[60];
+
+            document.getElementById('scoreDisplay').textContent = state.currentScore.toLocaleString();
+            const comboEl = document.getElementById('comboBadge');
+            document.getElementById('comboCountText').textContent = `${state.combo}`;
+            comboEl.classList.remove('animate-pop'); void comboEl.offsetWidth;
+            if (state.combo > 1) comboEl.classList.add('animate-pop');
+
+            document.getElementById('progressCounter').textContent = `${state.currentNoteIndex} / ${total}`;
+            document.getElementById('progressBar').style.width = `${(state.currentNoteIndex / total) * 100}%`;
+            const acc = state.totalAttempts > 0 ? Math.round((state.correctHits / state.totalAttempts) * 100) : 100;
+            const accEl = document.getElementById('accuracyValue');
+            accEl.textContent = `${acc}%`;
+            accEl.className = acc >= 80 ? 'text-emerald-400' : 'text-red-400';
+
+            document.getElementById('targetJianpuNum').textContent = targetKeyInfo.jianpu;
+            document.getElementById('fingerNameDisplay').textContent = FINGER_NAMES[currentTarget.finger] || '第 1 指';
+            document.getElementById('fingerBadgeCircle').textContent = currentTarget.finger;
+
+            const card = document.getElementById('instructionCard');
+            const badge = document.getElementById('feedbackBadge');
+            const hint = document.getElementById('lyricHint');
+            const mainText = document.getElementById('mainInstructionText');
+
+            card.classList.remove('border-emerald-500', 'border-red-500', 'animate-shake');
+
+            if (status === 'CORRECT') {
+                card.classList.add('border-emerald-500');
+                badge.className = 'px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                badge.textContent = state.combo >= 4 ? `✓ 連擊 x${state.combo}！` : '✓ 彈啱咗！';
+                hint.textContent = `繼續彈下一粒音：「${currentTarget.lyric}」`;
+            } else if (status === 'WRONG') {
+                const wrongInfo = MIDI_MAP[playedMidi] || { note: `MIDI ${playedMidi}`, jianpu: '?' };
+                const expInfo = MIDI_MAP[expectedMidi] || MIDI_MAP[60];
+                const directionHint = playedMidi > expectedMidi ? '你彈高咗音' : '你彈低咗音';
+                card.classList.add('border-red-500', 'animate-shake');
+                badge.className = 'px-2.5 py-0.5 text-xs font-bold rounded-full bg-red-500/20 text-red-300 border border-red-500/40';
+                badge.textContent = `✗ 彈錯咗 ${wrongInfo.note}`;
+                hint.textContent = `${directionHint}，請對照藍色鍵 ${expInfo.note}`;
+            } else {
+                badge.className = 'px-2.5 py-0.5 text-xs font-bold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30';
+                badge.textContent = '準備彈奏';
+                hint.textContent = `唱名提示：「${currentTarget.lyric}」`;
+            }
+            mainText.innerHTML = `請彈 <span class="text-blue-400">${targetKeyInfo.note} (簡譜 ${targetKeyInfo.jianpu})</span> · 用右手 <span class="text-amber-400">${FINGER_NAMES[currentTarget.finger]}</span>`;
+        }
+
+        function finishStageAndEvaluate() {
+            if (state.isDemoPlaying) {
+                clearInterval(demoInterval);
+                state.isDemoPlaying = false;
+                document.getElementById('demoPlayBtnText').textContent = '示範';
+                loadSong(state.currentSongKey);
+                return;
+            }
+
+            const song = SONGS[state.currentSongKey];
+            const acc = state.totalAttempts > 0 ? Math.round((state.correctHits / state.totalAttempts) * 100) : 100;
+            let stars = acc >= 95 ? 3 : (acc >= 88 ? 2 : (acc >= 80 ? 1 : 0));
+            const passed = stars >= 1;
+
+            playVictoryFanfare(passed);
+            const baseXP = song.xpReward || 60;
+            const xpEarned = passed ? Math.round(baseXP * (0.7 + stars * 0.15)) : 15;
+
+            const profile = state.profiles[state.activeProfileId];
+            const oldLevel = profile.level || 1;
+            profile.xp = (profile.xp || 0) + xpEarned;
+            profile.level = Math.floor(profile.xp / 100) + 1;
+            const leveledUp = profile.level > oldLevel;
+
+            if (!profile.stageProgress) profile.stageProgress = {};
+            const prevStage = profile.stageProgress[state.currentSongKey] || { stars: 0, bestAccuracy: 0, bestScore: 0, attempts: 0 };
+            profile.stageProgress[state.currentSongKey] = {
+                stars: Math.max(prevStage.stars, stars),
+                bestAccuracy: Math.max(prevStage.bestAccuracy, acc),
+                bestScore: Math.max(prevStage.bestScore, state.currentScore),
+                attempts: (prevStage.attempts || 0) + 1
+            };
+
+            if (passed && song.order && song.order >= (profile.unlockedStageOrder || 1)) {
+                profile.unlockedStageOrder = song.order + 1;
+            }
+
+            if (!profile.history) profile.history = [];
+            profile.history.unshift({
+                songKey: state.currentSongKey, songTitle: song.title, accuracy: acc, score: state.currentScore, stars, passed,
+                timestamp: new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' })
+            });
+
+            saveProfileToCloud(profile);
+            updateProfileHeaderUI();
+
+            document.getElementById('modalStarsContainer').innerHTML = [1, 2, 3].map(i => `<span class="${i <= stars ? 'opacity-100 scale-110' : 'opacity-25 grayscale'} inline-block">${i <= stars ? '⭐' : '☆'}</span>`).join('');
+            const headingEl = document.getElementById('modalResultHeading');
+            const nextBtn = document.getElementById('modalNextSongBtn');
+
+            if (passed) {
+                headingEl.textContent = stars === 3 ? '🏆 完美三星過關！' : '🎉 恭喜成功過關！';
+                headingEl.className = 'text-2xl font-extrabold text-emerald-400';
+                nextBtn.classList.remove('hidden');
+            } else {
+                headingEl.textContent = '💪 差少少咋！再練多次！';
+                headingEl.className = 'text-xl font-extrabold text-amber-400';
+                nextBtn.classList.add('hidden');
+            }
+
+            document.getElementById('completeSongTitle').textContent = song.title;
+            document.getElementById('modalAccuracy').textContent = `${acc}%`;
+            document.getElementById('modalScore').textContent = state.currentScore.toLocaleString();
+            document.getElementById('modalXpEarned').textContent = `+${xpEarned} XP`;
+
+            const lvBanner = document.getElementById('modalLevelUpBanner');
+            if (leveledUp) {
+                document.getElementById('modalNewLevelText').textContent = `Lv.${profile.level} ${LEVEL_TITLES[Math.min(profile.level - 1, LEVEL_TITLES.length - 1)]}`;
+                lvBanner.classList.remove('hidden');
+            } else {
+                lvBanner.classList.add('hidden');
+            }
+
+            const modal = document.getElementById('completeModal');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+        }
+
+        const sheetCanvas = document.getElementById('sheetCanvas');
+        const ctx = sheetCanvas.getContext('2d');
+        const DIATONIC_STEP_FROM_C4 = { 53: -4, 54: -4, 55: -3, 56: -3, 57: -2, 58: -2, 59: -1, 60: 0, 61: 0, 62: 1, 63: 1, 64: 2, 65: 3, 66: 3, 67: 4, 68: 4, 69: 5, 70: 5, 71: 6, 72: 7, 73: 7, 74: 8, 75: 8, 76: 9 };
+
+        function resizeSheetCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = sheetCanvas.getBoundingClientRect();
+            sheetCanvas.width = rect.width * dpr;
+            sheetCanvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        window.addEventListener('resize', resizeSheetCanvas);
+
+        function renderSheetMusicLoop() {
+            const width = sheetCanvas.clientWidth;
+            const height = sheetCanvas.clientHeight;
+            ctx.clearRect(0, 0, width, height);
+
+            const isLight = state.theme === 'light';
+            state.smoothScrollIndex += (state.currentNoteIndex - state.smoothScrollIndex) * 0.14;
+
+            const lineSpacing = Math.max(11, Math.min(15, Math.floor(height * 0.08)));
+            const bottomLineY = height * 0.58;
+            const playheadX = Math.max(105, width * 0.22);
+            const noteSpacing = 88;
+
+            const staffTopY = bottomLineY - lineSpacing * 4;
+            ctx.fillStyle = isLight ? 'rgba(241, 245, 249, 0.85)' : 'rgba(30, 41, 59, 0.55)';
+            ctx.fillRect(14, staffTopY - lineSpacing * 0.8, width - 28, lineSpacing * 5.6);
+
+            ctx.strokeStyle = isLight ? '#1e293b' : '#94a3b8';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 5; i++) {
+                const y = bottomLineY - i * lineSpacing;
+                ctx.beginPath(); ctx.moveTo(20, y); ctx.lineTo(width - 20, y); ctx.stroke();
+            }
+
+            ctx.fillStyle = isLight ? '#0f172a' : '#e2e8f0';
+            ctx.font = `${Math.round(lineSpacing * 4.5)}px serif`;
+            ctx.textBaseline = 'middle';
+            ctx.fillText('𝄞', 30, bottomLineY - lineSpacing * 1.8);
+
+            const grad = ctx.createLinearGradient(0, 10, 0, height - 10);
+            grad.addColorStop(0, 'rgba(59, 130, 246, 0.0)');
+            grad.addColorStop(0.5, isLight ? 'rgba(59, 130, 246, 0.22)' : 'rgba(59, 130, 246, 0.35)');
+            grad.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(playheadX - 22, 10, 44, height - 20);
+
+            ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.moveTo(playheadX, 16); ctx.lineTo(playheadX, height - 16); ctx.stroke();
+
+            const song = SONGS[state.currentSongKey];
+            if (song && song.notes) {
+                song.notes.forEach((noteItem, idx) => {
+                    const x = playheadX + (idx - state.smoothScrollIndex) * noteSpacing;
+                    if (x < 65 || x > width + 60) return;
+
+                    const stepFromC4 = DIATONIC_STEP_FROM_C4[noteItem.midi] || 0;
+                    const y = bottomLineY - (stepFromC4 - 2) * (lineSpacing / 2);
+                    const keyInfo = MIDI_MAP[noteItem.midi] || MIDI_MAP[60];
+                    const isTarget = idx === state.currentNoteIndex;
+                    const isDone = state.noteStates[idx] === 'correct';
+
+                    if (noteItem.midi === 60 || noteItem.midi === 61) {
+                        ctx.strokeStyle = isTarget ? '#2563eb' : (isLight ? '#0f172a' : '#cbd5e1');
+                        ctx.lineWidth = 2.5;
+                        ctx.beginPath(); ctx.moveTo(x - 22, y); ctx.lineTo(x + 22, y); ctx.stroke();
+                    }
+
+                    let fillColor = isLight ? '#334155' : '#475569';
+                    let borderColor = isLight ? '#0f172a' : '#cbd5e1';
+                    if (isDone) { fillColor = '#10b981'; borderColor = '#047857'; }
+                    else if (isTarget) { fillColor = '#2563eb'; borderColor = '#1d4ed8'; }
+
+                    ctx.strokeStyle = borderColor; ctx.lineWidth = 2.5;
+                    ctx.beginPath(); ctx.moveTo(x + 12, y); ctx.lineTo(x + 12, y - 34); ctx.stroke();
+
+                    ctx.beginPath(); ctx.arc(x, y, 14, 0, Math.PI * 2);
+                    ctx.fillStyle = fillColor; ctx.fill(); ctx.lineWidth = isTarget ? 3 : 2; ctx.strokeStyle = borderColor; ctx.stroke();
+
+                    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 14px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(keyInfo.jianpu, x, y + 0.5);
+
+                    const fingerY = y - 44;
+                    ctx.beginPath(); ctx.arc(x + 12, fingerY, 9, 0, Math.PI * 2);
+                    ctx.fillStyle = isTarget ? '#f59e0b' : '#1e293b'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#d97706'; ctx.stroke();
+
+                    ctx.fillStyle = isTarget ? '#0f172a' : '#fbbf24'; ctx.font = 'bold 11px Inter, sans-serif';
+                    ctx.fillText(noteItem.finger, x + 12, fingerY + 0.5);
+
+                    ctx.fillStyle = isTarget ? '#2563eb' : (isDone ? '#059669' : '#cbd5e1');
+                    ctx.font = isTarget ? 'bold 13px Inter, sans-serif' : '600 12px Inter, sans-serif';
+                    ctx.fillText(keyInfo.note, x, bottomLineY + 30);
+                    ctx.fillStyle = '#94a3b8'; ctx.font = '11px Inter, sans-serif';
+                    ctx.fillText(noteItem.lyric || '', x, bottomLineY + 46);
+                });
+            }
+            requestAnimationFrame(renderSheetMusicLoop);
+        }
+
+        let micAudioCtx = null;
+        let analyserNode = null;
+        let micStream = null;
+        let audioBuffer = null;
+
+        async function toggleMicrophone() {
+            const btn = document.getElementById('toggleMicBtn');
+            const btnText = document.getElementById('toggleMicBtnText');
+            const dot = document.getElementById('micDot');
+            const label = document.getElementById('micStatusLabel');
+
+            if (state.isMicListening) {
+                state.isMicListening = false;
+                if (micStream) micStream.getTracks().forEach(t => t.stop());
+                btn.className = 'flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-3 py-2 rounded-xl shadow transition';
+                btnText.textContent = '開 Mic'; dot.className = 'w-2 h-2 rounded-full bg-slate-600'; label.textContent = 'Mic 未開';
+                return;
+            }
+
+            try {
+                // 針對舊 iPad Safari 的多重容錯處理
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                micAudioCtx = new AudioContextClass();
+                if (micAudioCtx.state === 'suspended') {
+                    await micAudioCtx.resume();
+                }
+
+                // 建立一個靜音 Oscillator 瞬間解鎖 iOS 舊版 AudioContext 限制
+                const dummyOsc = micAudioCtx.createOscillator();
+                const dummyGain = micAudioCtx.createGain();
+                dummyGain.gain.setValueAtTime(0.00001, micAudioCtx.currentTime);
+                dummyOsc.connect(dummyGain);
+                dummyGain.connect(micAudioCtx.destination);
+                dummyOsc.start();
+                dummyOsc.stop(micAudioCtx.currentTime + 0.05);
+
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices = navigator.mediaDevices || {};
+                    navigator.mediaDevices.getUserMedia = function(c) {
+                        const g = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+                        if (!g) return Promise.reject(new Error('Browser API not supported'));
+                        return new Promise((res, rej) => g.call(navigator, c, res, rej));
+                    };
+                }
+
+                try {
+                    micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, autoGainControl: false, noiseSuppression: false } });
+                } catch (e1) {
+                    // 若失敗則退回最簡單的 { audio: true }
+                    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                }
+
+                const source = micAudioCtx.createMediaStreamSource(micStream);
+                analyserNode = micAudioCtx.createAnalyser();
+                analyserNode.fftSize = 2048;
+                source.connect(analyserNode);
+
+                audioBuffer = new Float32Array(analyserNode.fftSize);
+                state.isMicListening = true;
+
+                btn.className = 'flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3 py-2 rounded-xl shadow transition';
+                btnText.textContent = '收音中';
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping';
+                label.textContent = '聆聽真琴';
+                detectPitchLoop();
+            } catch (err) {
+                label.textContent = '收音受阻(可用虛擬鍵)';
+                dot.className = 'w-2 h-2 rounded-full bg-amber-500';
+                document.getElementById('lyricHint').innerHTML = '💡 <strong>舊 iPad Safari 提示</strong>：如 Mic 受阻，可直接用手指點擊下方虛擬琴鍵或電腦鍵盤 A~K 彈奏闖關！';
+            }
+        }
+
+        function autoCorrelatePitch(buf, sampleRate) {
+            let size = buf.length; let rms = 0;
+            for (let i = 0; i < size; i++) { rms += buf[i] * buf[i]; }
+            rms = Math.sqrt(rms / size);
+            if (rms < 0.035) return { freq: -1, rms };
+
+            let r1 = 0, r2 = size - 1; const thres = 0.2;
+            for (let i = 0; i < size / 2; i++) { if (Math.abs(buf[i]) < thres) { r1 = i; break; } }
+            for (let i = 1; i < size / 2; i++) { if (Math.abs(buf[size - i]) < thres) { r2 = size - i; break; } }
+
+            const trimmed = buf.slice(r1, r2); size = trimmed.length;
+            const c = new Float32Array(size);
+            for (let i = 0; i < size; i++) {
+                let sum = 0; for (let j = 0; j < size - i; j++) { sum += trimmed[j] * trimmed[j + i]; }
+                c[i] = sum;
+            }
+            let d = 0; while (d < size - 1 && c[d] > c[d + 1]) { d++; }
+            let maxval = -1, maxpos = -1;
+            for (let i = d; i < size; i++) { if (c[i] > maxval) { maxval = c[i]; maxpos = i; } }
+            let T0 = maxpos;
+            if (T0 > 0 && T0 < size - 1) {
+                const x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
+                const a = (x1 + x3 - 2 * x2) / 2; const b = (x3 - x1) / 2;
+                if (a) T0 = T0 - b / (2 * a);
+            }
+            return { freq: sampleRate / T0, rms };
+        }
+
+        let pitchStabilityBuffer = [];
+        function detectPitchLoop() {
+            if (!state.isMicListening) return;
+            analyserNode.getFloatTimeDomainData(audioBuffer);
+            const { freq, rms } = autoCorrelatePitch(audioBuffer, micAudioCtx.sampleRate);
+            document.getElementById('volumeMeter').style.width = `${Math.min(100, Math.round(rms * 420))}%`;
+
+            if (rms < 0.015 || rms > state.previousRms * 1.45) state.sameNoteReleased = true;
+            state.previousRms = rms;
+
+            if (freq !== -1 && freq >= 130 && freq <= 1050) {
+                const detectedMidi = Math.round(12 * Math.log2(freq / 440) + 69);
+                const keyInfo = MIDI_MAP[detectedMidi];
+                if (keyInfo) {
+                    document.getElementById('detectedPitchText').textContent = `${keyInfo.note}`;
+                    pitchStabilityBuffer.push(detectedMidi);
+                    if (pitchStabilityBuffer.length > 2) pitchStabilityBuffer.shift();
+                    if (pitchStabilityBuffer.length === 2 && pitchStabilityBuffer[0] === pitchStabilityBuffer[1]) {
+                        const now = performance.now();
+                        if (now - state.lastNoteTriggerTime > 260) {
+                            const song = SONGS[state.currentSongKey];
+                            const expected = song.notes[state.currentNoteIndex];
+                            if (expected && ((detectedMidi === expected.midi && state.sameNoteReleased) || detectedMidi !== expected.midi)) {
+                                state.lastNoteTriggerTime = now;
+                                handleUserPlayedNote(detectedMidi, 'mic');
+                            }
+                        }
+                    }
+                }
+            }
+            requestAnimationFrame(detectPitchLoop);
+        }
+
+        function initWebMIDI() {
+            const badge = document.getElementById('midiStatusBadge');
+            if (!navigator.requestMIDIAccess) return;
+            navigator.requestMIDIAccess().then((midiAccess) => {
+                const updateDevices = () => {
+                    const inputs = Array.from(midiAccess.inputs.values());
+                    if (inputs.length > 0) {
+                        badge.textContent = `🎹 MIDI: ${inputs[0].name}`;
+                        inputs.forEach(input => {
+                            input.onmidimessage = (msg) => {
+                                const [command, note, velocity] = msg.data;
+                                if (command === 144 && velocity > 0) handleUserPlayedNote(note, 'midi');
+                            };
+                        });
+                    }
+                };
+                updateDevices(); midiAccess.onstatechange = updateDevices;
+            }).catch(() => {});
+        }
+
+        const JIANPU_BASE_SEMITONE = { '1': 0, '2': 2, '3': 4, '4': 5, '5': 7, '6': 9, '7': 11 };
+
+        function parseCustomJianpuString(rawStr) {
+            const tokens = rawStr.trim().split(/[\s,，、]+/).filter(Boolean);
+            const parsedNotes = [];
+            for (const token of tokens) {
+                const match = token.match(/^(#?)([1-7])(['’.]?)(?::([1-5]))?$/);
+                if (!match) return { error: `無法識別簡譜「${token}」` };
+                const isSharp = match[1] === '#';
+                const num = match[2]; const octaveMod = match[3];
+                const customFinger = match[4] ? parseInt(match[4], 10) : null;
+                let midi = 60 + JIANPU_BASE_SEMITONE[num];
+                if (isSharp) midi += 1;
+                if (octaveMod === "'" || octaveMod === "’") midi += 12;
+                if (octaveMod === ".") midi -= 12;
+                if (midi < 53) midi = 53; if (midi > 76) midi = 76;
+                const keyInfo = MIDI_MAP[midi] || MIDI_MAP[60];
+                parsedNotes.push({ midi, finger: customFinger || 1, lyric: keyInfo.solfege });
+            }
+            if (parsedNotes.length < 2) return { error: '請至少輸入 2 粒音符。' };
+            return { notes: parsedNotes };
+        }
+
+        function reconstructRawNotation(notesArr) {
+            if (!Array.isArray(notesArr)) return '';
+            const midiToToken = { 60: '1', 62: '2', 64: '3', 65: '4', 67: '5', 69: '6', 71: '7', 72: "1'" };
+            return notesArr.map(n => midiToToken[n.midi] || '1').join(' ');
+        }
+
+        function renderSavedCustomSongsList() {
+            const listEl = document.getElementById('savedCustomSongsList');
+            const badgeEl = document.getElementById('savedCustomCountBadge');
+            if (!listEl) return;
+            const customEntries = Object.entries(SONGS).filter(([, s]) => s.isCustom);
+            badgeEl.textContent = `${customEntries.length} 首`;
+            listEl.innerHTML = '';
+
+            customEntries.forEach(([key, song]) => {
+                const isEditingThis = state.editingCustomSongKey === key;
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-xl border transition flex flex-col gap-2 ${isEditingThis ? 'bg-blue-950/50 border-blue-500' : 'bg-slate-900 border-slate-800'}`;
+                item.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div><div class="font-bold text-xs text-white">${song.title}</div><div class="text-[10px] text-slate-400 font-mono mt-0.5">${song.rawNotation || ''}</div></div>
+                        <span class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded text-[10px]">${song.notes.length}音</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 pt-1 border-t border-slate-800">
+                        <button data-play-key="${key}" class="custom-play-btn flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] py-1 px-2 rounded-lg">▶ 練習</button>
+                        <button data-edit-key="${key}" class="custom-edit-btn bg-slate-800 text-amber-300 border border-amber-500/30 font-semibold text-[11px] py-1 px-2 rounded-lg">✏️ 編輯</button>
+                        <button data-del-key="${key}" class="custom-del-btn bg-slate-800 text-rose-400 border border-rose-500/20 py-1 px-2 rounded-lg">🗑️</button>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
+
+            listEl.querySelectorAll('.custom-play-btn').forEach(btn => {
+                btn.addEventListener('click', () => { loadSong(btn.dataset.playKey); document.getElementById('customSongModal').classList.add('hidden'); });
+            });
+            listEl.querySelectorAll('.custom-edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const k = btn.dataset.editKey; const song = SONGS[k];
+                    state.editingCustomSongKey = k;
+                    document.getElementById('customSongTitleInput').value = song.title;
+                    document.getElementById('customSongNotesInput').value = song.rawNotation || reconstructRawNotation(song.notes);
+                    document.getElementById('customFormModeBadge').textContent = `✏️ 編輯：${song.title}`;
+                    document.getElementById('cancelEditCustomBtn').classList.remove('hidden');
+                    renderSavedCustomSongsList();
+                });
+            });
+            listEl.querySelectorAll('.custom-del-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const k = btn.dataset.delKey; delete SONGS[k]; deleteCustomSongFromCloud(k);
+                    if (state.currentSongKey === k) loadSong('stage1_middleC');
+                    populateSongSelectDropdown(); renderSavedCustomSongsList();
+                });
+            });
+        }
+
+        function resetCustomFormMode() {
+            state.editingCustomSongKey = null;
+            document.getElementById('customSongTitleInput').value = '';
+            document.getElementById('customSongNotesInput').value = '';
+            document.getElementById('customFormModeBadge').textContent = '➕ 建立新簡譜';
+            document.getElementById('cancelEditCustomBtn').classList.add('hidden');
+            document.getElementById('customSongErrorMsg').classList.add('hidden');
+            renderSavedCustomSongsList();
+        }
+
+        function populateSongSelectDropdown() {}
+
+        function updateProfileHeaderUI() {
+            const profile = state.profiles[state.activeProfileId];
+            if (!profile) return;
+            document.getElementById('headerAvatar').textContent = profile.avatar || '🦊';
+            document.getElementById('headerPlayerName').textContent = profile.name;
+            document.getElementById('headerLevelBadge').textContent = `Lv.${profile.level || 1}`;
+            let totalStars = 0; Object.values(profile.stageProgress || {}).forEach(st => totalStars += (st.stars || 0));
+            document.getElementById('headerTotalStars').textContent = `⭐ ${totalStars}`;
+            const xpInLevel = (profile.xp || 0) % 100;
+            document.getElementById('headerXpBar').style.width = `${xpInLevel}%`;
+            document.getElementById('headerXpText').textContent = `${xpInLevel}/100 XP`;
+        }
+
+        function renderCourseMapModal() {
+            const listEl = document.getElementById('courseStagesList');
+            const profile = state.profiles[state.activeProfileId];
+            const unlockedOrder = profile.unlockedStageOrder || 1;
+            listEl.innerHTML = '';
+
+            Object.entries(SONGS).forEach(([key, song]) => {
+                if (song.isCustom) return;
+                const progress = (profile.stageProgress && profile.stageProgress[key]) || { stars: 0, bestAccuracy: 0, bestScore: 0, attempts: 0 };
+                const isLocked = song.order > unlockedOrder;
+                const isCurrent = key === state.currentSongKey;
+                const card = document.createElement('div');
+                card.className = `p-3.5 rounded-2xl border transition flex items-center justify-between gap-3 ${isLocked ? 'bg-slate-950/50 opacity-60' : (isCurrent ? 'bg-blue-950/40 border-blue-500' : 'bg-slate-950 border-slate-800')}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl flex items-center justify-center font-black text-base bg-indigo-600/20 text-indigo-300">${isLocked ? '🔒' : `Lv.${song.order}`}</div>
+                        <div>
+                            <div class="flex items-center gap-2"><h4 class="font-extrabold text-sm text-white">${song.title}</h4><span class="text-xs text-yellow-400">${[1,2,3].map(i => i <= progress.stars ? '⭐' : '☆').join('')}</span></div>
+                            <p class="text-[11px] text-slate-400">${song.goal}</p>
+                        </div>
+                    </div>
+                    <div>${isLocked ? `<span class="text-xs text-slate-500">需解鎖上一關</span>` : `<button data-song-key="${key}" class="select-stage-btn bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl">挑戰</button>`}</div>
+                `;
+                listEl.appendChild(card);
+            });
+
+            listEl.querySelectorAll('.select-stage-btn').forEach(btn => {
+                btn.addEventListener('click', () => { loadSong(btn.dataset.songKey); document.getElementById('courseMapModal').classList.add('hidden'); });
+            });
+        }
+
+        function renderProfilesModalContent() {
+            const grid = document.getElementById('profilesGrid');
+            grid.innerHTML = '';
+            Object.values(state.profiles).forEach(prof => {
+                const isActive = prof.id === state.activeProfileId;
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-2xl border transition flex items-center justify-between ${isActive ? 'bg-blue-950/40 border-blue-500' : 'bg-slate-950 border-slate-800'}`;
+                div.innerHTML = `
+                    <div class="flex items-center gap-2.5 cursor-pointer flex-1 select-profile-area">
+                        <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-xl">${prof.avatar || '🦊'}</div>
+                        <div><div class="font-bold text-sm text-white">${prof.name} ${isActive ? '(使用中)' : ''}</div><div class="text-[11px] text-amber-400">Lv.${prof.level || 1}</div></div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button data-edit-id="${prof.id}" class="edit-profile-btn bg-slate-900 text-amber-300 border border-slate-700 p-1.5 rounded-lg text-xs">✏️</button>
+                        <button data-reset-id="${prof.id}" class="reset-profile-btn bg-slate-900 text-orange-400 border border-slate-700 p-1.5 rounded-lg text-xs">🔄</button>
+                    </div>
+                `;
+                div.querySelector('.select-profile-area').addEventListener('click', () => {
+                    state.activeProfileId = prof.id; saveProfilesToLocalStorage(); updateProfileHeaderUI(); renderProfilesModalContent();
+                });
+                grid.appendChild(div);
+            });
+        }
+
+        function loadSong(songKey) {
+            if (!SONGS[songKey]) songKey = 'stage1_middleC';
+            state.currentSongKey = songKey; state.currentNoteIndex = 0; state.smoothScrollIndex = 0;
+            state.totalAttempts = 0; state.correctHits = 0; state.currentScore = 0; state.combo = 0; state.maxCombo = 0;
+            state.mistakesByMidi = {}; state.wrongMidiNote = null; state.correctMidiNote = null; state.sameNoteReleased = true;
+
+            const song = SONGS[songKey];
+            state.noteStates = new Array(song.notes.length).fill('pending');
+            document.getElementById('completeModal').classList.add('hidden');
+            document.getElementById('currentStageBtnLabel').textContent = song.title;
+            document.getElementById('currentSongTitleText').textContent = song.title;
+            updateInstructionUI('INIT'); updateKeyboardHighlights();
+        }
+
+        const SHORTCUT_TO_MIDI = {};
+        PIANO_KEYS.forEach(k => { if (k.keyShortcut) SHORTCUT_TO_MIDI[k.keyShortcut.toLowerCase()] = k.midi; });
+        window.addEventListener('keydown', (e) => {
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+            if (e.repeat) return;
+            const midi = SHORTCUT_TO_MIDI[e.key.toLowerCase()];
+            if (midi) handleUserPlayedNote(midi, 'keyboard');
+        });
+
+        let demoInterval = null;
+        function toggleDemoPlay() {
+            const btnText = document.getElementById('demoPlayBtnText');
+            if (state.isDemoPlaying) { clearInterval(demoInterval); state.isDemoPlaying = false; btnText.textContent = '示範'; return; }
+            const song = SONGS[state.currentSongKey];
+            if (state.currentNoteIndex >= song.notes.length) loadSong(state.currentSongKey);
+            state.isDemoPlaying = true; btnText.textContent = '停止';
+            demoInterval = setInterval(() => {
+                const currentSong = SONGS[state.currentSongKey];
+                if (state.currentNoteIndex >= currentSong.notes.length) { clearInterval(demoInterval); state.isDemoPlaying = false; btnText.textContent = '示範'; return; }
+                handleUserPlayedNote(currentSong.notes[state.currentNoteIndex].midi, 'demo');
+            }, 500);
+        }
+
+        window.onload = function () {
+            loadFromLocalStorage(); applyTheme(state.theme);
+            buildVirtualKeyboard(); resizeSheetCanvas(); updateProfileHeaderUI();
+            loadSong('stage1_middleC'); renderSheetMusicLoop(); initWebMIDI(); initCloudStorage();
+
+            document.getElementById('themeToggleBtn').addEventListener('click', () => applyTheme(state.theme === 'dark' ? 'light' : 'dark'));
+            document.getElementById('toggleMicBtn').addEventListener('click', toggleMicrophone);
+            document.getElementById('resetSongBtn').addEventListener('click', () => loadSong(state.currentSongKey));
+            document.getElementById('demoPlayBtn').addEventListener('click', toggleDemoPlay);
+            document.getElementById('modalReplayBtn').addEventListener('click', () => loadSong(state.currentSongKey));
+            document.getElementById('modalNextSongBtn').addEventListener('click', () => {
+                const keys = Object.keys(SONGS).filter(k => !SONGS[k].isCustom);
+                const curIdx = keys.indexOf(state.currentSongKey);
+                if (curIdx >= 0 && curIdx < keys.length - 1) loadSong(keys[curIdx + 1]);
+            });
+
+            document.getElementById('openCourseMapBtn').addEventListener('click', () => { renderCourseMapModal(); document.getElementById('courseMapModal').classList.remove('hidden'); document.getElementById('courseMapModal').classList.add('flex'); });
+            document.getElementById('closeCourseMapBtn').addEventListener('click', () => document.getElementById('courseMapModal').classList.add('hidden'));
+
+            document.getElementById('openCustomSongModalBtn').addEventListener('click', () => { resetCustomFormMode(); document.getElementById('customSongModal').classList.remove('hidden'); document.getElementById('customSongModal').classList.add('flex'); });
+            document.getElementById('closeCustomSongModalBtn').addEventListener('click', () => document.getElementById('customSongModal').classList.add('hidden'));
+
+            document.getElementById('presetHbdBtn').addEventListener('click', () => {
+                document.getElementById('customSongTitleInput').value = '🎂 生日快樂歌 (Happy Birthday)';
+                document.getElementById('customSongNotesInput').value = '5 5 6 5 1\' 7 5 5 6 5 2\' 1\'';
+            });
+            document.getElementById('presetTwinkleBtn').addEventListener('click', () => {
+                document.getElementById('customSongTitleInput').value = '⭐ 小星星 (Twinkle Twinkle)';
+                document.getElementById('customSongNotesInput').value = '1 1 5 5 6 6 5 4 4 3 3 2 2 1';
+            });
+            document.getElementById('presetLondonBtn').addEventListener('click', () => {
+                document.getElementById('customSongTitleInput').value = '🌉 倫敦鐵橋 (London Bridge)';
+                document.getElementById('customSongNotesInput').value = '5 6 5 4 3 4 5 2 3 4 3 4 5';
+            });
+
+            document.getElementById('playCustomNowBtn').addEventListener('click', () => {
+                const titleInput = document.getElementById('customSongTitleInput').value.trim() || '自訂曲目';
+                const notesInput = document.getElementById('customSongNotesInput').value.trim();
+                const errEl = document.getElementById('customSongErrorMsg');
+                const parsed = parseCustomJianpuString(notesInput);
+                if (parsed.error) { errEl.textContent = parsed.error; errEl.classList.remove('hidden'); return; }
+
+                const customKey = state.editingCustomSongKey || ('custom_' + Date.now());
+                const newSongObj = { order: 99, isCustom: true, title: titleInput, rawNotation: notesInput, goal: `🎵 自訂曲目`, xpReward: 80, notes: parsed.notes };
+                SONGS[customKey] = newSongObj; saveCustomSongToCloud(customKey, newSongObj);
+                renderSavedCustomSongsList(); loadSong(customKey);
+                document.getElementById('customSongModal').classList.add('hidden');
+            });
+
+            document.getElementById('openProfileModalBtn').addEventListener('click', () => { renderProfilesModalContent(); document.getElementById('profileModal').classList.remove('hidden'); document.getElementById('profileModal').classList.add('flex'); });
+            document.getElementById('closeProfileModalBtn').addEventListener('click', () => document.getElementById('profileModal').classList.add('hidden'));
+        };
+    </script>
+</body>
+</html>
