@@ -444,6 +444,9 @@
             wrongMidiNote: null,
             correctMidiNote: null,
             sameNoteReleased: true,
+            heldMidiNote: null,
+            heldNotePeakRms: 0,
+            silenceFrames: 0,
             isMicListening: false,
             isDemoPlaying: false,
             noteStates: [],
@@ -1302,25 +1305,66 @@
             const { freq, rms } = autoCorrelatePitch(audioBuffer, micAudioCtx.sampleRate);
             document.getElementById('volumeMeter').style.width = `${Math.min(100, Math.round(rms * 420))}%`;
 
-            if (rms < 0.015 || rms > state.previousRms * 1.45) state.sameNoteReleased = true;
+            // 根據靈敏度滑桿動態調整門檻 (預設 6)
+            const sensVal = parseInt(document.getElementById('micSensitivity')?.value || '6', 10);
+            const silenceThreshold = Math.max(0.012, 0.048 - sensVal * 0.004);
+
+            // 1. 偵測放手或靜音：當音量低過靜音門檻連續幾幀，解除「長按鎖定」
+            if (rms < silenceThreshold) {
+                state.silenceFrames++;
+                if (state.silenceFrames >= 3) {
+                    state.sameNoteReleased = true;
+                    state.heldMidiNote = null;
+                    state.heldNotePeakRms = 0;
+                    pitchStabilityBuffer = [];
+                }
+            } else {
+                state.silenceFrames = 0;
+            }
+
+            // 2. 偵測「重新彈奏 (Attack Onset)」：音量比前一刻明顯飆升（代表手指重新槌落琴鍵）
+            const isFreshAttack = (rms > state.previousRms * 1.65 && rms > silenceThreshold * 1.8) ||
+                                  (state.heldNotePeakRms > 0 && rms > state.heldNotePeakRms * 1.35);
+
+            if (isFreshAttack) {
+                state.sameNoteReleased = true;
+            }
+
+            // 紀錄當前長按音符衰減過程中嘅音量基準，用嚟判斷有無重新撳鍵
+            if (state.heldMidiNote !== null) {
+                state.heldNotePeakRms = Math.max(rms, state.heldNotePeakRms * 0.92);
+            }
             state.previousRms = rms;
 
-            if (freq !== -1 && freq >= 130 && freq <= 1050) {
+            if (freq !== -1 && freq >= 130 && freq <= 1050 && rms >= silenceThreshold) {
                 const detectedMidi = Math.round(12 * Math.log2(freq / 440) + 69);
                 const keyInfo = MIDI_MAP[detectedMidi];
                 if (keyInfo) {
                     document.getElementById('detectedPitchText').textContent = `${keyInfo.note}`;
                     pitchStabilityBuffer.push(detectedMidi);
-                    if (pitchStabilityBuffer.length > 2) pitchStabilityBuffer.shift();
-                    if (pitchStabilityBuffer.length === 2 && pitchStabilityBuffer[0] === pitchStabilityBuffer[1]) {
+                    if (pitchStabilityBuffer.length > 3) pitchStabilityBuffer.shift();
+
+                    // 需要連續 3 幀穩定認到同一個音，過濾轉音期間嘅雜訊
+                    const isStablePitch = pitchStabilityBuffer.length === 3 &&
+                                          pitchStabilityBuffer[0] === detectedMidi &&
+                                          pitchStabilityBuffer[1] === detectedMidi &&
+                                          pitchStabilityBuffer[2] === detectedMidi;
+
+                    if (isStablePitch) {
                         const now = performance.now();
-                        if (now - state.lastNoteTriggerTime > 260) {
-                            const song = SONGS[state.currentSongKey];
-                            const expected = song.notes[state.currentNoteIndex];
-                            if (expected && ((detectedMidi === expected.midi && state.sameNoteReleased) || detectedMidi !== expected.midi)) {
-                                state.lastNoteTriggerTime = now;
-                                handleUserPlayedNote(detectedMidi, 'mic');
-                            }
+                        const timeSinceLast = now - state.lastNoteTriggerTime;
+
+                        // 核心防長按誤判邏輯：
+                        // 如果而家聽到嘅音，仲係啱啱彈完未放手嗰粒音 (detectedMidi === state.heldMidiNote)
+                        // 而且並無放過手或者重新大力彈落去 (!state.sameNoteReleased) -> 直接忽略！唔會當下一粒音錯！
+                        const isStillHoldingPreviousNote = (detectedMidi === state.heldMidiNote) && !state.sameNoteReleased;
+
+                        if (!isStillHoldingPreviousNote && timeSinceLast > 280) {
+                            state.lastNoteTriggerTime = now;
+                            state.heldMidiNote = detectedMidi;
+                            state.heldNotePeakRms = rms;
+                            state.sameNoteReleased = false;
+                            handleUserPlayedNote(detectedMidi, 'mic');
                         }
                     }
                 }
@@ -1511,7 +1555,8 @@
             if (!SONGS[songKey]) songKey = 'stage1_middleC';
             state.currentSongKey = songKey; state.currentNoteIndex = 0; state.smoothScrollIndex = 0;
             state.totalAttempts = 0; state.correctHits = 0; state.currentScore = 0; state.combo = 0; state.maxCombo = 0;
-            state.mistakesByMidi = {}; state.wrongMidiNote = null; state.correctMidiNote = null; state.sameNoteReleased = true;
+            state.mistakesByMidi = {}; state.wrongMidiNote = null; state.correctMidiNote = null;
+            state.sameNoteReleased = true; state.heldMidiNote = null; state.heldNotePeakRms = 0; state.silenceFrames = 0;
 
             const song = SONGS[songKey];
             state.noteStates = new Array(song.notes.length).fill('pending');
