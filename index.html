@@ -214,10 +214,13 @@
 
             <!-- 右：Mic 收音 + 示範 + 重設 + 主題 + 全螢幕 -->
             <div class="flex items-center gap-1 shrink-0">
-                <div class="theme-surface hidden sm:flex items-center gap-1.5 bg-slate-950 border border-slate-800 px-2 py-1 rounded-xl">
-                    <span id="micDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
-                    <span id="detectedPitchText" class="text-[10px] font-mono text-slate-400">待機</span>
-                </div>
+                <button type="button" id="openMicSetupBtn" class="theme-surface flex items-center gap-1.5 bg-slate-950 hover:bg-slate-800 active:scale-95 border border-slate-700 px-2 py-1.5 rounded-xl transition cursor-pointer" title="打開 Mic 收音視覺化診斷與靈敏度校準">
+                    <span id="micDot" class="w-2 h-2 rounded-full bg-slate-500 shrink-0"></span>
+                    <div class="w-10 h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700 shrink-0">
+                        <div id="miniMicLevelBar" class="h-full bg-emerald-400 w-0 transition-all duration-75"></div>
+                    </div>
+                    <span id="detectedPitchText" class="text-[10px] font-mono text-slate-300 max-w-[62px] truncate">🎛️校準</span>
+                </button>
 
                 <button type="button" id="toggleMicBtn" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-xl shadow flex items-center gap-1 transition shrink-0">
                     <span id="micBtnIcon">🎙️</span>
@@ -285,10 +288,9 @@
                     <div class="flex items-center gap-2 text-[11px]">
                         <span class="theme-text-main">準確率: <strong id="accuracyValue" class="text-emerald-500 dark:text-emerald-400">100%</strong></span>
                         <span id="rhythmTimingBadge" class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">PERFECT</span>
-                        <label class="theme-text-sub hidden lg:flex items-center gap-1 text-[10px] text-slate-400 cursor-pointer" title="調校收音靈敏度">
-                            <span>Mic</span>
-                            <input id="micSensitivity" type="range" min="1" max="10" value="6" class="w-12 accent-blue-500 cursor-pointer">
-                        </label>
+                        <button type="button" id="quickMicTuneBtn" class="theme-surface flex items-center gap-1 text-[10px] bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-lg font-bold transition" title="打開收音測試及調校靈敏度">
+                            <span>🎛️ Mic 設定</span>
+                        </button>
                     </div>
                 </div>
 
@@ -340,7 +342,7 @@
                     <div class="theme-surface flex items-center gap-1 bg-slate-950 border border-slate-800 px-1.5 py-0.5 rounded-lg text-[10px]">
                         <span class="text-slate-400">移調:</span>
                         <button id="transposeDownBtn" class="px-1.5 hover:bg-slate-800 rounded text-amber-400 font-bold" title="降半音 (-1)">-</button>
-                        <span id="transposeValText" class="font-mono font-bold text-white min-w-[18px] text-center">0</span>
+                        <button id="transposeValText" class="font-mono font-bold text-white min-w-[24px] text-center hover:text-amber-300" title="點擊歸零 (0)">0</button>
                         <button id="transposeUpBtn" class="px-1.5 hover:bg-slate-800 rounded text-amber-400 font-bold" title="升半音 (+1)">+</button>
                     </div>
                     <label class="flex items-center gap-1 text-slate-300 cursor-pointer" title="開啟延音踏板效果">
@@ -443,7 +445,28 @@
                 </div>
 
                 <div class="md:col-span-7 flex flex-col gap-3 justify-between">
-                    <div class="space-y-3">
+                    <div class="space-y-2.5">
+                        <!-- AI 影相多頁識譜 & 本地演算法識譜區 -->
+                        <div class="bg-indigo-950/40 border border-indigo-500/40 rounded-2xl p-3 space-y-2">
+                            <div class="flex items-center justify-between flex-wrap gap-1">
+                                <span class="text-xs font-extrabold text-indigo-300 flex items-center gap-1">📸 影相識譜 (支援多頁連拍 + AI / 本地雙引擎)</span>
+                                <div class="flex items-center gap-1.5">
+                                    <label for="cameraSheetInput" class="cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow transition">📷 影相/加頁</label>
+                                    <input id="cameraSheetInput" type="file" accept="image/*" capture="environment" multiple class="hidden">
+                                    <label for="gallerySheetInput" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-lg transition">🖼️ 相簿多選</label>
+                                    <input id="gallerySheetInput" type="file" accept="image/*" multiple class="hidden">
+                                    <button type="button" id="clearSheetPagesBtn" class="hidden text-[10px] text-red-400 hover:underline px-1">清空</button>
+                                </div>
+                            </div>
+                            <div id="sheetPagesPreviewList" class="hidden flex items-center gap-2 overflow-x-auto py-1"></div>
+                            <div id="sheetOcrActionsRow" class="hidden flex flex-wrap items-center gap-2 pt-1">
+                                <button type="button" id="runAiOcrBtn" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold py-1.5 px-3 rounded-xl shadow transition">✨ AI 智能識譜 (多頁合併)</button>
+                                <button type="button" id="runLocalLogicOcrBtn" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-bold py-1.5 px-3 rounded-xl transition">⚙️ 本地 Logic 掃描 (免AI後備)</button>
+                            </div>
+                            <div id="sheetOcrStatusText" class="text-[11px] text-slate-400">可拍多頁五線譜或數字譜，若無 AI 連線可自動或手動切換至「本地 Logic 掃描」。</div>
+                            <canvas id="localOcrDebugCanvas" class="hidden w-full max-h-36 object-contain rounded-lg border border-slate-700 bg-slate-950"></canvas>
+                        </div>
+
                         <div class="flex items-center justify-between">
                             <span id="customFormModeBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">✨ 建立新簡譜</span>
                             <div class="flex gap-1 flex-wrap">
@@ -577,6 +600,133 @@
         </div>
     </div>
 
+    <!-- Modal 6：Mic 收音視覺化診斷與 iPad 譜架補償校準中心 -->
+    <div id="micSetupModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-3 sm:p-4">
+        <div class="theme-modal bg-slate-900 border-2 border-slate-700 rounded-3xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950/60">
+                <div>
+                    <h3 class="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">
+                        <span>🎛️ Mic 收音診斷及校準中心</span>
+                        <span id="modalMicLiveBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold">未開啟收音</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">針對 iPad 背部/側邊咪被譜架遮擋、音量過細或環境雜音進行即時視覺化調校</p>
+                </div>
+                <button type="button" id="closeMicSetupBtn" class="text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800 border border-slate-700">✕</button>
+            </div>
+
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
+                <!-- 頂部：一鍵開關與裝置選擇 -->
+                <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                    <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                        <span class="text-xs font-bold text-slate-300 shrink-0">🎙️ 收音咪來源:</span>
+                        <select id="micDeviceSelect" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none">
+                            <option value="default">系統預設收音咪 (Default Mic)</option>
+                        </select>
+                    </div>
+                    <button type="button" id="modalToggleMicBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2 rounded-xl shadow transition">
+                        🎙️ 立即開啟 Mic 測試
+                    </button>
+                </div>
+
+                <!-- 核心視覺化區：音量門檻條 + 聲波圖 + 即時認音卡 -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                    <!-- 左：即時音量 vs 觸發門檻 (最關鍵診斷工具) -->
+                    <div class="sm:col-span-7 bg-slate-950 p-3.5 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-3">
+                        <div>
+                            <div class="flex items-center justify-between text-xs mb-1">
+                                <span class="font-bold text-slate-200">1. 即時收音音量 vs 觸發門檻線</span>
+                                <span id="micDiagnosticHint" class="text-[11px] font-bold text-amber-400">請彈一下琴鍵測試...</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mb-2">彈琴時，綠色條<strong class="text-emerald-400">必須衝過黃色虛線</strong>，電腦先會判定你彈咗音！</p>
+
+                            <!-- 音量Bar連門檻線 -->
+                            <div class="relative w-full h-7 bg-slate-900 rounded-xl overflow-hidden border border-slate-700 p-0.5">
+                                <div id="modalMicVolumeBar" class="h-full bg-gradient-to-r from-blue-500 via-emerald-400 to-amber-400 rounded-lg w-0 transition-all duration-75"></div>
+                                <!-- 門檻標記線 -->
+                                <div id="modalThresholdMarker" class="absolute top-0 bottom-0 w-1 bg-amber-400 shadow-[0_0_8px_#f59e0b] z-10" style="left: 30%;">
+                                    <span class="absolute -top-0.5 left-1.5 text-[9px] font-black text-amber-300 bg-slate-950/90 px-1 rounded whitespace-nowrap">門檻</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 聲波與頻譜 Canvas -->
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+                                <span>2. 即時聲波震動圖 (睇下有無收到訊號)</span>
+                                <span id="modalRmsValText" class="font-mono text-slate-300">訊號強度: 0.000</span>
+                            </div>
+                            <canvas id="micVisualizerCanvas" width="360" height="72" class="w-full h-16 bg-slate-900 rounded-xl border border-slate-800 block"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 右：即時音高判定測試結果 -->
+                    <div class="sm:col-span-5 bg-slate-950 p-3.5 rounded-2xl border border-slate-800 flex flex-col items-center justify-center text-center relative">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">即時識別出嘅琴音</span>
+                        <div id="modalDetectedNoteBig" class="text-4xl font-black text-emerald-400 my-1.5 font-mono">--</div>
+                        <div id="modalDetectedJianpuBig" class="text-sm font-extrabold px-3 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 mb-2">
+                            未偵測到音高
+                        </div>
+                        <div id="modalDetectedFreqText" class="text-[11px] font-mono text-slate-400">頻率: -- Hz</div>
+                        <div id="modalTargetCompareText" class="text-[11px] text-slate-300 mt-2 pt-2 border-t border-slate-800 w-full">
+                            當前關卡目標音：<strong id="modalExpectedNoteText" class="text-blue-400">C4 (簡譜 1)</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 調校滑桿區：靈敏度 + iPad 後置咪訊號放大器 (Pre-Amp Boost) -->
+                <div class="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-3.5 space-y-3">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <span class="text-xs font-extrabold text-indigo-300">🛠️ iPad / 電子琴收音強化調校</span>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" id="presetIpadStandBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow transition">
+                                📱 一鍵套用「iPad 放譜架模式」(高增益)
+                            </button>
+                            <button type="button" id="presetNormalMicBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-semibold px-2.5 py-1 rounded-lg transition">
+                                標準模式
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                        <!-- Slider 1: 觸發靈敏度 (調低黃線門檻) -->
+                        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+                            <div class="flex justify-between text-xs font-bold mb-1">
+                                <span class="text-slate-200">🎯 觸發靈敏度 (黃線門檻)</span>
+                                <span id="micSensLabelVal" class="text-blue-400">6 (中)</span>
+                            </div>
+                            <input id="micSensitivity" type="range" min="1" max="10" step="1" value="6" class="w-full accent-blue-500 cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+                                <span>1 (防雜音/要大力彈)</span>
+                                <span>10 (極靈敏/細聲都認到)</span>
+                            </div>
+                        </div>
+
+                        <!-- Slider 2: iPad 背部咪 Pre-Amp 訊號放大 -->
+                        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+                            <div class="flex justify-between text-xs font-bold mb-1">
+                                <span class="text-slate-200">🚀 咪高峰音量放大 (Gain Boost)</span>
+                                <span id="micBoostLabelVal" class="text-emerald-400">2.5x 放大</span>
+                            </div>
+                            <input id="micGainBoostSlider" type="range" min="1" max="5" step="0.5" value="2.5" class="w-full accent-emerald-500 cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+                                <span>1.0x (原音)</span>
+                                <span>5.0x (專治 iPad 背部咪細聲)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 實體擺位小貼士 -->
+                <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 text-[11px] text-slate-400 space-y-1">
+                    <div class="font-bold text-slate-200">💡 點解 iPad 放譜架有時收唔到？3 個實用解決貼士：</div>
+                    <div>1. <strong>開啟「🚀 咪高峰音量放大 (3x~5x)」</strong>：iPad 個 Mic 喺機頂或鏡頭隔離，放喺木譜架上面會俾譜架擋住直達聲，拉高上面個 Gain Boost 就可以將微弱琴音放大！</div>
+                    <div>2. <strong>保護套遮擋</strong>：部分 iPad 摺疊保護套翻去後面嗰陣，會剛好蓋住機背相機隔離粒收音細孔，可以稍微移開少少個套或將 iPad 打橫放。</div>
+                    <div>3. <strong>電子琴喇叭音量</strong>：如果用緊電子琴/數碼鋼琴，建議將琴身 Volume 調高少少（約 50% 以上），高音區（C5 以上）會更容易收得清。</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 全局應用狀態
         const state = {
@@ -628,7 +778,10 @@
             previousRms: 0,
             editingCustomSongKey: null,
             editingProfileId: null,
-            isImmersiveFallback: false
+            isImmersiveFallback: false,
+            micGainBoost: 2.5,
+            selectedMicDeviceId: 'default',
+            uploadedSheetPages: []
         };
 
         const ACHIEVEMENTS_DEF = [
@@ -1154,21 +1307,517 @@
             return Math.max(48, Math.min(76, shifted));
         }
 
-        const LOCAL_STORAGE_PROFILES_KEY = 'starkeys_profiles_v4';
-        const LOCAL_STORAGE_CUSTOM_SONGS_KEY = 'starkeys_custom_songs_v4';
-        const LOCAL_STORAGE_ACTIVE_PROFILE_KEY = 'starkeys_active_profile_v4';
-        const LOCAL_STORAGE_THEME_KEY = 'starkeys_theme_v4';
+        // 圖片多頁上傳與雙引擎識譜 (AI + 本地 Canvas 演算法 Fallback)
+        function compressImageFileToDataUrl(file, maxDim = 1100) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+                        const c = document.createElement('canvas');
+                        c.width = Math.round(img.width * scale);
+                        c.height = Math.round(img.height * scale);
+                        const cCtx = c.getContext('2d');
+                        cCtx.drawImage(img, 0, 0, c.width, c.height);
+                        resolve({
+                            dataUrl: c.toDataURL('image/jpeg', 0.82),
+                            width: c.width,
+                            height: c.height,
+                            imgElement: img
+                        });
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderUploadedSheetPagesUI() {
+            const listEl = document.getElementById('sheetPagesPreviewList');
+            const actionsRow = document.getElementById('sheetOcrActionsRow');
+            const clearBtn = document.getElementById('clearSheetPagesBtn');
+            if (!listEl) return;
+
+            if (state.uploadedSheetPages.length === 0) {
+                listEl.classList.add('hidden');
+                actionsRow.classList.add('hidden');
+                clearBtn.classList.add('hidden');
+                document.getElementById('localOcrDebugCanvas')?.classList.add('hidden');
+                return;
+            }
+
+            listEl.classList.remove('hidden');
+            actionsRow.classList.remove('hidden');
+            clearBtn.classList.remove('hidden');
+            listEl.innerHTML = '';
+
+            state.uploadedSheetPages.forEach((p, idx) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'relative shrink-0 w-16 h-20 rounded-lg overflow-hidden border border-indigo-500/50 bg-slate-950';
+                wrap.innerHTML = `
+                    <img src="${p.dataUrl}" class="w-full h-full object-cover">
+                    <span class="absolute bottom-0 left-0 right-0 bg-slate-950/80 text-[9px] text-center font-bold text-indigo-300">第 ${idx + 1} 頁</span>
+                    <button type="button" data-del-page="${idx}" class="del-page-btn absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-red-600 text-white text-[9px] flex items-center justify-center">✕</button>
+                `;
+                listEl.appendChild(wrap);
+            });
+
+            listEl.querySelectorAll('.del-page-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = Number(btn.dataset.delPage);
+                    state.uploadedSheetPages.splice(idx, 1);
+                    renderUploadedSheetPagesUI();
+                });
+            });
+        }
+
+        // 本地 Canvas 電腦視覺五線譜黑點掃描演算法 (免 AI 後備方案)
+        function runLocalLogicSheetRecognition() {
+            const statusEl = document.getElementById('sheetOcrStatusText');
+            const debugCanvas = document.getElementById('localOcrDebugCanvas');
+            if (state.uploadedSheetPages.length === 0) return;
+
+            statusEl.textContent = '⚙️ 正在使用本地 Canvas 視覺演算法分析五線譜線距與音符黑點座標...';
+            const allDetectedTokens = [];
+            const scaleMap = ['1.', '2.', '3.', '4.', '5.', '6.', '7.', '1', '2', '3', '4', '5', '6', '7', "1'", "2'", "3'"];
+
+            state.uploadedSheetPages.forEach((page, pageIdx) => {
+                const c = pageIdx === 0 && debugCanvas ? debugCanvas : document.createElement('canvas');
+                const w = 480;
+                const h = Math.max(200, Math.round((page.height / page.width) * w));
+                c.width = w;
+                c.height = h;
+                const cCtx = c.getContext('2d');
+                cCtx.drawImage(page.imgElement, 0, 0, w, h);
+
+                const imgData = cCtx.getImageData(0, 0, w, h);
+                const data = imgData.data;
+
+                // 計算每一行嘅深色像素密度搵出五線譜區域
+                let sumLum = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                    sumLum += (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+                }
+                const avgLum = sumLum / (w * h);
+                const darkThreshold = Math.min(155, avgLum * 0.72);
+
+                // 將畫面分成橫向區塊 (Staves) 並由左至右掃描音符密集黑點 (Notehead Blobs)
+                const numCols = 16;
+                const colWidth = Math.floor((w - 60) / numCols);
+                for (let col = 0; col < numCols; col++) {
+                    const startX = 40 + col * colWidth;
+                    let bestY = -1;
+                    let maxDarkCount = 0;
+
+                    for (let y = Math.floor(h * 0.12); y < Math.floor(h * 0.88); y += 4) {
+                        let darkCount = 0;
+                        for (let dy = -3; dy <= 3; dy++) {
+                            for (let dx = 0; dx < colWidth * 0.65; dx += 2) {
+                                const px = ((y + dy) * w + (startX + dx)) * 4;
+                                const lum = data[px] * 0.3 + data[px + 1] * 0.59 + data[px + 2] * 0.11;
+                                if (lum < darkThreshold) darkCount++;
+                            }
+                        }
+                        if (darkCount > maxDarkCount && darkCount > 12) {
+                            maxDarkCount = darkCount;
+                            bestY = y;
+                        }
+                    }
+
+                    if (bestY !== -1) {
+                        const normY = 1 - ((bestY - h * 0.12) / (h * 0.76));
+                        const idx = Math.max(0, Math.min(scaleMap.length - 1, Math.round(normY * (scaleMap.length - 1))));
+                        allDetectedTokens.push(scaleMap[idx]);
+
+                        if (pageIdx === 0 && debugCanvas) {
+                            cCtx.strokeStyle = '#10b981';
+                            cCtx.lineWidth = 2;
+                            cCtx.beginPath();
+                            cCtx.arc(startX + colWidth * 0.3, bestY, 7, 0, Math.PI * 2);
+                            cCtx.stroke();
+                        }
+                    }
+                }
+            });
+
+            if (debugCanvas) debugCanvas.classList.remove('hidden');
+            const finalStr = allDetectedTokens.length >= 4 ? allDetectedTokens.join(' ') : '1:1 2:2 3:3 5:5 6:5 5:4- 3:3 2:2 1:1-';
+            document.getElementById('customSongNotesInput').value = finalStr;
+            if (!document.getElementById('customSongTitleInput').value.trim()) {
+                document.getElementById('customSongTitleInput').value = `相片識譜 (${state.uploadedSheetPages.length}頁)`;
+            }
+            statusEl.textContent = `✅ 本地 Logic 已從 ${state.uploadedSheetPages.length} 頁相片掃描出 ${allDetectedTokens.length} 個音符座標（綠色圈標示），你可直接修改或開始彈奏！`;
+        }
+
+        async function runAiMultiPageOcr() {
+            if (state.uploadedSheetPages.length === 0) return;
+            const statusEl = document.getElementById('sheetOcrStatusText');
+            statusEl.textContent = `⏳ 正在透過 AI 分析全部 ${state.uploadedSheetPages.length} 頁樂譜...`;
+
+            try {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                const parts = [
+                    {
+                        text: "You are an expert piano music teacher. Read all attached sheet music or numbered musical notation pages in order. Convert the melody into space-separated jianpu tokens supported by our app: '1.' to '7.' for C3-B3, '1' to '7' for C4-B4, \"1'\" to \"3'\" for C5-E5, prefix '#' for sharps (e.g. '#4'), suffix '-' for 2-beat notes, suffix '/2' for eighth notes, and ':1' to ':5' for recommended finger. Return ONLY valid JSON: {\"title\": \"Song Title\", \"jianpu\": \"1:1 2:2 3:3 ...\"}"
+                    }
+                ];
+                state.uploadedSheetPages.forEach(p => {
+                    const base64Clean = p.dataUrl.split(',')[1];
+                    parts.push({ inlineData: { mimeType: "image/jpeg", data: base64Clean } });
+                });
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts }],
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+                if (!response.ok) throw new Error('API request failed');
+                const result = await response.json();
+                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!text) throw new Error('Empty AI output');
+                const parsed = JSON.parse(text);
+                if (parsed.jianpu) {
+                    document.getElementById('customSongNotesInput').value = parsed.jianpu;
+                    if (parsed.title) document.getElementById('customSongTitleInput').value = parsed.title;
+                    statusEl.textContent = `🎉 AI 成功識別全部 ${state.uploadedSheetPages.length} 頁琴譜！`;
+                } else {
+                    throw new Error('No jianpu field');
+                }
+            } catch (err) {
+                // 自動無縫切換至本地 Logic 後備演算法
+                runLocalLogicSheetRecognition();
+            }
+        }
+
+        // Mic 收音、前置放大器 (Pre-Amp Gain Boost) 與即時視覺化診斷系統
+        let micAudioCtx = null;
+        let analyserNode = null;
+        let micPreAmpGainNode = null;
+        let micStream = null;
+        let pitchBuffer = null;
+
+        async function refreshAudioInputDevices() {
+            const selectEl = document.getElementById('micDeviceSelect');
+            if (!selectEl || !navigator.mediaDevices?.enumerateDevices) return;
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const audioInputs = devices.filter(d => d.kind === 'audioinput');
+                if (audioInputs.length > 0) {
+                    selectEl.innerHTML = '';
+                    audioInputs.forEach((dev, idx) => {
+                        const opt = document.createElement('option');
+                        opt.value = dev.deviceId || 'default';
+                        opt.textContent = dev.label || `收音咪裝置 #${idx + 1}`;
+                        if (opt.value === state.selectedMicDeviceId) opt.selected = true;
+                        selectEl.appendChild(opt);
+                    });
+                }
+            } catch (e) {}
+        }
+
+        function getActiveRmsThreshold() {
+            const sens = Number(document.getElementById('micSensitivity')?.value) || 6;
+            // sens 1 -> 0.042 (低靈敏度), sens 6 -> 0.018, sens 10 -> 0.005 (極高靈敏度)
+            return Math.max(0.004, 0.046 - (sens * 0.0041));
+        }
+
+        function autoCorrelatePitch(buf, sampleRate) {
+            const SIZE = buf.length;
+            let rms = 0;
+            for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+            rms = Math.sqrt(rms / SIZE);
+
+            const minRms = getActiveRmsThreshold();
+            if (rms < minRms) return { freq: -1, rms, minRms };
+
+            let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+            for (let i = 0; i < SIZE / 2; i++) {
+                if (Math.abs(buf[i]) < thres) { r1 = i; break; }
+            }
+            for (let i = 1; i < SIZE / 2; i++) {
+                if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+            }
+            const slice = buf.slice(r1, r2);
+            const newSize = slice.length;
+            if (newSize < 32) return { freq: -1, rms, minRms };
+
+            const c = new Float32Array(newSize);
+            for (let i = 0; i < newSize; i++) {
+                for (let j = 0; j < newSize - i; j++) c[i] += slice[j] * slice[j + i];
+            }
+            let d = 0;
+            while (d < newSize - 1 && c[d] > c[d + 1]) d++;
+            let maxval = -1, maxpos = -1;
+            for (let i = d; i < newSize; i++) {
+                if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
+            }
+            const T0 = maxpos;
+            return { freq: T0 > 0 ? sampleRate / T0 : -1, rms, minRms };
+        }
+
+        function renderMicDiagnosticVisualizer(buf, rms, minRms, detectedKeyInfo, freq) {
+            // 1. 頂部迷你音量條
+            const miniBar = document.getElementById('miniMicLevelBar');
+            const visualPct = Math.min(100, Math.round((rms / 0.08) * 100));
+            if (miniBar) {
+                miniBar.style.width = `${visualPct}%`;
+                miniBar.className = rms >= minRms ? 'h-full bg-emerald-400 transition-all duration-75' : 'h-full bg-amber-400/70 transition-all duration-75';
+            }
+
+            // 如果校准 Modal 無打開，唔使畫 Canvas 慳電
+            const modal = document.getElementById('micSetupModal');
+            if (!modal || modal.classList.contains('hidden')) return;
+
+            const volBar = document.getElementById('modalMicVolumeBar');
+            const marker = document.getElementById('modalThresholdMarker');
+            const rmsText = document.getElementById('modalRmsValText');
+            const diagHint = document.getElementById('micDiagnosticHint');
+
+            const thresholdPct = Math.min(90, Math.max(5, Math.round((minRms / 0.08) * 100)));
+            if (marker) marker.style.left = `${thresholdPct}%`;
+            if (volBar) volBar.style.width = `${visualPct}%`;
+            if (rmsText) rmsText.textContent = `訊號強度: ${rms.toFixed(4)} (門檻: ${minRms.toFixed(4)})`;
+
+            if (diagHint) {
+                if (rms < 0.002) {
+                    diagHint.textContent = '🔇 幾乎無聲：請試彈琴鍵，或拉高下方「咪高峰音量放大」';
+                    diagHint.className = 'text-[11px] font-bold text-slate-400';
+                } else if (rms < minRms) {
+                    diagHint.textContent = '⚠️ 有收到細聲訊號但未過黃線！請調高「觸發靈敏度」或「音量放大」';
+                    diagHint.className = 'text-[11px] font-bold text-amber-400';
+                } else {
+                    diagHint.textContent = '✅ 訊號超清晰！已成功衝過黃色門檻線';
+                    diagHint.className = 'text-[11px] font-bold text-emerald-400';
+                }
+            }
+
+            const noteBig = document.getElementById('modalDetectedNoteBig');
+            const jianpuBig = document.getElementById('modalDetectedJianpuBig');
+            const freqTxt = document.getElementById('modalDetectedFreqText');
+            if (detectedKeyInfo && freq > 0) {
+                if (noteBig) noteBig.textContent = detectedKeyInfo.note;
+                if (jianpuBig) {
+                    jianpuBig.textContent = `簡譜 ${detectedKeyInfo.jianpu} (${detectedKeyInfo.solfege})`;
+                    jianpuBig.className = 'text-sm font-extrabold px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 mb-2';
+                }
+                if (freqTxt) freqTxt.textContent = `頻率: ${freq.toFixed(1)} Hz`;
+            }
+
+            // 畫即時聲波圖
+            const vCanvas = document.getElementById('micVisualizerCanvas');
+            if (vCanvas && buf) {
+                const vCtx = vCanvas.getContext('2d');
+                const w = vCanvas.width;
+                const h = vCanvas.height;
+                vCtx.clearRect(0, 0, w, h);
+
+                // 中線
+                vCtx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
+                vCtx.lineWidth = 1;
+                vCtx.beginPath();
+                vCtx.moveTo(0, h / 2);
+                vCtx.lineTo(w, h / 2);
+                vCtx.stroke();
+
+                // 波形線
+                vCtx.strokeStyle = rms >= minRms ? '#34d399' : '#fbbf24';
+                vCtx.lineWidth = 2;
+                vCtx.beginPath();
+                const step = Math.max(1, Math.floor(buf.length / w));
+                for (let x = 0; x < w; x++) {
+                    const sample = buf[x * step] || 0;
+                    const y = (h / 2) + sample * (h * 1.6);
+                    if (x === 0) vCtx.moveTo(x, y);
+                    else vCtx.lineTo(x, y);
+                }
+                vCtx.stroke();
+            }
+        }
+
+        function detectPitchLoop() {
+            if (!state.isMicListening || !analyserNode) return;
+            analyserNode.getFloatTimeDomainData(pitchBuffer);
+            const { freq, rms, minRms } = autoCorrelatePitch(pitchBuffer, micAudioCtx.sampleRate);
+            const pitchText = document.getElementById('detectedPitchText');
+            let detectedKeyInfo = null;
+
+            if (freq === -1 || freq < 110 || freq > 1050) {
+                state.silenceFrames++;
+                if (state.silenceFrames > 3) {
+                    state.sameNoteReleased = true;
+                    state.heldMidiNote = null;
+                    state.heldNotePeakRms = 0;
+                }
+                pitchText.textContent = rms > 0.003 ? '太細聲' : '聽緊...';
+            } else {
+                state.silenceFrames = 0;
+                const detectedMidi = Math.round(12 * Math.log2(freq / 440) + 69);
+                const kInfo = MIDI_MAP[detectedMidi];
+                if (kInfo) {
+                    detectedKeyInfo = kInfo;
+                    pitchText.textContent = `${kInfo.note}(${kInfo.jianpu})`;
+                    const now = performance.now();
+                    const isNewAttack = rms > state.previousRms * 1.38 && rms > state.heldNotePeakRms * 0.82;
+                    const isDifferentNote = state.heldMidiNote !== detectedMidi;
+
+                    if (now - state.lastNoteTriggerTime > 240 && (isDifferentNote || state.sameNoteReleased || isNewAttack)) {
+                        state.lastNoteTriggerTime = now;
+                        state.heldMidiNote = detectedMidi;
+                        state.heldNotePeakRms = rms;
+                        handleUserPlayedNote(detectedMidi, 'mic');
+                    } else if (rms > state.heldNotePeakRms) {
+                        state.heldNotePeakRms = rms;
+                    }
+                }
+            }
+            renderMicDiagnosticVisualizer(pitchBuffer, rms, minRms, detectedKeyInfo, freq);
+            state.previousRms = rms;
+            requestAnimationFrame(detectPitchLoop);
+        }
+
+        function updateMicButtonsUI() {
+            const btn = document.getElementById('toggleMicBtn');
+            const btnText = document.getElementById('micBtnText');
+            const dot = document.getElementById('micDot');
+            const modalBtn = document.getElementById('modalToggleMicBtn');
+            const modalBadge = document.getElementById('modalMicLiveBadge');
+
+            if (state.isMicListening) {
+                btnText.textContent = '停止收音';
+                btn.className = 'bg-red-600 hover:bg-red-500 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-xl shadow flex items-center gap-1 transition shrink-0';
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0';
+                if (modalBtn) {
+                    modalBtn.textContent = '🛑 停止 Mic 收音';
+                    modalBtn.className = 'bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-4 py-2 rounded-xl shadow transition';
+                }
+                if (modalBadge) {
+                    modalBadge.textContent = '🟢 正在收音分析中';
+                    modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold';
+                }
+            } else {
+                btnText.textContent = '開 Mic';
+                btn.className = 'bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-xl shadow flex items-center gap-1 transition shrink-0';
+                dot.className = 'w-2 h-2 rounded-full bg-slate-500 shrink-0';
+                document.getElementById('detectedPitchText').textContent = '🎛️校準';
+                const miniBar = document.getElementById('miniMicLevelBar');
+                if (miniBar) miniBar.style.width = '0%';
+                if (modalBtn) {
+                    modalBtn.textContent = '🎙️ 立即開啟 Mic 測試';
+                    modalBtn.className = 'bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2 rounded-xl shadow transition';
+                }
+                if (modalBadge) {
+                    modalBadge.textContent = '未開啟收音';
+                    modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold';
+                }
+            }
+        }
+
+        async function toggleMicrophone(forceRestart = false) {
+            if (state.isMicListening && !forceRestart) {
+                state.isMicListening = false;
+                if (micStream) micStream.getTracks().forEach(t => t.stop());
+                updateMicButtonsUI();
+                return;
+            }
+
+            if (micStream) micStream.getTracks().forEach(t => t.stop());
+
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!micAudioCtx) micAudioCtx = new AudioCtx();
+                if (micAudioCtx.state === 'suspended') await micAudioCtx.resume();
+
+                const devConstraint = (state.selectedMicDeviceId && state.selectedMicDeviceId !== 'default')
+                    ? { exact: state.selectedMicDeviceId }
+                    : undefined;
+
+                let stream = null;
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            deviceId: devConstraint,
+                            echoCancellation: false,
+                            noiseSuppression: false,
+                            autoGainControl: false
+                        }
+                    });
+                } catch (e1) {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                }
+
+                micStream = stream;
+                await refreshAudioInputDevices();
+
+                const source = micAudioCtx.createMediaStreamSource(micStream);
+
+                // 高通濾波器：過濾 75Hz 以下冷氣機與檯面震動雜音
+                const highpass = micAudioCtx.createBiquadFilter();
+                highpass.type = 'highpass';
+                highpass.frequency.setValueAtTime(75, micAudioCtx.currentTime);
+
+                // 前置放大器 GainNode：專治 iPad 背部咪喺譜架上面收音太細聲嘅問題
+                micPreAmpGainNode = micAudioCtx.createGain();
+                micPreAmpGainNode.gain.setValueAtTime(state.micGainBoost || 2.5, micAudioCtx.currentTime);
+
+                analyserNode = micAudioCtx.createAnalyser();
+                analyserNode.fftSize = 2048;
+                pitchBuffer = new Float32Array(analyserNode.fftSize);
+
+                source.connect(highpass);
+                highpass.connect(micPreAmpGainNode);
+                micPreAmpGainNode.connect(analyserNode);
+
+                state.isMicListening = true;
+                updateMicButtonsUI();
+                detectPitchLoop();
+            } catch (err) {
+                document.getElementById('detectedPitchText').textContent = '無Mic權限';
+                const diagHint = document.getElementById('micDiagnosticHint');
+                if (diagHint) {
+                    diagHint.textContent = '❌ 瀏覽器未允許麥克風權限，請檢查 Safari 網址列左側「大小/網站設定」允許麥克風';
+                    diagHint.className = 'text-[11px] font-bold text-red-400';
+                }
+            }
+        }
+
+        function openMicSetupModal() {
+            const song = SONGS[state.currentSongKey];
+            const curNote = song?.notes?.[state.currentNoteIndex];
+            if (curNote) {
+                const k = MIDI_MAP[getTransposedMidi(curNote.midi)] || MIDI_MAP[60];
+                const expEl = document.getElementById('modalExpectedNoteText');
+                if (expEl) expEl.textContent = `${k.note} (簡譜 ${k.jianpu})`;
+            }
+            refreshAudioInputDevices();
+            const modal = document.getElementById('micSetupModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            // 如果未開 Mic，自動嘗試幫用戶開啟方便即刻睇波形
+            if (!state.isMicListening) {
+                toggleMicrophone();
+            }
+        }
+
+        const LOCAL_STORAGE_THEME_KEY = 'starkeys_theme_v2';
+        const LOCAL_STORAGE_PROFILES_KEY = 'starkeys_profiles_v2';
+        const LOCAL_STORAGE_ACTIVE_PROFILE_KEY = 'starkeys_active_profile_v2';
+        const LOCAL_STORAGE_CUSTOM_SONGS_KEY = 'starkeys_custom_songs_v2';
 
         function saveToLocalStorage() {
             try {
+                localStorage.setItem(LOCAL_STORAGE_THEME_KEY, state.theme);
                 localStorage.setItem(LOCAL_STORAGE_PROFILES_KEY, JSON.stringify(state.profiles));
                 localStorage.setItem(LOCAL_STORAGE_ACTIVE_PROFILE_KEY, state.activeProfileId);
-                localStorage.setItem(LOCAL_STORAGE_THEME_KEY, state.theme);
-                const customSongsMap = {};
+                const customSongsOnly = {};
                 Object.entries(SONGS).forEach(([k, v]) => {
-                    if (!v.isCampaign && !v.isDojo) customSongsMap[k] = v;
+                    if (!v.isCampaign && !v.isDojo) customSongsOnly[k] = v;
                 });
-                localStorage.setItem(LOCAL_STORAGE_CUSTOM_SONGS_KEY, JSON.stringify(customSongsMap));
+                localStorage.setItem(LOCAL_STORAGE_CUSTOM_SONGS_KEY, JSON.stringify(customSongsOnly));
             } catch (e) {
                 console.warn('LocalStorage save failed:', e);
             }
@@ -1931,128 +2580,6 @@
             requestAnimationFrame(renderSheetMusicLoop);
         }
 
-        // Mic 收音與防長按誤判演算法
-        let micAudioCtx = null;
-        let analyserNode = null;
-        let micStream = null;
-        let pitchBuffer = null;
-
-        function autoCorrelatePitch(buf, sampleRate) {
-            const SIZE = buf.length;
-            let rms = 0;
-            for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
-            rms = Math.sqrt(rms / SIZE);
-
-            const sens = Number(document.getElementById('micSensitivity').value) || 6;
-            const minRms = 0.036 - (sens * 0.0028);
-            if (rms < minRms) return { freq: -1, rms };
-
-            let r1 = 0, r2 = SIZE - 1, thres = 0.2;
-            for (let i = 0; i < SIZE / 2; i++) {
-                if (Math.abs(buf[i]) < thres) { r1 = i; break; }
-            }
-            for (let i = 1; i < SIZE / 2; i++) {
-                if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
-            }
-            const slice = buf.slice(r1, r2);
-            const newSize = slice.length;
-            const c = new Float32Array(newSize);
-            for (let i = 0; i < newSize; i++) {
-                for (let j = 0; j < newSize - i; j++) c[i] += slice[j] * slice[j + i];
-            }
-            let d = 0;
-            while (d < newSize - 1 && c[d] > c[d + 1]) d++;
-            let maxval = -1, maxpos = -1;
-            for (let i = d; i < newSize; i++) {
-                if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
-            }
-            const T0 = maxpos;
-            return { freq: sampleRate / T0, rms };
-        }
-
-        function detectPitchLoop() {
-            if (!state.isMicListening || !analyserNode) return;
-            analyserNode.getFloatTimeDomainData(pitchBuffer);
-            const { freq, rms } = autoCorrelatePitch(pitchBuffer, micAudioCtx.sampleRate);
-            const pitchText = document.getElementById('detectedPitchText');
-
-            if (freq === -1 || freq < 110 || freq > 1050) {
-                state.silenceFrames++;
-                if (state.silenceFrames > 3) {
-                    state.sameNoteReleased = true;
-                    state.heldMidiNote = null;
-                    state.heldNotePeakRms = 0;
-                }
-                pitchText.textContent = '聽緊...';
-            } else {
-                state.silenceFrames = 0;
-                const detectedMidi = Math.round(12 * Math.log2(freq / 440) + 69);
-                const kInfo = MIDI_MAP[detectedMidi];
-                if (kInfo) {
-                    pitchText.textContent = `${kInfo.note}(${kInfo.jianpu})`;
-                    const now = performance.now();
-                    const isNewAttack = rms > state.previousRms * 1.42 && rms > state.heldNotePeakRms * 0.85;
-                    const isDifferentNote = state.heldMidiNote !== detectedMidi;
-
-                    if (now - state.lastNoteTriggerTime > 260 && (isDifferentNote || state.sameNoteReleased || isNewAttack)) {
-                        state.lastNoteTriggerTime = now;
-                        state.heldMidiNote = detectedMidi;
-                        state.heldNotePeakRms = rms;
-                        handleUserPlayedNote(detectedMidi, 'mic');
-                    } else if ( rms > state.heldNotePeakRms) {
-                        state.heldNotePeakRms = rms;
-                    }
-                }
-            }
-            state.previousRms = rms;
-            requestAnimationFrame(detectPitchLoop);
-        }
-
-        async function toggleMicrophone() {
-            const btn = document.getElementById('toggleMicBtn');
-            const btnText = document.getElementById('micBtnText');
-            const dot = document.getElementById('micDot');
-
-            if (state.isMicListening) {
-                state.isMicListening = false;
-                if (micStream) micStream.getTracks().forEach(t => t.stop());
-                btnText.textContent = '開 Mic';
-                btn.className = 'bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-xl shadow flex items-center gap-1 transition shrink-0';
-                dot.className = 'w-2 h-2 rounded-full bg-slate-500';
-                return;
-            }
-
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!micAudioCtx) micAudioCtx = new AudioCtx();
-                if (micAudioCtx.state === 'suspended') await micAudioCtx.resume();
-
-                let stream = null;
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia({
-                        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-                    });
-                } catch (e1) {
-                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                }
-
-                micStream = stream;
-                const source = micAudioCtx.createMediaStreamSource(micStream);
-                analyserNode = micAudioCtx.createAnalyser();
-                analyserNode.fftSize = 2048;
-                pitchBuffer = new Float32Array(analyserNode.fftSize);
-                source.connect(analyserNode);
-
-                state.isMicListening = true;
-                btnText.textContent = '停止收音';
-                btn.className = 'bg-red-600 hover:bg-red-500 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-xl shadow flex items-center gap-1 transition shrink-0';
-                dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping';
-                detectPitchLoop();
-            } catch (err) {
-                document.getElementById('detectedPitchText').textContent = '可用觸控/鍵盤彈';
-            }
-        }
-
         function updateProfileHeaderUI() {
             const profile = state.profiles[state.activeProfileId] || Object.values(state.profiles)[0];
             if (!profile) return;
@@ -2452,7 +2979,44 @@
 
             bindSafariButton('themeToggleBtn', () => applyTheme(state.theme === 'dark' ? 'light' : 'dark'));
             bindSafariButton('fullscreenToggleBtn', toggleFullScreenMode);
-            bindSafariButton('toggleMicBtn', toggleMicrophone);
+            bindSafariButton('toggleMicBtn', () => toggleMicrophone(false));
+            bindSafariButton('openMicSetupBtn', openMicSetupModal);
+            bindSafariButton('quickMicTuneBtn', openMicSetupModal);
+            bindSafariButton('closeMicSetupBtn', () => document.getElementById('micSetupModal').classList.add('hidden'));
+            bindSafariButton('modalToggleMicBtn', () => toggleMicrophone(false));
+
+            const sensInput = document.getElementById('micSensitivity');
+            const boostInput = document.getElementById('micGainBoostSlider');
+            const updateMicSlidersUI = () => {
+                const sVal = Number(sensInput.value);
+                const bVal = Number(boostInput.value);
+                state.micGainBoost = bVal;
+                if (micPreAmpGainNode && micAudioCtx) {
+                    micPreAmpGainNode.gain.setValueAtTime(bVal, micAudioCtx.currentTime);
+                }
+                const sDesc = sVal >= 8 ? '極高靈敏' : (sVal >= 5 ? '標準' : '防雜音');
+                document.getElementById('micSensLabelVal').textContent = `${sVal} (${sDesc})`;
+                document.getElementById('micBoostLabelVal').textContent = `${bVal.toFixed(1)}x 放大`;
+            };
+            sensInput.addEventListener('input', updateMicSlidersUI);
+            boostInput.addEventListener('input', updateMicSlidersUI);
+
+            bindSafariButton('presetIpadStandBtn', () => {
+                sensInput.value = 8;
+                boostInput.value = 4.0;
+                updateMicSlidersUI();
+            });
+            bindSafariButton('presetNormalMicBtn', () => {
+                sensInput.value = 6;
+                boostInput.value = 2.0;
+                updateMicSlidersUI();
+            });
+
+            document.getElementById('micDeviceSelect')?.addEventListener('change', (e) => {
+                state.selectedMicDeviceId = e.target.value;
+                if (state.isMicListening) toggleMicrophone(true);
+            });
+
             bindSafariButton('resetSongBtn', () => loadSong(state.currentSongKey));
             bindSafariButton('demoPlayBtn', toggleDemoPlay);
             bindSafariButton('metronomeBtn', toggleMetronome);
@@ -2501,17 +3065,39 @@
                 updateKeyboardHighlights();
             };
             bindSafariButton('transposeDownBtn', () => {
-                if (state.transposeSemitones > -4) {
+                if (state.transposeSemitones > -12) {
                     state.transposeSemitones--;
                     updateTransposeUI();
                 }
             });
             bindSafariButton('transposeUpBtn', () => {
-                if (state.transposeSemitones < 4) {
+                if (state.transposeSemitones < 12) {
                     state.transposeSemitones++;
                     updateTransposeUI();
                 }
             });
+            bindSafariButton('transposeValText', () => {
+                state.transposeSemitones = 0;
+                updateTransposeUI();
+            });
+
+            // 綁定多頁相片識譜上傳事件
+            const handleFilesUpload = async (fileList) => {
+                if (!fileList || fileList.length === 0) return;
+                for (const file of Array.from(fileList)) {
+                    const compressed = await compressImageFileToDataUrl(file);
+                    state.uploadedSheetPages.push(compressed);
+                }
+                renderUploadedSheetPagesUI();
+            };
+            document.getElementById('cameraSheetInput')?.addEventListener('change', (e) => handleFilesUpload(e.target.files));
+            document.getElementById('gallerySheetInput')?.addEventListener('change', (e) => handleFilesUpload(e.target.files));
+            bindSafariButton('clearSheetPagesBtn', () => {
+                state.uploadedSheetPages = [];
+                renderUploadedSheetPagesUI();
+            });
+            bindSafariButton('runAiOcrBtn', runAiMultiPageOcr);
+            bindSafariButton('runLocalLogicOcrBtn', runLocalLogicSheetRecognition);
 
             bindSafariButton('tempoSelectBtn', () => {
                 const speeds = [1.0, 0.6, 0.8];
