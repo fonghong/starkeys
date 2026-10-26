@@ -666,51 +666,71 @@
                         <div id="modalDetectedJianpuBig" class="text-sm font-extrabold px-3 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 mb-2">
                             未偵測到音高
                         </div>
-                        <div id="modalDetectedFreqText" class="text-[11px] font-mono text-slate-400">頻率: -- Hz</div>
+                        <div id="modalDetectedFreqText" class="text-[11px] font-mono text-slate-400">頻率: -- Hz | 純度: --%</div>
+                        <div id="modalVoiceFilterBadge" class="mt-1.5 px-2.5 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400">
+                            🛡️ 防人聲/雜音過濾器：運作中
+                        </div>
                         <div id="modalTargetCompareText" class="text-[11px] text-slate-300 mt-2 pt-2 border-t border-slate-800 w-full">
                             當前關卡目標音：<strong id="modalExpectedNoteText" class="text-blue-400">C4 (簡譜 1)</strong>
                         </div>
                     </div>
                 </div>
 
-                <!-- 調校滑桿區：靈敏度 + iPad 後置咪訊號放大器 (Pre-Amp Boost) -->
+                <!-- 調校滑桿區：靈敏度 + iPad 後置咪訊號放大器 (Pre-Amp Boost) + 防人聲純度門檻 -->
                 <div class="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-3.5 space-y-3">
                     <div class="flex items-center justify-between flex-wrap gap-2">
-                        <span class="text-xs font-extrabold text-indigo-300">🛠️ iPad / 電子琴收音強化調校</span>
-                        <div class="flex items-center gap-1.5">
-                            <button type="button" id="presetIpadStandBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow transition">
-                                📱 一鍵套用「iPad 放譜架模式」(高增益)
+                        <span class="text-xs font-extrabold text-indigo-300">🛠️ iPad 收音強化 & 🛡️ 防人聲/背景音過濾設定</span>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button type="button" id="calibrateNoiseBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow transition">
+                                🔇 自動偵測環境底噪 (1秒)
                             </button>
-                            <button type="button" id="presetNormalMicBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-semibold px-2.5 py-1 rounded-lg transition">
-                                標準模式
+                            <button type="button" id="presetIpadStandBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow transition">
+                                📱 iPad 放譜架模式
+                            </button>
+                            <button type="button" id="presetNoisyRoomBtn" class="bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow transition">
+                                🛡️ 強效防人聲模式
                             </button>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                         <!-- Slider 1: 觸發靈敏度 (調低黃線門檻) -->
                         <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
                             <div class="flex justify-between text-xs font-bold mb-1">
-                                <span class="text-slate-200">🎯 觸發靈敏度 (黃線門檻)</span>
-                                <span id="micSensLabelVal" class="text-blue-400">6 (中)</span>
+                                <span class="text-slate-200">🎯 音量門檻靈敏度</span>
+                                <span id="micSensLabelVal" class="text-blue-400">6 (標準)</span>
                             </div>
                             <input id="micSensitivity" type="range" min="1" max="10" step="1" value="6" class="w-full accent-blue-500 cursor-pointer">
                             <div class="flex justify-between text-[10px] text-slate-500 mt-1">
-                                <span>1 (防雜音/要大力彈)</span>
-                                <span>10 (極靈敏/細聲都認到)</span>
+                                <span>1 (防雜音)</span>
+                                <span>10 (極靈敏)</span>
                             </div>
                         </div>
 
                         <!-- Slider 2: iPad 背部咪 Pre-Amp 訊號放大 -->
                         <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
                             <div class="flex justify-between text-xs font-bold mb-1">
-                                <span class="text-slate-200">🚀 咪高峰音量放大 (Gain Boost)</span>
+                                <span class="text-slate-200">🚀 咪高峰音量放大</span>
                                 <span id="micBoostLabelVal" class="text-emerald-400">2.5x 放大</span>
                             </div>
                             <input id="micGainBoostSlider" type="range" min="1" max="5" step="0.5" value="2.5" class="w-full accent-emerald-500 cursor-pointer">
                             <div class="flex justify-between text-[10px] text-slate-500 mt-1">
                                 <span>1.0x (原音)</span>
-                                <span>5.0x (專治 iPad 背部咪細聲)</span>
+                                <span>5.0x (譜架補償)</span>
+                            </div>
+                        </div>
+
+                        <!-- Slider 3: 防人聲及背景雜音過濾強度 (Harmonic Clarity & Pitch Stability) -->
+                        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+                            <div class="flex justify-between text-xs font-bold mb-1">
+                                <span class="text-slate-200">🛡️ 防人聲/背景音過濾</span>
+                                <span id="voiceFilterLabelVal" class="text-amber-400">中 (78%純度)</span>
+                            </div>
+                            <input id="voiceFilterStrengthSlider" type="range" min="1" max="3" step="1" value="2" class="w-full accent-amber-500 cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+                                <span>1 (寬鬆)</span>
+                                <span>2 (標準)</span>
+                                <span>3 (嚴格防講嘢)</span>
                             </div>
                         </div>
                     </div>
@@ -718,10 +738,9 @@
 
                 <!-- 實體擺位小貼士 -->
                 <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 text-[11px] text-slate-400 space-y-1">
-                    <div class="font-bold text-slate-200">💡 點解 iPad 放譜架有時收唔到？3 個實用解決貼士：</div>
-                    <div>1. <strong>開啟「🚀 咪高峰音量放大 (3x~5x)」</strong>：iPad 個 Mic 喺機頂或鏡頭隔離，放喺木譜架上面會俾譜架擋住直達聲，拉高上面個 Gain Boost 就可以將微弱琴音放大！</div>
-                    <div>2. <strong>保護套遮擋</strong>：部分 iPad 摺疊保護套翻去後面嗰陣，會剛好蓋住機背相機隔離粒收音細孔，可以稍微移開少少個套或將 iPad 打橫放。</div>
-                    <div>3. <strong>電子琴喇叭音量</strong>：如果用緊電子琴/數碼鋼琴，建議將琴身 Volume 調高少少（約 50% 以上），高音區（C5 以上）會更容易收得清。</div>
+                    <div class="font-bold text-slate-200">💡 點樣防止人聲講嘢、冷氣或背景聲被誤認做琴音？</div>
+                    <div>1. <strong>撳「🔇 自動偵測環境底噪 (1秒)」</strong>：唔好彈琴 1 秒鐘，系統會自動量度你間房嘅冷氣/背景聲大細，自動將黃色門檻線設喺背景噪音之上！</div>
+                    <div>2. <strong>開啟「🛡️ 強效防人聲模式」</strong>：人講嘢嗰陣音高會不斷滑動（無固定頻率）而且諧波純度低；開啟嚴格過濾後，只有頻率穩定、諧波純度高於 84% 嘅真實鋼琴聲先會被計分！</div>
                 </div>
             </div>
         </div>
@@ -780,6 +799,9 @@
             editingProfileId: null,
             isImmersiveFallback: false,
             micGainBoost: 2.5,
+            voiceFilterLevel: 2, // 1=寬鬆(0.70), 2=標準(0.78), 3=嚴格防人聲(0.84)
+            ambientNoiseFloor: 0,
+            pitchHistoryWindow: [],
             selectedMicDeviceId: 'default',
             uploadedSheetPages: []
         };
@@ -1522,18 +1544,42 @@
 
         function getActiveRmsThreshold() {
             const sens = Number(document.getElementById('micSensitivity')?.value) || 6;
-            // sens 1 -> 0.042 (低靈敏度), sens 6 -> 0.018, sens 10 -> 0.005 (極高靈敏度)
-            return Math.max(0.004, 0.046 - (sens * 0.0041));
+            const baseThreshold = Math.max(0.004, 0.046 - (sens * 0.0041));
+            // 若已量度環境底噪，確保門檻最少高於底噪 1.65 倍
+            return Math.max(baseThreshold, (state.ambientNoiseFloor || 0) * 1.65);
         }
 
+        function getRequiredClarityThreshold() {
+            const lvl = Number(state.voiceFilterLevel) || 2;
+            if (lvl === 1) return 0.68;
+            if (lvl === 3) return 0.84;
+            return 0.77;
+        }
+
+        // 升級版鋼琴專用音高與諧波純度分析 (過濾人聲、氣音與背景雜訊)
         function autoCorrelatePitch(buf, sampleRate) {
             const SIZE = buf.length;
             let rms = 0;
-            for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+            let zeroCrossings = 0;
+            for (let i = 0; i < SIZE; i++) {
+                const val = buf[i];
+                rms += val * val;
+                if (i > 0 && ((buf[i - 1] >= 0 && val < 0) || (buf[i - 1] < 0 && val >= 0))) {
+                    zeroCrossings++;
+                }
+            }
             rms = Math.sqrt(rms / SIZE);
-
             const minRms = getActiveRmsThreshold();
-            if (rms < minRms) return { freq: -1, rms, minRms };
+
+            if (rms < minRms) {
+                return { freq: -1, rms, minRms, clarity: 0, rejectReason: 'low_volume' };
+            }
+
+            // 第 1 關：過零率 (Zero-Crossing Rate) 過濾氣音、摩擦聲、拍手聲與講嘢子音 (s, sh, t, k)
+            const zcrRatio = zeroCrossings / SIZE;
+            if (zcrRatio > 0.22) {
+                return { freq: -1, rms, minRms, clarity: 0, rejectReason: 'high_zcr_noise' };
+            }
 
             let r1 = 0, r2 = SIZE - 1, thres = 0.2;
             for (let i = 0; i < SIZE / 2; i++) {
@@ -1544,23 +1590,65 @@
             }
             const slice = buf.slice(r1, r2);
             const newSize = slice.length;
-            if (newSize < 32) return { freq: -1, rms, minRms };
+            if (newSize < 64) return { freq: -1, rms, minRms, clarity: 0, rejectReason: 'short_slice' };
 
-            const c = new Float32Array(newSize);
-            for (let i = 0; i < newSize; i++) {
-                for (let j = 0; j < newSize - i; j++) c[i] += slice[j] * slice[j + i];
+            // 搜尋 110Hz (A2) 至 1100Hz (C#6) 對應嘅 Lag 範圍，直接忽略鋼琴以外頻率
+            const minLag = Math.max(4, Math.floor(sampleRate / 1100));
+            const maxLag = Math.min(newSize - 2, Math.ceil(sampleRate / 110));
+
+            let energy0 = 0;
+            for (let j = 0; j < newSize; j++) energy0 += slice[j] * slice[j];
+            if (energy0 <= 0) return { freq: -1, rms, minRms, clarity: 0, rejectReason: 'zero_energy' };
+
+            const c = new Float32Array(maxLag + 2);
+            for (let lag = 0; lag <= maxLag + 1; lag++) {
+                let sum = 0;
+                const limit = newSize - lag;
+                for (let j = 0; j < limit; j++) {
+                    sum += slice[j] * slice[j + lag];
+                }
+                c[lag] = sum;
             }
-            let d = 0;
-            while (d < newSize - 1 && c[d] > c[d + 1]) d++;
+
+            let d = minLag;
+            while (d < maxLag && c[d] > c[d + 1]) d++;
+
             let maxval = -1, maxpos = -1;
-            for (let i = d; i < newSize; i++) {
-                if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
+            for (let i = d; i <= maxLag; i++) {
+                if (c[i] > maxval) {
+                    maxval = c[i];
+                    maxpos = i;
+                }
             }
-            const T0 = maxpos;
-            return { freq: T0 > 0 ? sampleRate / T0 : -1, rms, minRms };
+
+            if (maxpos <= 0) return { freq: -1, rms, minRms, clarity: 0, rejectReason: 'no_peak' };
+
+            // 計算歸一化諧波純度 (Normalized Harmonic Clarity: 0.0 ~ 1.0)
+            // 真實鋼琴弦振動具有極高週期規律性 (Clarity >= 0.77)，而人聲講嘢或環境雜音通常 < 0.72
+            const overlapLen = newSize - maxpos;
+            let normFactor = energy0 * (overlapLen / newSize);
+            const clarity = normFactor > 0 ? Math.min(1, maxval / normFactor) : 0;
+
+            const minClarity = getRequiredClarityThreshold();
+            if (clarity < minClarity) {
+                return { freq: -1, rms, minRms, clarity, rejectReason: 'low_clarity_voice_or_noise' };
+            }
+
+            // 拋物線插值 (Parabolic Interpolation) 提升音高精準度
+            let refinedLag = maxpos;
+            if (maxpos > 1 && maxpos < maxLag) {
+                const y1 = c[maxpos - 1], y2 = c[maxpos], y3 = c[maxpos + 1];
+                const denom = y1 - 2 * y2 + y3;
+                if (Math.abs(denom) > 1e-6) {
+                    refinedLag = maxpos - (y3 - y1) / (2 * denom);
+                }
+            }
+
+            const freq = sampleRate / refinedLag;
+            return { freq, rms, minRms, clarity, rejectReason: null };
         }
 
-        function renderMicDiagnosticVisualizer(buf, rms, minRms, detectedKeyInfo, freq) {
+        function renderMicDiagnosticVisualizer(buf, rms, minRms, detectedKeyInfo, freq, clarity = 0, rejectReason = null) {
             // 1. 頂部迷你音量條
             const miniBar = document.getElementById('miniMicLevelBar');
             const visualPct = Math.min(100, Math.round((rms / 0.08) * 100));
@@ -1577,21 +1665,41 @@
             const marker = document.getElementById('modalThresholdMarker');
             const rmsText = document.getElementById('modalRmsValText');
             const diagHint = document.getElementById('micDiagnosticHint');
+            const voiceBadge = document.getElementById('modalVoiceFilterBadge');
 
             const thresholdPct = Math.min(90, Math.max(5, Math.round((minRms / 0.08) * 100)));
             if (marker) marker.style.left = `${thresholdPct}%`;
             if (volBar) volBar.style.width = `${visualPct}%`;
             if (rmsText) rmsText.textContent = `訊號強度: ${rms.toFixed(4)} (門檻: ${minRms.toFixed(4)})`;
 
+            if (voiceBadge) {
+                if (rejectReason === 'low_clarity_voice_or_noise' || rejectReason === 'high_zcr_noise') {
+                    voiceBadge.textContent = `🛡️ 已攔截人聲/雜音 (純度僅 ${Math.round(clarity * 100)}%，非鋼琴波形)`;
+                    voiceBadge.className = 'mt-1.5 px-2.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[10px] font-bold text-amber-300';
+                } else if (rejectReason === 'unstable_voice_glide') {
+                    voiceBadge.textContent = '🗣️ 已攔截人聲講嘢 (偵測到語調滑動，非固定琴音)';
+                    voiceBadge.className = 'mt-1.5 px-2.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[10px] font-bold text-amber-300';
+                } else if (freq > 0) {
+                    voiceBadge.textContent = `🎹 確認為純淨鋼琴音 (諧波純度 ${Math.round(clarity * 100)}%)`;
+                    voiceBadge.className = 'mt-1.5 px-2.5 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-bold text-emerald-300';
+                } else {
+                    voiceBadge.textContent = '🛡️ 防人聲/雜音過濾器：運作中';
+                    voiceBadge.className = 'mt-1.5 px-2.5 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400';
+                }
+            }
+
             if (diagHint) {
                 if (rms < 0.002) {
                     diagHint.textContent = '🔇 幾乎無聲：請試彈琴鍵，或拉高下方「咪高峰音量放大」';
                     diagHint.className = 'text-[11px] font-bold text-slate-400';
                 } else if (rms < minRms) {
-                    diagHint.textContent = '⚠️ 有收到細聲訊號但未過黃線！請調高「觸發靈敏度」或「音量放大」';
+                    diagHint.textContent = '⚠️ 有細微背景聲但未過黃線（不會誤觸發）';
                     diagHint.className = 'text-[11px] font-bold text-amber-400';
+                } else if (rejectReason) {
+                    diagHint.textContent = '🛡️ 音量過咗黃線，但系統識別為「人聲或環境雜音」已自動過濾！';
+                    diagHint.className = 'text-[11px] font-bold text-purple-400';
                 } else {
-                    diagHint.textContent = '✅ 訊號超清晰！已成功衝過黃色門檻線';
+                    diagHint.textContent = '✅ 鋼琴訊號超清晰！已通過純度驗證';
                     diagHint.className = 'text-[11px] font-bold text-emerald-400';
                 }
             }
@@ -1605,7 +1713,9 @@
                     jianpuBig.textContent = `簡譜 ${detectedKeyInfo.jianpu} (${detectedKeyInfo.solfege})`;
                     jianpuBig.className = 'text-sm font-extrabold px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 mb-2';
                 }
-                if (freqTxt) freqTxt.textContent = `頻率: ${freq.toFixed(1)} Hz`;
+                if (freqTxt) freqTxt.textContent = `頻率: ${freq.toFixed(1)} Hz | 純度: ${Math.round(clarity * 100)}%`;
+            } else if (rejectReason && rms >= minRms) {
+                if ( freqTxt ) freqTxt.textContent = `純度: ${Math.round(clarity * 100)}% (已作為雜音濾除)`;
             }
 
             // 畫即時聲波圖
@@ -1624,8 +1734,8 @@
                 vCtx.lineTo(w, h / 2);
                 vCtx.stroke();
 
-                // 波形線
-                vCtx.strokeStyle = rms >= minRms ? '#34d399' : '#fbbf24';
+                // 波形線：通過純度係綠色，被防人聲攔截係紫色，未過門檻係黃色
+                vCtx.strokeStyle = (rms >= minRms && !rejectReason) ? '#34d399' : (rejectReason && rms >= minRms ? '#c084fc' : '#fbbf24');
                 vCtx.lineWidth = 2;
                 vCtx.beginPath();
                 const step = Math.max(1, Math.floor(buf.length / w));
@@ -1642,23 +1752,47 @@
         function detectPitchLoop() {
             if (!state.isMicListening || !analyserNode) return;
             analyserNode.getFloatTimeDomainData(pitchBuffer);
-            const { freq, rms, minRms } = autoCorrelatePitch(pitchBuffer, micAudioCtx.sampleRate);
+            let { freq, rms, minRms, clarity, rejectReason } = autoCorrelatePitch(pitchBuffer, micAudioCtx.sampleRate);
             const pitchText = document.getElementById('detectedPitchText');
             let detectedKeyInfo = null;
 
-            if (freq === -1 || freq < 110 || freq > 1050) {
-                state.silenceFrames++;
-                if (state.silenceFrames > 3) {
-                    state.sameNoteReleased = true;
-                    state.heldMidiNote = null;
-                    state.heldNotePeakRms = 0;
+            if (freq === -1 || freq < 115 || freq > 1020) {
+                state.pitchHistoryWindow = [];
+                if (rms < minRms) {
+                    state.silenceFrames++;
+                    if (state.silenceFrames > 3) {
+                        state.sameNoteReleased = true;
+                        state.heldMidiNote = null;
+                        state.heldNotePeakRms = 0;
+                    }
+                    pitchText.textContent = rms > 0.003 ? '太細聲' : '聽緊...';
+                } else {
+                    pitchText.textContent = '🛡️濾雜音';
                 }
-                pitchText.textContent = rms > 0.003 ? '太細聲' : '聽緊...';
             } else {
                 state.silenceFrames = 0;
-                const detectedMidi = Math.round(12 * Math.log2(freq / 440) + 69);
+                const exactMidiFloat = 12 * Math.log2(freq / 440) + 69;
+                const detectedMidi = Math.round(exactMidiFloat);
+                const centsOff = Math.abs((exactMidiFloat - detectedMidi) * 100);
+
+                // 第 2 關：人聲語調滑動攔截 (Pitch Stability & Tuning Check)
+                // 鋼琴音準固定，而人講嘢音高每 Frame 都會飄移；必須連續 2 個 Frame 穩定喺同一個半音內先至通過
+                state.pitchHistoryWindow.push(exactMidiFloat);
+                if (state.pitchHistoryWindow.length > 3) state.pitchHistoryWindow.shift();
+
+                const requiredFrames = state.voiceFilterLevel >= 2 ? 2 : 1;
+                let isStablePianoPitch = state.pitchHistoryWindow.length >= requiredFrames;
+                if (isStablePianoPitch && state.pitchHistoryWindow.length >= 2) {
+                    const prevFloat = state.pitchHistoryWindow[state.pitchHistoryWindow.length - 2];
+                    // 如果相鄰兩個 Frame 音高飄移超過 0.42 個半音 (42 cents)，代表係人聲講嘢滑音
+                    if (Math.abs(exactMidiFloat - prevFloat) > 0.42 || centsOff > 42) {
+                        isStablePianoPitch = false;
+                        rejectReason = 'unstable_voice_glide';
+                    }
+                }
+
                 const kInfo = MIDI_MAP[detectedMidi];
-                if (kInfo) {
+                if (kInfo && isStablePianoPitch) {
                     detectedKeyInfo = kInfo;
                     pitchText.textContent = `${kInfo.note}(${kInfo.jianpu})`;
                     const now = performance.now();
@@ -1673,9 +1807,11 @@
                     } else if (rms > state.heldNotePeakRms) {
                         state.heldNotePeakRms = rms;
                     }
+                } else if (!isStablePianoPitch) {
+                    pitchText.textContent = '🗣️濾人聲';
                 }
             }
-            renderMicDiagnosticVisualizer(pitchBuffer, rms, minRms, detectedKeyInfo, freq);
+            renderMicDiagnosticVisualizer(pitchBuffer, rms, minRms, detectedKeyInfo, freq, clarity, rejectReason);
             state.previousRms = rms;
             requestAnimationFrame(detectPitchLoop);
         }
@@ -1755,12 +1891,17 @@
 
                 const source = micAudioCtx.createMediaStreamSource(micStream);
 
-                // 高通濾波器：過濾 75Hz 以下冷氣機與檯面震動雜音
+                // 1. 高通濾波器：切走 105Hz 以下冷氣機、風扇、行路與檯面低頻轟鳴聲
                 const highpass = micAudioCtx.createBiquadFilter();
                 highpass.type = 'highpass';
-                highpass.frequency.setValueAtTime(75, micAudioCtx.currentTime);
+                highpass.frequency.setValueAtTime(105, micAudioCtx.currentTime);
 
-                // 前置放大器 GainNode：專治 iPad 背部咪喺譜架上面收音太細聲嘅問題
+                // 2. 低通濾波器：切走 1250Hz 以上人聲唇齒音 (s/t/k) 及背景高頻雜訊，鎖定 C3(130Hz)~E5(659Hz) 鋼琴基頻區
+                const lowpass = micAudioCtx.createBiquadFilter();
+                lowpass.type = 'lowpass';
+                lowpass.frequency.setValueAtTime(1250, micAudioCtx.currentTime);
+
+                // 3. 前置放大器 GainNode：專治 iPad 背部咪喺譜架上面收音太細聲嘅問題
                 micPreAmpGainNode = micAudioCtx.createGain();
                 micPreAmpGainNode.gain.setValueAtTime(state.micGainBoost || 2.5, micAudioCtx.currentTime);
 
@@ -1769,7 +1910,8 @@
                 pitchBuffer = new Float32Array(analyserNode.fftSize);
 
                 source.connect(highpass);
-                highpass.connect(micPreAmpGainNode);
+                highpass.connect(lowpass);
+                lowpass.connect(micPreAmpGainNode);
                 micPreAmpGainNode.connect(analyserNode);
 
                 state.isMicListening = true;
@@ -2987,29 +3129,66 @@
 
             const sensInput = document.getElementById('micSensitivity');
             const boostInput = document.getElementById('micGainBoostSlider');
+            const voiceFilterInput = document.getElementById('voiceFilterStrengthSlider');
             const updateMicSlidersUI = () => {
                 const sVal = Number(sensInput.value);
                 const bVal = Number(boostInput.value);
+                const vfVal = Number(voiceFilterInput?.value || 2);
                 state.micGainBoost = bVal;
+                state.voiceFilterLevel = vfVal;
                 if (micPreAmpGainNode && micAudioCtx) {
                     micPreAmpGainNode.gain.setValueAtTime(bVal, micAudioCtx.currentTime);
                 }
                 const sDesc = sVal >= 8 ? '極高靈敏' : (sVal >= 5 ? '標準' : '防雜音');
                 document.getElementById('micSensLabelVal').textContent = `${sVal} (${sDesc})`;
                 document.getElementById('micBoostLabelVal').textContent = `${bVal.toFixed(1)}x 放大`;
+                const vfLabels = { 1: '寬鬆 (68%純度)', 2: '中 (77%純度)', 3: '嚴格防人聲 (84%)' };
+                const vfEl = document.getElementById('voiceFilterLabelVal');
+                if (vfEl) vfEl.textContent = vfLabels[vfVal] || '中 (77%純度)';
             };
             sensInput.addEventListener('input', updateMicSlidersUI);
             boostInput.addEventListener('input', updateMicSlidersUI);
+            voiceFilterInput?.addEventListener('input', updateMicSlidersUI);
 
             bindSafariButton('presetIpadStandBtn', () => {
                 sensInput.value = 8;
                 boostInput.value = 4.0;
+                if (voiceFilterInput) voiceFilterInput.value = 2;
                 updateMicSlidersUI();
             });
-            bindSafariButton('presetNormalMicBtn', () => {
-                sensInput.value = 6;
-                boostInput.value = 2.0;
+            bindSafariButton('presetNoisyRoomBtn', () => {
+                sensInput.value = 5;
+                boostInput.value = 2.5;
+                if (voiceFilterInput) voiceFilterInput.value = 3;
                 updateMicSlidersUI();
+            });
+
+            // 1 秒自動環境底噪取樣校準
+            bindSafariButton('calibrateNoiseBtn', () => {
+                if (!state.isMicListening || !analyserNode) {
+                    toggleMicrophone(false);
+                    return;
+                }
+                const btn = document.getElementById('calibrateNoiseBtn');
+                const origText = btn.textContent;
+                btn.textContent = '⏳ 取樣環境噪音中 (請保持安靜)...';
+                let maxBgRms = 0;
+                let samples = 0;
+                const sampleTimer = setInterval(() => {
+                    if (!analyserNode || !pitchBuffer) return;
+                    analyserNode.getFloatTimeDomainData(pitchBuffer);
+                    let r = 0;
+                    for (let i = 0; i < pitchBuffer.length; i++) r += pitchBuffer[i] * pitchBuffer[i];
+                    r = Math.sqrt(r / pitchBuffer.length);
+                    if (r > maxBgRms) maxBgRms = r;
+                    samples++;
+                    if (samples >= 16) {
+                        clearInterval(sampleTimer);
+                        state.ambientNoiseFloor = maxBgRms;
+                        btn.textContent = `✅ 已鎖定底噪 (${maxBgRms.toFixed(3)})`;
+                        setTimeout(() => { btn.textContent = origText; }, 2500);
+                    }
+                }, 60);
             });
 
             document.getElementById('micDeviceSelect')?.addEventListener('change', (e) => {
