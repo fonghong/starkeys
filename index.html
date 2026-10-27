@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-title" content="星光琴院">
     <meta name="theme-color" content="#0f172a">
 
-    <!-- Web App Manifest (Data URI 內嵌，支援單一 HTML 檔案變 PWA Standalone 全螢幕) -->
+    <!-- Standalone 顯示提示；Safari 分頁不能靠 manifest 或 JS 完全移除網址列。 -->
     <link rel="manifest" href='data:application/manifest+json,{"name":"星光琴院 StarKeys — 互動鋼琴學堂","short_name":"星光琴院","display":"standalone","orientation":"any","background_color":"#020617","theme_color":"#0f172a","icons":[{"src":"data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%234f46e5%22/><text x=%2250%22 y=%2268%22 font-size=%2258%22 text-anchor=%22middle%22>🎹</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}'>
     <link rel="apple-touch-icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="%234f46e5"/><text x="50" y="68" font-size="58" text-anchor="middle">🎹</text></svg>'>
 
@@ -32,7 +32,22 @@
             position: fixed;
             inset: 0;
             width: 100%;
+            height: 100%;
             height: 100dvh;
+        }
+        body {
+            box-sizing: border-box;
+            padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+        }
+        body.immersive-mode {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            height: var(--immersive-height, 100%);
+            overflow: hidden;
+            z-index: 99999;
         }
 
         /* 鋼琴鍵盤與五線譜徹底禁用 Safari 雙擊放大 (Double-tap to zoom) */
@@ -200,7 +215,7 @@
         .control-menu > summary { display: flex; align-items: center; justify-content: center; padding: 0 12px; border: 1px solid #64748b; border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: 700; list-style: none; }
         .control-menu > summary::-webkit-details-marker { display: none; }
         .control-menu[open] > summary { border-color: #818cf8; }
-        .control-panel { position: absolute; top: 100%; right: 8px; z-index: 50; display: flex; flex-wrap: wrap; gap: 8px; width: min(420px, calc(100vw - 16px)); max-height: 55dvh; overflow-y: auto; padding: 16px; border: 1px solid #64748b; border-radius: 16px; box-shadow: 0 12px 32px #0006; }
+        .control-panel { position: absolute; top: 100%; right: 8px; z-index: 50; display: flex; flex-wrap: wrap; gap: 8px; width: min(420px, calc(100vw - 16px)); max-height: 55vh; max-height: 55dvh; overflow-y: auto; padding: 16px; border: 1px solid #64748b; border-radius: 16px; box-shadow: 0 12px 32px #0006; }
         .control-panel h2 { width: 100%; font-size: 12px; font-weight: 700; }
         .control-panel button { flex-grow: 1; justify-content: center; }
         .control-menu:not([open]) > .control-panel { display: none; }
@@ -436,7 +451,7 @@
                 <div class="flex items-center gap-2 text-[10px] sm:text-[11px] text-slate-400 truncate">
                     <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span>C3~B3 左手低音(𝄢)</span>
                     <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span>C4~G5 右手高音(𝄞)</span>
-                    <span class="hidden lg:inline text-slate-500">| 觸控點擊、真琴 Mic 收音、鍵盤 (Z~M / A~L) 或 USB MIDI</span>
+                    <span class="hidden xl:inline text-slate-500">| 觸控點擊、真琴 Mic 收音、鍵盤 (Z~M / A~L) 或 USB MIDI</span>
                 </div>
                 <div class="keyboard-tools flex flex-wrap items-center gap-2 text-[11px]">
                     <div class="theme-surface flex items-center gap-1 bg-slate-950 border border-slate-800 px-1.5 py-0.5 rounded-lg text-[10px]">
@@ -2323,39 +2338,91 @@
             saveToLocalStorage();
         }
 
+        function isIOSDevice() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+
+        function updateImmersiveViewport() {
+            if (state.isImmersiveFallback) {
+                const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                document.body.style.setProperty('--immersive-height', `${height}px`);
+            } else {
+                document.body.style.removeProperty('--immersive-height');
+            }
+        }
+
+        function syncFullscreenUI() {
+            const active = !!(document.fullscreenElement || document.webkitFullscreenElement || state.isImmersiveFallback);
+            document.body.classList.toggle('immersive-mode', state.isImmersiveFallback);
+            updateImmersiveViewport();
+            const icon = document.getElementById('fullscreenIcon');
+            const button = document.getElementById('fullscreenToggleBtn');
+            if (icon) icon.textContent = active ? '🗗' : '⛶';
+            if (button) button.setAttribute('aria-pressed', String(active));
+            setTimeout(resizeSheetCanvas, 150);
+        }
+
         function toggleFullScreenMode() {
             const docEl = document.documentElement;
-            const fsIcon = document.getElementById('fullscreenIcon');
-
             const isNativeFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-            if (!isNativeFullscreen && !state.isImmersiveFallback) {
-                const reqFs = docEl.requestFullscreen || docEl.webkitRequestFullscreen;
-                if (reqFs) {
-                    reqFs.call(docEl).then(() => {
-                        if (fsIcon) fsIcon.textContent = '🗗';
-                        setTimeout(resizeSheetCanvas, 150);
-                    }).catch(() => {
-                        state.isImmersiveFallback = true;
-                        document.body.classList.add('immersive-mode');
-                        if (fsIcon) fsIcon.textContent = '🗗';
-                        setTimeout(resizeSheetCanvas, 100);
-                    });
-                } else {
-                    state.isImmersiveFallback = true;
-                    document.body.classList.add('immersive-mode');
-                    if (fsIcon) fsIcon.textContent = '🗗';
-                    setTimeout(resizeSheetCanvas, 100);
-                }
-            } else {
+            if (isNativeFullscreen) {
                 const exitFs = document.exitFullscreen || document.webkitExitFullscreen;
-                if (isNativeFullscreen && exitFs) {
-                    exitFs.call(document).catch(() => {});
+                if (exitFs) {
+                    try { Promise.resolve(exitFs.call(document)).then(syncFullscreenUI).catch(syncFullscreenUI); }
+                    catch { syncFullscreenUI(); }
                 }
-                state.isImmersiveFallback = false;
-                document.body.classList.remove('immersive-mode');
-                if (fsIcon) fsIcon.textContent = '⛶';
-                setTimeout(resizeSheetCanvas, 150);
+                return;
             }
+            if (state.isImmersiveFallback) {
+                state.isImmersiveFallback = false;
+                syncFullscreenUI();
+                return;
+            }
+            const enterFallback = () => {
+                state.isImmersiveFallback = true;
+                syncFullscreenUI();
+            };
+            // iPad 的桌面 UA 也必須避開 WebKit 原生全螢幕關閉按鈕。
+            const reqFs = !isIOSDevice() && (docEl.requestFullscreen || docEl.webkitRequestFullscreen);
+            if (!reqFs) { enterFallback(); return; }
+            try { Promise.resolve(reqFs.call(docEl)).then(syncFullscreenUI).catch(enterFallback); }
+            catch { enterFallback(); }
+        }
+
+        function setupFullscreen() {
+            document.addEventListener('fullscreenchange', syncFullscreenUI);
+            document.addEventListener('webkitfullscreenchange', syncFullscreenUI);
+            window.addEventListener('resize', updateImmersiveViewport);
+            if (window.visualViewport) window.visualViewport.addEventListener('resize', updateImmersiveViewport);
+            syncFullscreenUI();
+            if (!isIOSDevice()) return;
+
+            // Safari 15 不支援 overscroll-behavior：保留內層捲動，只攔截邊界與背景拖動。
+            let lastTouch = null;
+            document.addEventListener('touchstart', e => {
+                lastTouch = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+            }, { passive: true });
+            document.addEventListener('touchmove', e => {
+                if (!state.isImmersiveFallback || !lastTouch || e.touches.length !== 1) return;
+                const touch = e.touches[0];
+                const dx = lastTouch.x - touch.clientX;
+                const dy = lastTouch.y - touch.clientY;
+                lastTouch = { x: touch.clientX, y: touch.clientY };
+                if (e.target.closest('input[type="range"], #pianoKeyboard')) return;
+                const horizontal = Math.abs(dx) > Math.abs(dy);
+                const delta = horizontal ? dx : dy;
+                if (!delta) return;
+                for (let el = e.target; el && el !== document.body; el = el.parentElement) {
+                    const style = window.getComputedStyle(el);
+                    const overflow = horizontal ? style.overflowX : style.overflowY;
+                    const position = horizontal ? el.scrollLeft : el.scrollTop;
+                    const limit = horizontal ? el.scrollWidth - el.clientWidth : el.scrollHeight - el.clientHeight;
+                    if (/auto|scroll/.test(overflow) && limit > 0 &&
+                        (delta < 0 ? position > 0 : position < limit - 1)) return;
+                }
+                if (e.cancelable) e.preventDefault();
+            }, { passive: false });
         }
 
         function saveProfileToCloud(profile) {
@@ -3591,6 +3658,7 @@
             applyTheme(state.theme);
             buildVirtualKeyboard();
             setupPracticeControls();
+            setupFullscreen();
             resizeSheetCanvas();
             updateProfileHeaderUI();
             loadSong('stage1_middleC');
