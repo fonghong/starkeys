@@ -561,10 +561,10 @@
 
                 <div class="md:col-span-7 flex flex-col gap-3 justify-between">
                     <div class="space-y-2.5">
-                        <!-- AI 影相多頁識譜 & 本地演算法識譜區 -->
+                        <!-- 本地多頁五線譜辨識區 -->
                         <div class="bg-indigo-950/40 border border-indigo-500/40 rounded-2xl p-3 space-y-2">
                             <div class="flex items-center justify-between flex-wrap gap-1">
-                                <span class="text-xs font-extrabold text-indigo-300 flex items-center gap-1">📸 影相識譜 (支援多頁連拍 + AI / 本地雙引擎)</span>
+                                <span class="text-xs font-extrabold text-indigo-300 flex items-center gap-1">📸 影相識譜 (本地五線譜辨識 · 支援多頁)</span>
                                 <div class="flex items-center gap-1.5">
                                     <label for="cameraSheetInput" class="cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow transition">📷 影相/加頁</label>
                                     <input id="cameraSheetInput" type="file" accept="image/*" capture="environment" multiple class="hidden">
@@ -575,11 +575,14 @@
                             </div>
                             <div id="sheetPagesPreviewList" class="hidden flex items-center gap-2 overflow-x-auto py-1"></div>
                             <div id="sheetOcrActionsRow" class="hidden flex flex-wrap items-center gap-2 pt-1">
-                                <button type="button" id="runAiOcrBtn" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold py-1.5 px-3 rounded-xl shadow transition">✨ AI 智能識譜 (多頁合併)</button>
-                                <button type="button" id="runLocalLogicOcrBtn" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-bold py-1.5 px-3 rounded-xl transition">⚙️ 本地五線譜辨識 (免上傳)</button>
+                                <button type="button" id="runLocalLogicOcrBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-1.5 px-3 rounded-xl shadow transition">⚙️ 本地五線譜辨識 (免上傳)</button>
                             </div>
-                            <p class="text-[11px] text-slate-400">本地：清晰、正面的 C 大調單旋律高音五線譜；不支援數字譜、低音譜表及多聲部。休止符、附點、升降記號須人工校對。</p>
-                            <div id="sheetOcrStatusText" role="status" aria-live="polite" class="text-[11px] text-slate-400">加入圖片後可逐頁辨識。藍線標示譜表，綠圈標示音符；結果是待校對初稿，不會在失敗時填入範例歌曲。</div>
+                            <details id="sheetOcrIntro" class="text-[11px] text-slate-400">
+                                <summary class="cursor-pointer text-indigo-300">識譜說明與注意事項</summary>
+                                <p class="mt-1">請用清晰、正面的 C 大調單旋律高音五線譜；不支援數字譜、低音譜表及多聲部。休止符、附點、升降記號須人工校對。辨識結果只係待校對初稿，請先試聽再儲存。</p>
+                                <p class="mt-1">加入圖片後可逐頁辨識。藍線標示譜表，綠圈標示音符；辨識失敗不會填入範例歌曲。</p>
+                            </details>
+                            <div id="sheetOcrStatusText" role="status" aria-live="polite" class="text-[11px] text-slate-400"></div>
                             <select id="localOcrPageSelect" aria-label="選擇辨識校對頁面" class="hidden w-full text-xs rounded-lg bg-slate-800 text-slate-200 p-2"></select>
                             <div class="max-h-96 overflow-auto">
                                 <canvas id="localOcrDebugCanvas" aria-label="五線譜及音符辨識標記" class="hidden w-full h-auto rounded-lg border border-slate-700 bg-white"></canvas>
@@ -603,6 +606,11 @@
                         <div>
                             <label class="block text-xs font-bold text-slate-300 mb-1">輸入數字簡譜（用空格分隔每粒音）</label>
                             <textarea id="customSongNotesInput" rows="4" placeholder="1 1 5 5 6 6 5- 4 4 3 3 2 2 1-" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm font-mono text-emerald-300 focus:border-blue-500 focus:outline-none"></textarea>
+                            <div id="previewCustomSongTrack" aria-label="試聽進度：點擊數字可選取並修改" class="hidden max-h-28 overflow-y-auto rounded-lg border border-indigo-500/40 bg-slate-900 p-2 text-sm font-mono text-emerald-300 whitespace-pre-wrap break-words"></div>
+                            <div class="flex items-center gap-2 mt-2">
+                                <button type="button" id="previewCustomSongBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg" aria-label="試聽目前簡譜">▶ 試聽簡譜</button>
+                                <span id="previewCustomSongStatus" role="status" aria-live="polite" class="text-[11px] text-slate-400"></span>
+                            </div>
                         </div>
 
                         <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 text-[11px] text-slate-400 space-y-1">
@@ -1523,14 +1531,6 @@
         const LEGACY_BUILTIN_PRESETS = JSON.parse(JSON.stringify(BUILTIN_CUSTOM_PRESETS));
         PianoCurriculum.reviewPresets(BUILTIN_CUSTOM_PRESETS, SONGS);
         const PREVIOUS_REVIEWED_PRESETS = JSON.parse(JSON.stringify(BUILTIN_CUSTOM_PRESETS));
-        const presetLyrics = {
-            custom_preset_birthday: 'Hap- py birth- day to you Hap- py birth- day to you Hap- py birth- day dear dear friend Hap- py birth- day to you',
-            custom_preset_twinkle_full: 'Twin- kle twin- kle lit- tle star How I won- der what you are Up a- bove the world so high Like a dia- mond in the sky Twin- kle twin- kle lit- tle star How I won- der what you are',
-            custom_preset_london_full: 'Lon- don bridge is fall- ing down fall- ing down fall- ing down Lon- don bridge is fall- ing down my fair la- dy',
-            custom_preset_ode_full: '青 天 高 高 白 雲 飄 飄 太 陽 出 山 天 下 明 青 天 高 高 白 雲 飄 飄 太 陽 出 山 天 下 明'
-        };
-        Object.entries(presetLyrics).forEach(([key, words]) => {
-            const song = BUILTIN_CUSTOM_PRESETS[key];
         const fullMelodySections = {
             custom_preset_frere_jacques: '5:5(Son-) 6:5(nez) 5:5(les) 4:4(ma-) 3:3(ti-) 1-:1(nes) 5:5(Son-) 6:5(nez) 5:5(les) 4:4(ma-) 3:3(ti-) 1-:1(nes) 1:1(Ding) 5.:1(dang) 1-:1(dong) 1:1(Ding) 5.:1(dang) 1-:1(dong)',
             custom_preset_row_boat: '5:5(Mer-) 5:5(ri-) 5:5(ly) 3:3(mer-) 3:3(ri-) 3:3(ly) 1:1(mer-) 1:1(ri-) 1:1(ly) 5:5(mer-) 4:4(ri-) 3:3(ly) 2:2(life) 1-:1(dream)',
@@ -1553,6 +1553,14 @@
             song.title = song.title.replace('（主題短編）', '').replace('（器樂主題短編）', '') + '（完整入門編曲）';
             song.tip = '完整入門單音編曲，並非原曲逐音還原；高低音跨手位時可以停低搬手。';
         });
+        const presetLyrics = {
+            custom_preset_birthday: 'Hap- py birth- day to you Hap- py birth- day to you Hap- py birth- day dear dear friend Hap- py birth- day to you',
+            custom_preset_twinkle_full: 'Twin- kle twin- kle lit- tle star How I won- der what you are Up a- bove the world so high Like a dia- mond in the sky Twin- kle twin- kle lit- tle star How I won- der what you are',
+            custom_preset_london_full: 'Lon- don bridge is fall- ing down fall- ing down fall- ing down Lon- don bridge is fall- ing down my fair la- dy',
+            custom_preset_ode_full: '青 天 高 高 白 雲 飄 飄 太 陽 出 山 天 下 明 青 天 高 高 白 雲 飄 飄 太 陽 出 山 天 下 明'
+        };
+        Object.entries(presetLyrics).forEach(([key, words]) => {
+            const song = BUILTIN_CUSTOM_PRESETS[key];
             const lyrics = words.split(' ');
             const tokens = song.rawJianpu.split(' ');
             let lyricIndex = 0;
@@ -1577,7 +1585,7 @@
             return Math.max(48, Math.min(79, shifted));
         }
 
-        // 圖片多頁上傳與雙引擎識譜 (AI + 本地 Canvas 演算法 Fallback)
+        // 本地 Canvas 多頁五線譜辨識
         function compressImageFileToDataUrl(file, maxDim = 1100) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -1615,6 +1623,7 @@
             document.getElementById('sheetOcrStatusText').textContent = state.uploadedSheetPages.length
                 ? '圖片列表已更新，請開始辨識；原有簡譜不會清除。' : '';
             updateSheetRecognitionButtons();
+            document.getElementById('sheetOcrIntro').open = state.uploadedSheetPages.length > 0;
 
             if (state.uploadedSheetPages.length === 0) {
                 listEl.classList.add('hidden');
@@ -1651,12 +1660,9 @@
 
         let localSheetResults = [];
         let localSheetRecognitionRunning = false;
-        let aiSheetRecognitionRunning = false;
 
         function updateSheetRecognitionButtons() {
-            const disabled = localSheetRecognitionRunning || aiSheetRecognitionRunning || !state.uploadedSheetPages.length;
-            document.getElementById('runLocalLogicOcrBtn').disabled = disabled;
-            document.getElementById('runAiOcrBtn').disabled = disabled;
+            document.getElementById('runLocalLogicOcrBtn').disabled = localSheetRecognitionRunning || !state.uploadedSheetPages.length;
         }
 
         function renderLocalSheetDebug(pageIndex = 0) {
@@ -1693,7 +1699,8 @@
         }
 
         async function runLocalLogicSheetRecognition() {
-            if (!state.uploadedSheetPages.length || localSheetRecognitionRunning || aiSheetRecognitionRunning) return;
+            if (!state.uploadedSheetPages.length || localSheetRecognitionRunning) return;
+            document.getElementById('sheetOcrIntro').open = true;
             const statusEl = document.getElementById('sheetOcrStatusText');
             const selector = document.getElementById('localOcrPageSelect');
             const pages = [...state.uploadedSheetPages];
@@ -1739,6 +1746,7 @@
                     statusEl.textContent = `⚠️ 未匯入，原有簡譜已保留。${failed.length ? `第 ${failed.join('、')} 頁未找到可辨識音符，請用清晰、正面、完整的高音譜表。` : ''}${unsupported ? `有 ${unsupported} 個音符超出 C3–G5（紅圈），請校對。` : ''}`;
                     return;
                 }
+                stopCustomSongPreview();
                 document.getElementById('customSongNotesInput').value = localSheetResults
                     .flatMap(entry => entry.result.staves.map(staff => staff.notes.map(note => note.token).join(' ')))
                     .join('\n');
@@ -1754,65 +1762,6 @@
                 statusEl.textContent = '⚠️ 本地辨識未完成，原有簡譜已保留。請換用清晰、完整的五線譜圖片再試。';
             } finally {
                 localSheetRecognitionRunning = false;
-                updateSheetRecognitionButtons();
-            }
-        }
-
-        async function runAiMultiPageOcr() {
-            if (!state.uploadedSheetPages.length || localSheetRecognitionRunning || aiSheetRecognitionRunning) return;
-            const pages = [...state.uploadedSheetPages];
-            const pagesChanged = () => pages.length !== state.uploadedSheetPages.length || pages.some((page, i) => page !== state.uploadedSheetPages[i]);
-            aiSheetRecognitionRunning = true;
-            updateSheetRecognitionButtons();
-            const statusEl = document.getElementById('sheetOcrStatusText');
-            statusEl.textContent = `⏳ 正在透過 AI 分析全部 ${state.uploadedSheetPages.length} 頁樂譜...`;
-
-            try {
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-                const parts = [
-                    {
-                        text: "You are an expert piano music teacher. Read all attached sheet music or numbered musical notation pages in order. Convert the melody into space-separated jianpu tokens supported by our app: '1.' to '7.' for C3-B3, '1' to '7' for C4-B4, \"1'\" to \"5'\" for C5-G5, prefix '#' for sharps (e.g. '#4'), suffix '-' for 2-beat notes, suffix '--' for 4-beat notes, suffix '/2' for eighth notes, and ':1' to ':5' for recommended finger. Return ONLY valid JSON: {\"title\": \"Song Title\", \"jianpu\": \"1:1 2:2 3:3 ...\"}"
-                    }
-                ];
-                state.uploadedSheetPages.forEach(p => {
-                    const base64Clean = p.dataUrl.split(',')[1];
-                    parts.push({ inlineData: { mimeType: "image/jpeg", data: base64Clean } });
-                });
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ role: "user", parts }],
-                        generationConfig: { responseMimeType: "application/json" }
-                    })
-                });
-                if (!response.ok) throw new Error('API request failed');
-                const result = await response.json();
-                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!text) throw new Error('Empty AI output');
-                const parsed = JSON.parse(text);
-                if (pagesChanged()) {
-                    statusEl.textContent = '圖片列表已更改，請重新辨識；原有簡譜已保留。';
-                    return;
-                }
-                if (parsed.jianpu) {
-                    document.getElementById('customSongNotesInput').value = parsed.jianpu;
-                    if (parsed.title) document.getElementById('customSongTitleInput').value = parsed.title;
-                    statusEl.textContent = `🎉 AI 成功識別全部 ${state.uploadedSheetPages.length} 頁琴譜！`;
-                } else {
-                    throw new Error('No jianpu field');
-                }
-            } catch (err) {
-                if (pagesChanged()) {
-                    statusEl.textContent = '圖片列表已更改，請重新辨識；原有簡譜已保留。';
-                    return;
-                }
-                aiSheetRecognitionRunning = false;
-                await runLocalLogicSheetRecognition();
-            } finally {
-                aiSheetRecognitionRunning = false;
                 updateSheetRecognitionButtons();
             }
         }
@@ -2653,8 +2602,8 @@
             if (synthAudioCtx.state === 'suspended') synthAudioCtx.resume();
         }
 
-        function playPianoTone(midiNote, duration = 0.55) {
-            if (!document.getElementById('playSynthToggle').checked && !state.isDemoPlaying) return;
+        function playPianoTone(midiNote, duration = 0.55, preview = false) {
+            if (!document.getElementById('playSynthToggle').checked && !state.isDemoPlaying && !preview) return;
             ensureAudioCtx();
             const sustainOn = document.getElementById('sustainPedalToggle')?.checked;
             const actualDuration = sustainOn ? Math.max(duration * 2.1, 1.25) : duration;
@@ -2684,6 +2633,14 @@
             osc2.start(now);
             osc1.stop(now + actualDuration);
             osc2.stop(now + actualDuration);
+            return () => {
+                if (synthAudioCtx.currentTime >= now + actualDuration) return;
+                const stopAt = synthAudioCtx.currentTime + 0.02;
+                gainNode.gain.cancelScheduledValues(synthAudioCtx.currentTime);
+                gainNode.gain.setTargetAtTime(0.0001, synthAudioCtx.currentTime, 0.005);
+                osc1.stop(stopAt);
+                osc2.stop(stopAt);
+            };
         }
 
         function playMetronomeTick(isDownbeat = false) {
@@ -3493,6 +3450,7 @@
 
             container.querySelectorAll('.play-custom-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
+                    stopCustomSongPreview();
                     loadSong(btn.dataset.playKey);
                     document.getElementById('customSongModal').classList.add('hidden');
                 });
@@ -3503,6 +3461,7 @@
                     const key = btn.dataset.editKey;
                     const song = SONGS[key];
                     if (!song) return;
+                    stopCustomSongPreview();
                     state.editingCustomSongKey = key;
                     document.getElementById('customSongTitleInput').value = song.title.replace(/^🎵\s*/, '');
                     document.getElementById('customSongNotesInput').value = song.rawJianpu || '';
@@ -3512,7 +3471,96 @@
             });
         }
 
+        let customSongPreviewTimer = null;
+        let customSongPreviewStopTone = null;
+        function stopCustomSongPreview(keepTrack = false) {
+            clearTimeout(customSongPreviewTimer);
+            customSongPreviewTimer = null;
+            if (customSongPreviewStopTone) customSongPreviewStopTone();
+            customSongPreviewStopTone = null;
+            if (!keepTrack) document.getElementById('previewCustomSongTrack').classList.add('hidden');
+            const button = document.getElementById('previewCustomSongBtn');
+            button.textContent = '▶ 試聽簡譜';
+            button.setAttribute('aria-label', '試聽目前簡譜');
+        }
+
+        function highlightCustomSongPreviewToken(buttons, index) {
+            buttons.forEach((button, i) => {
+                button.classList.toggle('bg-amber-400', i === index);
+                button.classList.toggle('text-slate-950', i === index);
+                if (i === index) button.setAttribute('aria-current', 'true');
+                else button.removeAttribute('aria-current');
+            });
+            buttons[index].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+
+        function toggleCustomSongPreview() {
+            if (customSongPreviewTimer !== null) {
+                stopCustomSongPreview(true);
+                document.getElementById('previewCustomSongStatus').textContent = '已停止試聽；可點擊上方數字修改';
+                return;
+            }
+            const editor = document.getElementById('customSongNotesInput');
+            const raw = editor.value;
+            const tokens = [...raw.matchAll(/\S+/g)];
+            const notes = parseJianpuString(raw);
+            const status = document.getElementById('previewCustomSongStatus');
+            if (!notes.length || notes.length !== tokens.length) {
+                status.textContent = '請輸入有效簡譜，並檢查每粒音';
+                return;
+            }
+            const track = document.getElementById('previewCustomSongTrack');
+            track.replaceChildren();
+            const tokenButtons = tokens.map((match, i) => {
+                const tokenButton = document.createElement('button');
+                tokenButton.type = 'button';
+                tokenButton.textContent = match[0];
+                tokenButton.className = 'rounded px-0.5 hover:bg-indigo-500/40 focus:outline focus:outline-2 focus:outline-indigo-400';
+                tokenButton.setAttribute('aria-label', `第 ${i + 1} 粒音：${match[0]}，點擊修改`);
+                tokenButton.addEventListener('click', () => {
+                    stopCustomSongPreview(true);
+                    highlightCustomSongPreviewToken(tokenButtons, i);
+                    editor.focus();
+                    editor.setSelectionRange(match.index, match.index + match[0].length);
+                    status.textContent = `已選取第 ${i + 1} 粒音，請修改簡譜`;
+                });
+                track.append(tokenButton);
+                track.append(document.createTextNode(raw.slice(match.index + match[0].length, tokens[i + 1]?.index ?? raw.length)));
+                return tokenButton;
+            });
+            track.classList.remove('hidden');
+            const button = document.getElementById('previewCustomSongBtn');
+            button.textContent = '■ 停止試聽';
+            button.setAttribute('aria-label', '停止試聽簡譜');
+            let index = 0;
+            const playNext = () => {
+                if (index >= notes.length) {
+                    stopCustomSongPreview(true);
+                    status.textContent = '試聽完成；可點擊上方數字修改或儲存';
+                    return;
+                }
+                if (customSongPreviewStopTone) customSongPreviewStopTone();
+                customSongPreviewStopTone = null;
+                const note = notes[index++];
+                highlightCustomSongPreviewToken(tokenButtons, index - 1);
+                const durationMs = (note.dur || 1) * 650;
+                status.textContent = `試聽中 ${index} / ${notes.length}`;
+                if (!note.isRest) {
+                    try {
+                        customSongPreviewStopTone = playPianoTone(note.midi, durationMs / 1000, true);
+                    } catch (error) {
+                        stopCustomSongPreview();
+                        status.textContent = '此瀏覽器無法播放音訊';
+                        return;
+                    }
+                }
+                customSongPreviewTimer = setTimeout(playNext, durationMs);
+            };
+            playNext();
+        }
+
         function resetCustomSongForm() {
+            stopCustomSongPreview();
             state.editingCustomSongKey = null;
             document.getElementById('customSongTitleInput').value = '';
             document.getElementById('customSongNotesInput').value = '';
@@ -3535,6 +3583,7 @@
         }
 
         function saveCustomSongFromForm(andPlay = false) {
+            stopCustomSongPreview();
             const titleInput = document.getElementById('customSongTitleInput').value.trim() || '我的自訂簡譜';
             const rawNotes = document.getElementById('customSongNotesInput').value.trim();
             const parsedNotes = parseJianpuString(rawNotes);
@@ -4004,7 +4053,6 @@
                 state.uploadedSheetPages = [];
                 renderUploadedSheetPagesUI();
             });
-            bindSafariButton('runAiOcrBtn', runAiMultiPageOcr);
             bindSafariButton('runLocalLogicOcrBtn', runLocalLogicSheetRecognition);
             document.getElementById('localOcrPageSelect').addEventListener('change', event => {
                 renderLocalSheetDebug(Number(event.target.value));
@@ -4060,15 +4108,25 @@
                 document.getElementById('customSongModal').classList.remove('hidden');
                 document.getElementById('customSongModal').classList.add('flex');
             });
-            bindSafariButton('closeCustomSongBtn', () => document.getElementById('customSongModal').classList.add('hidden'));
+            bindSafariButton('closeCustomSongBtn', () => {
+                stopCustomSongPreview();
+                document.getElementById('customSongModal').classList.add('hidden');
+            });
+            bindSafariButton('previewCustomSongBtn', toggleCustomSongPreview);
+            document.getElementById('customSongNotesInput').addEventListener('input', () => {
+                stopCustomSongPreview();
+                document.getElementById('previewCustomSongStatus').textContent = '';
+            });
             bindSafariButton('newCustomSongResetBtn', resetCustomSongForm);
             bindSafariButton('deleteCustomSongBtn', deleteCustomSongFromForm);
 
             bindSafariButton('fillSampleCanonBtn', () => {
+                stopCustomSongPreview();
                 document.getElementById('customSongTitleInput').value = '帕海貝爾《卡農 Canon》雙手精華';
                 document.getElementById('customSongNotesInput').value = BUILTIN_CUSTOM_PRESETS.custom_preset_canon_full.rawJianpu;
             });
             bindSafariButton('fillSampleEliseBtn', () => {
+                stopCustomSongPreview();
                 document.getElementById('customSongTitleInput').value = '貝多芬《致愛麗絲》主題';
                 document.getElementById('customSongNotesInput').value = BUILTIN_CUSTOM_PRESETS.custom_preset_elise_full.rawJianpu;
             });

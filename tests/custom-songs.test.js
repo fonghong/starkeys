@@ -23,12 +23,12 @@ function harness(storage = new Map()) {
     let confirmed = false;
     let renders = 0;
     const context = vm.createContext({
-        state, SONGS: songs, BUILTIN_CUSTOM_PRESETS: { custom_preset: preset }, LEGACY_BUILTIN_PRESETS: {}, PREVIOUS_REVIEWED_PRESETS: {},
+        state, SONGS: songs, BUILTIN_CUSTOM_PRESETS: { custom_preset: preset }, LEGACY_BUILTIN_PRESETS: {}, PREVIOUS_REVIEWED_PRESETS: {}, PREVIOUS_LYRICS_PRESETS: {},
         localStorage: { setItem: (key, value) => storage.set(key, value), getItem: key => storage.get(key) || null },
         document: { getElementById: id => elements[id] }, window: { confirm: () => confirmed },
         PianoCurriculum: { isUnmodifiedPreset: () => false, migrateProfile() {} },
         loadSong: key => { loaded.push(key); state.currentSongKey = key; },
-        renderSavedCustomSongsList: () => { renders++; }, console
+        renderSavedCustomSongsList: () => { renders++; }, stopCustomSongPreview() {}, console
     });
     vm.runInContext(`
         const LOCAL_STORAGE_THEME_KEY = 'starkeys_theme_v2';
@@ -84,4 +84,58 @@ test('resetting editor hides delete action without removing a song', () => {
     h.context.resetCustomSongForm();
     assert.ok(h.songs.custom_123);
     assert.equal(h.elements.deleteCustomSongBtn.hidden, true);
+});
+
+test('unsaved notes can be previewed with rests and durations, then stopped or edited', () => {
+    const timers = new Map();
+    const played = [];
+    const makeElement = () => ({
+        value: '', textContent: '', children: [], attributes: {},
+        classList: { values: new Set(), add(value) { this.values.add(value); }, remove(value) { this.values.delete(value); }, toggle(value, on) { if (on) this.add(value); else this.remove(value); }, contains(value) { return this.values.has(value); } },
+        setAttribute(name, value) { this.attributes[name] = value; },
+        removeAttribute(name) { delete this.attributes[name]; },
+        replaceChildren() { this.children = []; }, append(child) { this.children.push(child); },
+        addEventListener(name, handler) { this[name] = handler; },
+        scrollIntoView() {}, focus() {},
+        setSelectionRange(start, end) { this.selectionStart = start; this.selectionEnd = end; }
+    });
+    const elements = Object.fromEntries(['customSongNotesInput', 'previewCustomSongBtn', 'previewCustomSongStatus', 'previewCustomSongTrack'].map(id => [id, makeElement()]));
+    let nextTimer = 0;
+    const context = vm.createContext({
+        document: { getElementById: id => elements[id], createElement: makeElement, createTextNode: text => ({ textContent: text }) },
+        parseJianpuString: raw => raw.split(/\s+/).filter(Boolean).map(token => ({
+            midi: Number(token[0]) + 60, dur: token.endsWith('-') ? 2 : 1, isRest: token[0] === '0'
+        })),
+        playPianoTone: (...args) => { played.push(args); return () => {}; },
+        setTimeout: (callback, ms) => { const id = ++nextTimer; timers.set(id, { callback, ms }); return id; },
+        clearTimeout: id => timers.delete(id)
+    });
+    vm.runInContext(`let customSongPreviewTimer = null; let customSongPreviewStopTone = null; ${source('stopCustomSongPreview')} ${source('highlightCustomSongPreviewToken')} ${source('toggleCustomSongPreview')}`, context);
+    elements.customSongNotesInput.value = '1 0\n2- 2-';
+    context.toggleCustomSongPreview();
+    const tokenButtons = elements.previewCustomSongTrack.children.filter(child => child.type === 'button');
+    assert.deepEqual(tokenButtons.map(button => button.textContent), ['1', '0', '2-', '2-']);
+    assert.ok(tokenButtons[0].classList.contains('bg-amber-400'));
+    assert.deepEqual(played, [[61, 0.65, true]]);
+    assert.equal([...timers.values()][0].ms, 650);
+    let [id, timer] = [...timers][0]; timers.delete(id); timer.callback();
+    assert.equal(played.length, 1);
+    assert.ok(tokenButtons[1].classList.contains('bg-amber-400'));
+    assert.ok(!tokenButtons[0].classList.contains('bg-amber-400'));
+    [id, timer] = [...timers][0]; timers.delete(id); timer.callback();
+    assert.deepEqual(played[1], [62, 1.3, true]);
+    assert.ok(tokenButtons[2].classList.contains('bg-amber-400'));
+    context.toggleCustomSongPreview();
+    assert.equal(timers.size, 0);
+    assert.ok(!elements.previewCustomSongTrack.classList.contains('hidden'));
+    tokenButtons[3].click();
+    assert.ok(tokenButtons[3].classList.contains('bg-amber-400'));
+    assert.equal(elements.customSongNotesInput.selectionStart, 7);
+    assert.equal(elements.customSongNotesInput.selectionEnd, 9);
+    assert.equal(elements.previewCustomSongBtn.textContent, '▶ 試聽簡譜');
+    context.stopCustomSongPreview();
+    assert.ok(elements.previewCustomSongTrack.classList.contains('hidden'));
+    elements.customSongNotesInput.value = '';
+    context.toggleCustomSongPreview();
+    assert.match(elements.previewCustomSongStatus.textContent, /有效簡譜/);
 });

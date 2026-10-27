@@ -23,7 +23,7 @@ function recognized(...rows) {
     return { staves, notes, tokens: notes.map(note => note.token), unsupported: 0 };
 }
 
-function harness(results = [], { onYield, fetch } = {}) {
+function harness(results = [], { onYield } = {}) {
     const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]));
     const elements = new Map();
     const createdCanvases = [];
@@ -66,7 +66,8 @@ function harness(results = [], { onYield, fetch } = {}) {
             }
         },
         setTimeout(callback) { queueMicrotask(() => { onYield?.(state); callback(); }); },
-        fetch: fetch || (() => { throw new Error('Local recognition must not call fetch'); }),
+        fetch: () => { throw new Error('Local recognition must not call fetch'); },
+        stopCustomSongPreview() {},
         LocalSheetRecognition: {
             recognize() {
                 const result = results[calls++];
@@ -127,8 +128,7 @@ test('inline lyrics and four rest durations preserve token alignment and hand ov
 test('local multi-page import keeps staff order, original resolution, debug pages and existing title', async () => {
     const h = harness([recognized(['1', '2'], ["5'--"]), recognized(['3/2'])]);
     const run = h.context.runLocalLogicSheetRecognition();
-    assert.ok(h.element('runAiOcrBtn').disabled);
-    await h.context.runAiMultiPageOcr();
+    assert.ok(h.element('runLocalLogicOcrBtn').disabled);
     await h.context.runLocalLogicSheetRecognition();
     await run;
     assert.equal(h.calls(), 2);
@@ -138,8 +138,8 @@ test('local multi-page import keeps staff order, original resolution, debug page
     assert.equal(h.element('localOcrPageSelect').children.length, 2);
     h.context.renderLocalSheetDebug(1);
     assert.equal(h.element('localOcrDebugCanvas').getContext().image, h.state.uploadedSheetPages[1].imgElement);
-    assert.equal(h.element('runAiOcrBtn').disabled, false);
     assert.equal(h.element('runLocalLogicOcrBtn').disabled, false);
+    assert.equal(h.element('sheetOcrIntro').open, true);
 });
 
 test('large pages are capped at 1800px without using compressed preview', async () => {
@@ -188,27 +188,15 @@ test('upload changes clear old debug pages and status but preserve transcription
     assert.ok(h.element('localOcrDebugCanvas').classList.contains('hidden'));
     assert.equal(h.element('sheetOcrStatusText').textContent, '');
     assert.equal(h.element('customSongNotesInput').value, '1');
-    assert.ok(h.element('runAiOcrBtn').disabled);
+    assert.ok(h.element('runLocalLogicOcrBtn').disabled);
+    assert.equal(h.element('sheetOcrIntro').open, false);
 });
 
-test('AI failure awaits local fallback and restores both buttons (network mocked)', async () => {
-    const h = harness([recognized(['1'])], { fetch: async () => { throw new Error('Offline'); } });
-    const run = h.context.runAiMultiPageOcr();
-    await h.context.runLocalLogicSheetRecognition();
-    await run;
-    assert.equal(h.calls(), 1);
-    assert.equal(h.element('customSongNotesInput').value, '1');
-    assert.equal(h.element('runAiOcrBtn').disabled, false);
-});
-
-test('AI response cannot overwrite notes after pages change (network mocked)', async () => {
-    let respond;
-    const h = harness([recognized(['1'])], { fetch: () => new Promise(resolve => { respond = resolve; }) });
-    const run = h.context.runAiMultiPageOcr();
-    h.state.uploadedSheetPages = [];
-    respond({ ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: '{"jianpu":"2"}' }] } }] }) });
-    await run;
-    assert.equal(h.element('customSongNotesInput').value, 'old notes');
-    assert.equal(h.calls(), 0);
-    assert.ok(h.element('runAiOcrBtn').disabled);
+test('OCR exposes only local recognition and keeps introduction collapsed until images are added', () => {
+    assert.doesNotMatch(html, /runAiOcrBtn|runAiMultiPageOcr|generativelanguage\.googleapis\.com/);
+    assert.match(html, /<details id="sheetOcrIntro"/);
+    assert.doesNotMatch(html, /<details id="sheetOcrIntro"[^>]*\bopen\b/);
+    const h = harness([recognized(['1'])]);
+    h.context.renderUploadedSheetPagesUI();
+    assert.equal(h.element('sheetOcrIntro').open, true);
 });
