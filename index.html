@@ -17,6 +17,7 @@
 
     <title>星光琴院 StarKeys — 入門至初中階互動鋼琴學堂</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         html, body {
@@ -45,7 +46,41 @@
             pointer-events: none;
         }
 
-        html.light body { background-color: #f1f5f9; color: #0f172a; }
+        html.dark { color-scheme: dark; }
+        html.light { color-scheme: light; }
+
+        /* Shared utility palette also covers cards and status badges created after a theme change.
+           Piano keys and modal backdrops intentionally retain their physical/dimming colours. */
+        html.light :where(.bg-slate-900, .bg-slate-950):not(:where(#pianoKeyboard, #pianoKeyboard *)) { background-color: #ffffff !important; }
+        html.light :where([class~="bg-slate-950/40"], [class~="bg-slate-950/50"], [class~="bg-slate-950/60"], [class~="bg-slate-950/70"], [class~="bg-slate-950/80"], [class~="bg-slate-950/90"]) { background-color: #f8fafc !important; }
+        html.light :where(.bg-slate-800):not(:where(#pianoKeyboard *)) { background-color: #e2e8f0 !important; }
+        html.light :where(.bg-slate-700, [class~="bg-slate-700/30"], [class~="bg-slate-700/40"]) { background-color: #cbd5e1 !important; }
+        html.light :where([class~="bg-indigo-950/30"], [class~="bg-indigo-950/40"], [class~="bg-indigo-950/80"]) { background-color: #eef2ff !important; }
+        html.light :where([class~="bg-blue-950/40"]) { background-color: #eff6ff !important; }
+        html.light :where(.bg-emerald-950, [class~="bg-emerald-950/40"]) { background-color: #ecfdf5 !important; }
+        html.light :where([class~="bg-red-950/40"]) { background-color: #fef2f2 !important; }
+        html.light :where(.border-slate-600, .border-slate-700, .border-slate-800, [class~="border-slate-800/60"], [class~="border-slate-800/80"]):not(:where(#pianoKeyboard, #pianoKeyboard *)) { border-color: #cbd5e1 !important; }
+        html.light :where(.text-slate-100, .text-slate-200, .text-slate-300):not(:where(#pianoKeyboard *)) { color: #334155 !important; }
+        html.light :where(.theme-modal) :where(h3, h4, input, select, .theme-text-main) { color: #0f172a !important; }
+        html.light :where(.text-slate-400, .text-slate-500):not(:where(#pianoKeyboard *)) { color: #475569 !important; }
+        html.light :where(.text-amber-300, .text-amber-400, .text-amber-500):not(:where(#pianoKeyboard *)) { color: #92400e !important; }
+        html.light :where(.text-blue-200, .text-blue-300, .text-blue-400, .text-blue-500):not(:where(#pianoKeyboard *)) { color: #1d4ed8 !important; }
+        html.light :where(.text-indigo-200, .text-indigo-300, .text-indigo-500) { color: #4338ca !important; }
+        html.light :where(.text-emerald-300, .text-emerald-400, .text-emerald-500):not(:where(#pianoKeyboard *)) { color: #065f46 !important; }
+        html.light .text-orange-500 { color: #9a3412 !important; }
+        html.light :where(.text-purple-300, .text-purple-400):not(:where(#pianoKeyboard *)) { color: #7e22ce !important; }
+        html.light :where(.text-cyan-300, .text-cyan-400) { color: #0e7490 !important; }
+        html.light :where(.text-red-300, .text-red-400) { color: #b91c1c !important; }
+        html.light :where(input, textarea)::placeholder { color: #64748b; opacity: 1; }
+        html.light :where(#courseMapList, #achievementsGrid) > .theme-locked { opacity: 1; border-style: dashed; }
+        html.light :where(input, select, textarea) { accent-color: #4f46e5; }
+        html.light :where(input, select, textarea):focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+        html.light :where(.hover\:bg-slate-700, .hover\:bg-slate-800):hover:not(:where(#pianoKeyboard *)) { background-color: #cbd5e1 !important; }
+        html.light :where(.hover\:text-white):hover { color: #0f172a !important; }
+        html.light :where(.hover\:border-blue-500):hover { border-color: #3b82f6 !important; }
+        html.light :where([class~="hover:border-purple-500/50"]):hover { border-color: #a855f7 !important; }
+
+        html.light body { background-color: #f1f5f9 !important; color: #0f172a; }
         html.light header, html.light section { background-color: #ffffff !important; border-color: #cbd5e1 !important; }
         html.light .theme-card { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
         html.light .theme-surface { background-color: #f8fafc !important; border-color: #cbd5e1 !important; color: #1e293b !important; }
@@ -54,6 +89,45 @@
         html.light #sheetContainerBox { background-color: #fffbeb !important; border-color: #94a3b8 !important; }
         html.light .theme-badge-overlay { background-color: rgba(255, 255, 255, 0.92) !important; border-color: #cbd5e1 !important; color: #1e293b !important; }
         html.light .theme-modal { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+
+        .theme-surface.secondary-control {
+            --control-fill: rgba(124, 137, 180, 0.18);
+            --control-hover: rgba(144, 158, 204, 0.28);
+            --control-pressed: rgba(124, 137, 180, 0.12);
+            --control-border: #7c89ad;
+            --control-highlight: rgba(224, 231, 255, 0.12);
+            background-color: var(--control-fill) !important;
+            background-image: linear-gradient(180deg, var(--control-highlight), transparent);
+            border: 1px solid var(--control-border) !important;
+            color: #e2e8f0 !important;
+            box-shadow: inset 0 1px 0 var(--control-highlight), 0 2px 6px #0002;
+            min-width: 44px;
+            min-height: 44px;
+            transition: background-color 150ms ease, box-shadow 150ms ease, transform 100ms ease;
+        }
+        html.light .theme-surface.secondary-control {
+            --control-fill: #e8edf5;
+            --control-hover: #dce4f1;
+            --control-pressed: #ced9ea;
+            --control-border: #7c89a3;
+            --control-highlight: rgba(255, 255, 255, 0.6);
+            color: #334155 !important;
+        }
+        @media (hover: hover) {
+            .theme-surface.secondary-control:hover {
+                background-color: var(--control-hover) !important;
+                box-shadow: inset 0 1px 0 var(--control-highlight), 0 0 8px #818cf81a;
+            }
+        }
+        .theme-surface.secondary-control:active {
+            background-color: var(--control-pressed) !important;
+            box-shadow: inset 0 2px 4px #0002;
+            transform: scale(0.97);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .theme-surface.secondary-control { transition: none; }
+            .theme-surface.secondary-control:active { transform: none; }
+        }
 
         .white-key {
             transition: transform 0.06s ease, background-color 0.1s ease, box-shadow 0.1s ease;
@@ -122,6 +196,34 @@
 
         body.immersive-mode #topStatsRow { display: none !important; }
 
+        header button, header summary, .keyboard-tools button { min-width: 44px; min-height: 44px; }
+        .control-menu > summary { display: flex; align-items: center; justify-content: center; padding: 0 12px; border: 1px solid #64748b; border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: 700; list-style: none; }
+        .control-menu > summary::-webkit-details-marker { display: none; }
+        .control-menu[open] > summary { border-color: #818cf8; }
+        .control-panel { position: absolute; top: 100%; right: 8px; z-index: 50; display: flex; flex-wrap: wrap; gap: 8px; width: min(420px, calc(100vw - 16px)); max-height: 55dvh; overflow-y: auto; padding: 16px; border: 1px solid #64748b; border-radius: 16px; box-shadow: 0 12px 32px #0006; }
+        .control-panel h2 { width: 100%; font-size: 12px; font-weight: 700; }
+        .control-panel button { flex-grow: 1; justify-content: center; }
+        .control-menu:not([open]) > .control-panel { display: none; }
+        button:focus-visible, summary:focus-visible, input:focus-visible { outline: 3px solid #f59e0b; outline-offset: 3px; }
+        .toggle-pill { position: relative; cursor: pointer; }
+        .toggle-pill input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+        .toggle-pill > span { display: flex; align-items: center; justify-content: center; gap: 4px; min-height: 44px; padding: 0 12px; border-radius: 999px; border: 2px solid #64748b; background: #1e293b; color: #cbd5e1; font-size: 12px; font-weight: 700; }
+        .toggle-pill input:checked + span { background: #312e81; border-color: #818cf8; color: #eef2ff; }
+        .toggle-pill input:focus-visible + span { outline: 3px solid #f59e0b; outline-offset: 3px; }
+        .toggle-pill input:checked + span .toggle-off, .toggle-pill input:not(:checked) + span .toggle-on { display: none; }
+        html.light .toggle-pill > span { background: #f1f5f9; color: #334155; }
+        html.light .toggle-pill input:checked + span { background: #e0e7ff; color: #312e81; border-color: #6366f1; }
+        #sheetContainerBox { display: flex; flex-direction: column; min-height: 160px; }
+        .sheet-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; padding: 4px 12px; flex-shrink: 0; border-bottom: 1px solid #64748b; }
+        .sheet-toolbar-labels, .sheet-toolbar-actions, .sheet-zoom { flex: 1 1 auto; }
+        .sheet-toolbar-actions { display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .sheet-toolbar-actions button { min-height: 44px; }
+        .sheet-zoom { display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 12px; min-height: 44px; }
+        #sheetZoom { width: clamp(100px, 16vw, 180px); height: 44px; accent-color: #6366f1; }
+        #sheetZoomValue { min-width: 4ch; }
+        #sheetViewport { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; }
+        #sheetViewport #sheetCanvas { touch-action: pan-y !important; }
+
         /* Safari 頂部按鈕觸控修復：確保不會被橫向捲軸或系統手勢吞掉點擊 */
         header, header button {
             touch-action: manipulation;
@@ -168,8 +270,7 @@
                 </button>
             </div>
 
-            <!-- 中：關卡選擇 + 簡譜庫 + 和弦室 + 模式切換 (移除會卡死 Safari 觸控的 overflow-x-auto) -->
-            <div class="flex flex-wrap items-center gap-1 justify-center py-0.5">
+            <nav aria-label="學習捷徑" class="flex flex-wrap items-center gap-2 py-0.5">
                 <button type="button" id="openCourseMapBtn" class="theme-surface flex items-center gap-1 bg-indigo-600/20 hover:bg-indigo-600/30 active:scale-95 text-indigo-500 dark:text-indigo-200 border border-indigo-500/40 font-bold text-[11px] px-2.5 py-1.5 rounded-xl transition max-w-[175px] sm:max-w-[210px] shrink-0">
                     <span class="shrink-0">🗺️</span>
                     <span id="currentStageBtnLabel" class="truncate">第 1 關：認識中央 C</span>
@@ -178,14 +279,18 @@
 
                 <button type="button" id="openCustomSongModalBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0">
                     <span>✏️</span>
-                    <span class="hidden sm:inline">簡譜庫</span>
+                    <span>簡譜庫</span>
                 </button>
 
                 <button type="button" id="openChordDojoBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-purple-400 border border-purple-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="和弦、琶音與音階特訓室">
                     <span>🎹</span>
-                    <span class="hidden md:inline">和弦/音階</span>
+                    <span>和弦/音階</span>
                 </button>
-
+            </nav>
+            <details class="control-menu" name="top-controls">
+                <summary class="theme-surface">練習設定 ▾</summary>
+                <div class="control-panel theme-card bg-slate-900">
+                    <h2>練習設定</h2>
                 <button type="button" id="practiceModeBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-cyan-400 border border-cyan-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換練習模式：跟彈等待 / 節奏推進 / 視奏考核">
                     <span id="practiceModeIcon">✋</span>
                     <span id="practiceModeText">跟彈模式</span>
@@ -206,43 +311,27 @@
                     <span>拍子</span>
                 </button>
 
-                <button type="button" id="loopToggleBtn" class="theme-surface hidden lg:flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="循環重複練習目前呢 8 粒音">
+                <button type="button" id="loopToggleBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="循環重複練習目前呢 8 粒音">
                     <span>🔁</span>
                     <span id="loopBtnText">循環: 關</span>
                 </button>
-            </div>
+                    <h2>收音設定</h2>
+                    <button type="button" id="openMicSetupBtn" class="theme-surface flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 rounded-xl" title="Mic 收音設定與校準">
+                        <span id="micDot" class="w-2 h-2 rounded-full bg-slate-500 shrink-0"></span>
+                        <span>🎛️ Mic 設定</span>
+                        <span class="w-10 h-2 bg-slate-700 rounded-full overflow-hidden"><span id="miniMicLevelBar" class="block h-full bg-emerald-400 w-0"></span></span>
+                        <span id="detectedPitchText" class="text-[10px]">🎛️校準</span>
+                    </button>
+                </div>
+            </details>
 
-            <!-- 右：Mic 收音 + 示範 + 重設 + 主題 + 全螢幕 -->
-            <div class="flex items-center gap-1 shrink-0">
-                <button type="button" id="openMicSetupBtn" class="theme-surface flex items-center gap-1.5 bg-slate-950 hover:bg-slate-800 active:scale-95 border border-slate-700 px-2 py-1.5 rounded-xl transition cursor-pointer" title="打開 Mic 收音視覺化診斷與靈敏度校準">
-                    <span id="micDot" class="w-2 h-2 rounded-full bg-slate-500 shrink-0"></span>
-                    <div class="w-10 h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700 shrink-0">
-                        <div id="miniMicLevelBar" class="h-full bg-emerald-400 w-0 transition-all duration-75"></div>
-                    </div>
-                    <span id="detectedPitchText" class="w-[62px] shrink-0 text-[10px] font-mono text-slate-300 truncate">🎛️校準</span>
-                </button>
-
+            <div role="group" aria-label="即時操作與顯示" class="flex items-center gap-2 flex-wrap">
                 <button type="button" id="toggleMicBtn" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-xl shadow flex items-center gap-1 transition shrink-0">
                     <span id="micBtnIcon">🎙️</span>
                     <span id="micBtnText">開 Mic</span>
                 </button>
-
-                <button type="button" id="demoPlayBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-500 dark:text-amber-300 border border-slate-700 font-semibold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="聽電腦示範">
-                    <span>▶️</span>
-                    <span id="demoBtnText" class="hidden md:inline">示範</span>
-                </button>
-
-                <button type="button" id="resetSongBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 border border-slate-700 font-semibold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="重頭開始">
-                    <span>🔄</span>
-                </button>
-
-                <button type="button" id="themeToggleBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-400 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換光亮 / 深色主題">
-                    <span id="themeIcon">☀️</span>
-                </button>
-
-                <button type="button" id="fullscreenToggleBtn" class="theme-surface bg-slate-800 hover:bg-slate-700 active:scale-95 text-indigo-400 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換全螢幕模式">
-                    <span id="fullscreenIcon">⛶</span>
-                </button>
+                <button type="button" id="themeToggleBtn" class="theme-surface secondary-control bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 px-3 rounded-xl text-[11px] font-semibold transition shrink-0" title="切換光亮 / 深色主題"><span id="themeIcon">☀️</span> 主題</button>
+                <button type="button" id="fullscreenToggleBtn" class="theme-surface secondary-control bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 px-3 rounded-xl text-[11px] font-semibold transition shrink-0" title="切換全螢幕模式"><span id="fullscreenIcon">⛶</span> 全螢幕</button>
             </div>
         </div>
     </header>
@@ -307,9 +396,10 @@
 
         <!-- 高低音雙行大譜表與簡譜橫向捲動視窗 -->
         <div id="sheetContainerBox" class="relative bg-slate-900 border-2 border-slate-700 rounded-2xl overflow-hidden shadow-xl flex-1 min-h-[125px] w-full transition-colors duration-200">
-            <div class="absolute top-2 left-3 z-10 flex items-center gap-1.5 pointer-events-none flex-wrap">
+            <div class="sheet-toolbar">
+                <div class="sheet-toolbar-labels flex items-center gap-1.5 flex-wrap">
                 <span class="theme-badge-overlay px-2 py-0.5 rounded-md bg-slate-950/85 border border-slate-700 text-[10px] text-slate-200 font-semibold shadow-sm">
-                    🎼 高低音雙行大譜表 (Grand Staff) + 簡譜 + 指法
+                    🎼 大譜表 · 簡譜 · 指法
                 </span>
                 <span id="stageBadgeGoal" class="hidden md:inline-block px-2 py-0.5 rounded-md bg-indigo-950/80 border border-indigo-500/30 text-[10px] text-indigo-300 font-medium">
                     🎯 入門至初中階
@@ -317,16 +407,25 @@
                 <span id="transposeActiveBadge" class="hidden px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[10px] text-amber-300 font-bold">
                     移調: 0
                 </span>
+                </div>
+                <div role="group" aria-label="譜表操作" class="sheet-toolbar-actions">
+                    <button type="button" id="demoPlayBtn" class="theme-surface secondary-control bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-500 dark:text-amber-300 border border-slate-700 font-semibold text-[11px] px-3 rounded-xl transition shrink-0" title="聽電腦示範">
+                        <span>▶️</span> <span id="demoBtnText">示範</span>
+                    </button>
+                    <button type="button" id="resetSongBtn" class="theme-surface secondary-control bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 border border-slate-700 font-semibold text-[11px] px-3 rounded-xl transition shrink-0" title="重頭開始">
+                        <span>🔄</span> <span>重置</span>
+                    </button>
+                </div>
+                <label class="sheet-zoom theme-text-main" for="sheetZoom">
+                    譜表大小
+                    <input id="sheetZoom" type="range" min="100" max="200" step="10" value="100" aria-describedby="sheetZoomHint">
+                    <output id="sheetZoomValue" for="sheetZoom">100%</output>
+                </label>
+                <span id="sheetZoomHint" class="sr-only">最高兩倍；放大後可在譜區上下捲動，並跟隨目前音符。</span>
             </div>
-
-            <div class="theme-badge-overlay absolute top-2 right-3 z-10 hidden sm:flex items-center gap-2.5 bg-slate-950/85 border border-slate-700 px-2.5 py-0.5 rounded-md text-[10px] pointer-events-none shadow-sm">
-                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>右手高音(𝄞)</span>
-                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500 inline-block"></span>左手低音(𝄢)</span>
-                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>彈啱</span>
-                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>彈錯</span>
+            <div id="sheetViewport" tabindex="0" role="region" aria-label="琴譜，可上下捲動">
+                <canvas id="sheetCanvas" class="w-full block" role="img" aria-label="高低音大譜表；右手藍色、左手紫色，指法及音名見練習提示"></canvas>
             </div>
-
-            <canvas id="sheetCanvas" class="w-full h-full block"></canvas>
         </div>
     </main>
 
@@ -339,20 +438,20 @@
                     <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span>C4~G5 右手高音(𝄞)</span>
                     <span class="hidden lg:inline text-slate-500">| 觸控點擊、真琴 Mic 收音、鍵盤 (Z~M / A~L) 或 USB MIDI</span>
                 </div>
-                <div class="flex items-center gap-2 text-[11px] shrink-0">
+                <div class="keyboard-tools flex flex-wrap items-center gap-2 text-[11px]">
                     <div class="theme-surface flex items-center gap-1 bg-slate-950 border border-slate-800 px-1.5 py-0.5 rounded-lg text-[10px]">
                         <span class="text-slate-400">移調:</span>
                         <button id="transposeDownBtn" class="px-1.5 hover:bg-slate-800 rounded text-amber-400 font-bold" title="降半音 (-1)">-</button>
-                        <button id="transposeValText" class="font-mono font-bold text-white min-w-[24px] text-center hover:text-amber-300" title="點擊歸零 (0)">0</button>
+                        <button id="transposeValText" class="theme-text-main font-mono font-bold text-white min-w-[24px] text-center hover:text-amber-300" title="點擊歸零 (0)">0</button>
                         <button id="transposeUpBtn" class="px-1.5 hover:bg-slate-800 rounded text-amber-400 font-bold" title="升半音 (+1)">+</button>
                     </div>
-                    <label class="flex items-center gap-1 text-slate-300 cursor-pointer" title="開啟延音踏板效果">
-                        <input type="checkbox" id="sustainPedalToggle" checked class="rounded accent-indigo-500">
-                        <span class="text-[10px] sm:text-[11px]">✨延音踏板</span>
+                    <label class="toggle-pill" title="開啟延音踏板效果">
+                        <input type="checkbox" role="switch" id="sustainPedalToggle" aria-label="延音踏板" checked>
+                        <span>✨ 延音: <span class="toggle-on">開</span><span class="toggle-off">關</span></span>
                     </label>
-                    <label class="flex items-center gap-1 text-slate-300 cursor-pointer">
-                        <input type="checkbox" id="playSynthToggle" checked class="rounded accent-blue-500">
-                        <span class="text-[10px] sm:text-[11px]">撳鍵發聲</span>
+                    <label class="toggle-pill">
+                        <input type="checkbox" role="switch" id="playSynthToggle" aria-label="撳鍵發聲" checked>
+                        <span>♪ 撳鍵發聲: <span class="toggle-on">開</span><span class="toggle-off">關</span></span>
                     </label>
                     <span id="midiStatusBadge" class="hidden md:inline-block px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[10px]">MIDI: 待機</span>
                 </div>
@@ -394,7 +493,7 @@
             </div>
 
             <div class="flex gap-2.5">
-                <button id="replayStageBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl border border-slate-700 transition text-sm">
+                <button id="replayStageBtn" class="theme-text-main flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl border border-slate-700 transition text-sm">
                     🔄 再練一次
                 </button>
                 <button id="nextStageBtn" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 rounded-xl shadow-lg transition text-sm">
@@ -1894,7 +1993,8 @@
                 vCtx.clearRect(0, 0, w, h);
 
                 // 中線
-                vCtx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
+                const isLight = state.theme === 'light';
+                vCtx.strokeStyle = isLight ? '#94a3b8' : 'rgba(148, 163, 184, 0.2)';
                 vCtx.lineWidth = 1;
                 vCtx.beginPath();
                 vCtx.moveTo(0, h / 2);
@@ -1902,7 +2002,9 @@
                 vCtx.stroke();
 
                 // 波形線：通過純度係綠色，被防人聲攔截係紫色，未過門檻係黃色
-                vCtx.strokeStyle = (rms >= minRms && !rejectReason) ? '#34d399' : (rejectReason && rms >= minRms ? '#c084fc' : '#fbbf24');
+                vCtx.strokeStyle = (rms >= minRms && !rejectReason)
+                    ? (isLight ? '#047857' : '#34d399')
+                    : (rejectReason && rms >= minRms ? (isLight ? '#7e22ce' : '#c084fc') : (isLight ? '#92400e' : '#fbbf24'));
                 vCtx.lineWidth = 2;
                 vCtx.beginPath();
                 const step = Math.max(1, Math.floor(buf.length / w));
@@ -2749,39 +2851,158 @@
         const canvas = document.getElementById('sheetCanvas');
         const ctx = canvas.getContext('2d');
 
+        let sheetZoom = 1;
+        let sheetLayout = null;
+        let sheetLayoutNotes = null;
+        let sheetLayoutTranspose = null;
+        let sheetFollowIndex = null;
+
+        function buildSheetLayout(notes) {
+            const staves = {};
+            let cursor = 12;
+            for (const hand of ['R', 'L']) {
+                const entries = notes.filter(note => (note.hand === 'L' ? 'L' : 'R') === hand);
+                const spacing = entries.length ? 11 : 6;
+                const top = hand === 'L' ? 0 : -spacing * 4;
+                const bottom = top + spacing * 4;
+                let min = top - 24;
+                let max = bottom;
+                for (const note of entries) {
+                    const y = -(note.step - (hand === 'L' ? -2 : 2)) * spacing / 2;
+                    min = Math.min(min, y - 50);
+                    max = Math.max(max, y + 8);
+                }
+                const origin = cursor - min;
+                staves[hand] = {
+                    spacing, opacity: entries.length ? 1 : 0.3, origin,
+                    top: top + origin, bottom: bottom + origin,
+                    textY: max + origin + 16
+                };
+                cursor = max + origin + (entries.length ? 42 : 12);
+            }
+            const positions = notes.map(note => {
+                const staff = staves[note.hand === 'L' ? 'L' : 'R'];
+                const y = staff.origin - (note.step - (note.hand === 'L' ? -2 : 2)) * staff.spacing / 2;
+                return { y, fingerY: Math.min(y - 42, staff.top - 16), textY: staff.textY };
+            });
+            return { staves, positions, height: cursor + 8 };
+        }
+
+        function getSheetFollowScroll(position, zoom, viewportHeight, contentHeight, currentScroll) {
+            const top = (position.fingerY - 12) * zoom;
+            const noteBottom = (position.y + 12) * zoom;
+            const bottom = (position.textY + 22) * zoom;
+            let next = currentScroll;
+            if (top < currentScroll || bottom > currentScroll + viewportHeight) {
+                next = bottom - top <= viewportHeight
+                    ? (top + bottom - viewportHeight) / 2
+                    : (top + noteBottom - viewportHeight) / 2;
+            }
+            return Math.max(0, Math.min(Math.max(0, contentHeight - viewportHeight), next));
+        }
+
         function resizeSheetCanvas() {
-            const box = document.getElementById('sheetContainerBox');
-            if (!box) return;
+            const viewport = document.getElementById('sheetViewport');
+            if (!viewport) return;
+            const width = viewport.clientWidth;
+            const height = viewport.clientHeight;
+            if (!width || !height) return;
+            const notes = SONGS[state.currentSongKey]?.notes;
+            sheetLayout = buildSheetLayout((notes || []).map(note => ({
+                hand: note.hand,
+                step: DIATONIC_STEP_FROM_C4[getTransposedMidi(note.midi)] ?? 0
+            })));
+            sheetLayoutNotes = notes;
+            sheetLayoutTranspose = state.transposeSemitones;
+            const contentHeight = Math.max(height, Math.ceil(sheetLayout.height * sheetZoom));
+            const verticalOffset = (contentHeight / sheetZoom - sheetLayout.height) / 2;
+            for (const staff of Object.values(sheetLayout.staves)) {
+                staff.origin += verticalOffset;
+                staff.top += verticalOffset;
+                staff.bottom += verticalOffset;
+                staff.textY += verticalOffset;
+            }
+            for (const position of sheetLayout.positions) {
+                position.y += verticalOffset;
+                position.fingerY += verticalOffset;
+                position.textY += verticalOffset;
+            }
             const dpr = window.devicePixelRatio || 1;
-            const rect = box.getBoundingClientRect();
-            if (rect.width === 0 || rect.height === 0) return;
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            canvas.style.height = `${contentHeight}px`;
+            canvas.width = Math.round(width * dpr);
+            canvas.height = Math.round(contentHeight * dpr);
+            ctx.setTransform(dpr * sheetZoom, 0, 0, dpr * sheetZoom, 0, 0);
+            sheetFollowIndex = null;
+        }
+
+        function setSheetZoom(value) {
+            const percent = Math.max(100, Math.min(200, Math.round((Number(value) || 100) / 10) * 10));
+            sheetZoom = percent / 100;
+            document.getElementById('sheetZoom').value = String(percent);
+            document.getElementById('sheetZoomValue').textContent = `${percent}%`;
+            resizeSheetCanvas();
+        }
+
+        function setupPracticeControls() {
+            document.getElementById('sheetZoom').addEventListener('input', event => setSheetZoom(event.target.value));
+            const menus = [...document.querySelectorAll('.control-menu')];
+            menus.forEach(menu => {
+                menu.addEventListener('toggle', () => {
+                    if (menu.open) menus.forEach(other => { if (other !== menu) other.open = false; });
+                });
+                for (const type of ['pointerup', 'touchend', 'click']) {
+                    menu.addEventListener(type, event => {
+                        if (event.target.closest('#openMicSetupBtn')) menu.open = false;
+                    });
+                }
+            });
+            document.addEventListener('pointerdown', event => {
+                menus.forEach(menu => { if (!menu.contains(event.target)) menu.open = false; });
+            });
+            document.addEventListener('keydown', event => {
+                if (event.key !== 'Escape') return;
+                menus.forEach(menu => {
+                    if (!menu.open) return;
+                    menu.open = false;
+                    menu.querySelector('summary').focus();
+                });
+            });
         }
 
         const sheetResizeObserver = new ResizeObserver(() => resizeSheetCanvas());
-        sheetResizeObserver.observe(document.getElementById('sheetContainerBox'));
+        sheetResizeObserver.observe(document.getElementById('sheetViewport'));
         window.addEventListener('resize', resizeSheetCanvas);
 
         function renderSheetMusicLoop() {
+            const song = SONGS[state.currentSongKey];
+            if (!sheetLayout || sheetLayoutNotes !== song?.notes || sheetLayoutTranspose !== state.transposeSemitones) {
+                resizeSheetCanvas();
+            }
             const rect = canvas.getBoundingClientRect();
-            const width = rect.width;
-            const height = rect.height;
+            const width = rect.width / sheetZoom;
+            const height = rect.height / sheetZoom;
+            const viewport = document.getElementById('sheetViewport');
+            if (sheetLayout && sheetFollowIndex !== state.currentNoteIndex) {
+                const position = sheetLayout.positions[state.currentNoteIndex];
+                if (position) viewport.scrollTop = getSheetFollowScroll(position, sheetZoom, viewport.clientHeight, rect.height, viewport.scrollTop);
+                sheetFollowIndex = state.currentNoteIndex;
+            }
 
-            if (width > 0 && height > 0) {
+            if (sheetLayout && width > 0 && height > 0) {
                 ctx.clearRect(0, 0, width, height);
                 const isLight = state.theme === 'light';
                 state.smoothScrollIndex += (state.currentNoteIndex - state.smoothScrollIndex) * 0.15;
 
-                const lineSpacing = Math.max(8, Math.min(11, Math.floor(height * 0.048)));
-                const trebleBottomY = height * 0.42;
-                const bassTopY = height * 0.62;
-                const bassBottomY = bassTopY + lineSpacing * 4;
-                const playheadX = Math.max(95, width * 0.20);
+                const lineSpacing = 11;
+                const treble = sheetLayout.staves.R;
+                const bass = sheetLayout.staves.L;
+                const trebleBottomY = treble.bottom;
+                const bassTopY = bass.top;
+                const bassBottomY = bass.bottom;
+                const playheadX = Math.min(width - 28, Math.max(95, width * 0.20));
                 const noteSpacing = 92;
 
-                const trebleTopY = trebleBottomY - lineSpacing * 4;
+                const trebleTopY = treble.top;
                 ctx.fillStyle = isLight ? 'rgba(241, 245, 249, 0.92)' : 'rgba(30, 41, 59, 0.55)';
                 ctx.fillRect(14, trebleTopY - lineSpacing * 0.8, width - 28, (bassBottomY - trebleTopY) + lineSpacing * 2.2);
 
@@ -2794,25 +3015,27 @@
 
                 ctx.strokeStyle = isLight ? '#1e293b' : '#94a3b8';
                 ctx.lineWidth = 1.6;
-                for (let i = 0; i < 5; i++) {
-                    const ty = trebleBottomY - i * lineSpacing;
-                    ctx.beginPath();
-                    ctx.moveTo(20, ty);
-                    ctx.lineTo(width - 20, ty);
-                    ctx.stroke();
-                    const by = bassTopY + i * lineSpacing;
-                    ctx.beginPath();
-                    ctx.moveTo(20, by);
-                    ctx.lineTo(width - 20, by);
-                    ctx.stroke();
+                for (const staff of [treble, bass]) {
+                    ctx.globalAlpha = staff.opacity;
+                    for (let i = 0; i < 5; i++) {
+                        const y = staff.top + i * staff.spacing;
+                        ctx.beginPath();
+                        ctx.moveTo(20, y);
+                        ctx.lineTo(width - 20, y);
+                        ctx.stroke();
+                    }
                 }
 
                 ctx.fillStyle = isLight ? '#0f172a' : '#e2e8f0';
-                ctx.font = `${Math.round(lineSpacing * 4.2)}px serif`;
+                ctx.textAlign = 'left';
+                ctx.font = `${Math.round(treble.spacing * 4.2)}px serif`;
                 ctx.textBaseline = 'middle';
-                ctx.fillText('𝄞', 26, trebleBottomY - lineSpacing * 1.8);
-                ctx.font = `${Math.round(lineSpacing * 3.4)}px serif`;
-                ctx.fillText('𝄢', 26, bassTopY + lineSpacing * 1.6);
+                ctx.globalAlpha = treble.opacity;
+                ctx.fillText('𝄞', 26, trebleBottomY - treble.spacing * 1.8);
+                ctx.font = `${Math.round(bass.spacing * 3.4)}px serif`;
+                ctx.globalAlpha = bass.opacity;
+                ctx.fillText('𝄢', 26, bassTopY + bass.spacing * 1.6);
+                ctx.globalAlpha = 1;
 
                 const grad = ctx.createLinearGradient(0, 10, 0, height - 10);
                 grad.addColorStop(0, 'rgba(59, 130, 246, 0.0)');
@@ -2828,7 +3051,6 @@
                 ctx.lineTo(playheadX, height - 14);
                 ctx.stroke();
 
-                const song = SONGS[state.currentSongKey];
                 if (song && song.notes) {
                     song.notes.forEach((noteItem, idx) => {
                         const x = playheadX + (idx - state.smoothScrollIndex) * noteSpacing;
@@ -2836,7 +3058,7 @@
 
                         if (idx > 0 && idx % 4 === 0) {
                             const barX = x - noteSpacing * 0.5;
-                            ctx.strokeStyle = isLight ? 'rgba(100,116,139,0.35)' : 'rgba(148,163,184,0.25)';
+                            ctx.strokeStyle = isLight ? 'rgba(100,116,139,0.35)' : '#cbd5e1';
                             ctx.lineWidth = 1.5;
                             ctx.beginPath();
                             ctx.moveTo(barX, trebleTopY);
@@ -2848,9 +3070,8 @@
                         const stepFromC4 = DIATONIC_STEP_FROM_C4[actualMidi] ?? 0;
                         const isLeft = noteItem.hand === 'L';
 
-                        const y = isLeft
-                            ? bassTopY - (stepFromC4 - (-2)) * (lineSpacing / 2)
-                            : trebleBottomY - (stepFromC4 - 2) * (lineSpacing / 2);
+                        const position = sheetLayout.positions[idx];
+                        const y = position.y;
 
                         const keyInfo = MIDI_MAP[actualMidi] || MIDI_MAP[60];
                         const isTarget = idx === state.currentNoteIndex;
@@ -2928,7 +3149,7 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillText(state.practiceMode === 'sight' ? '♪' : keyInfo.jianpu, x, y + 0.5);
 
-                        const fingerY = y - 32;
+                        const fingerY = position.fingerY;
                         ctx.beginPath();
                         ctx.arc(stemX, fingerY, 7, 0, Math.PI * 2);
                         ctx.fillStyle = isLeft ? '#9333ea' : (isTarget ? '#f59e0b' : '#1e293b');
@@ -2941,13 +3162,15 @@
                         ctx.font = 'bold 8px Inter, sans-serif';
                         ctx.fillText(isLeft ? `L${noteItem.finger}` : noteItem.finger, stemX, fingerY + 0.5);
 
-                        const textBaseY = bassBottomY + 14;
+                        const textBaseY = position.textY;
+                        const labelX = isTarget ? playheadX + 3 : x;
+                        ctx.textAlign = isTarget ? 'left' : 'center';
                         ctx.fillStyle = isTarget ? (isLeft ? '#a855f7' : '#2563eb') : (isDone ? '#059669' : (isLight ? '#334155' : '#cbd5e1'));
                         ctx.font = isTarget ? 'bold 11px Inter, sans-serif' : '600 10px Inter, sans-serif';
-                        ctx.fillText(state.practiceMode === 'sight' ? '' : keyInfo.note, x, textBaseY);
+                        ctx.fillText(state.practiceMode === 'sight' ? '' : keyInfo.note, labelX, textBaseY);
                         ctx.fillStyle = isLight ? '#64748b' : '#94a3b8';
                         ctx.font = '10px Inter, sans-serif';
-                        ctx.fillText(noteItem.lyric || '', x, textBaseY + 13);
+                        ctx.fillText(noteItem.lyric || '', labelX, textBaseY + 13);
                     });
                 }
             }
@@ -2978,7 +3201,7 @@
                 const isUnlocked = song.order <= unlockedOrder;
                 const prog = profile?.stageProgress?.[key] || { stars: 0, highScore: 0, bestAcc: 0 };
                 const card = document.createElement('div');
-                card.className = `p-3.5 rounded-2xl border-2 flex flex-col justify-between transition ${isUnlocked ? 'bg-slate-950/90 border-slate-700 hover:border-blue-500' : 'bg-slate-950/40 border-slate-800/60 opacity-60'}`;
+                card.className = `p-3.5 rounded-2xl border-2 flex flex-col justify-between transition ${isUnlocked ? 'bg-slate-950/90 border-slate-700 hover:border-blue-500' : 'theme-locked bg-slate-950/40 border-slate-800/60 opacity-60'}`;
                 card.innerHTML = `
                     <div>
                         <div class="flex items-center justify-between gap-2 mb-1">
@@ -3021,7 +3244,7 @@
                 item.className = `p-2.5 rounded-xl border transition flex items-center justify-between gap-2 ${isSelected ? 'bg-emerald-950/40 border-emerald-500/50' : 'bg-slate-900 border-slate-800'}`;
                 item.innerHTML = `
                     <div class="min-w-0 flex-1">
-                        <div class="text-xs font-extrabold text-white truncate">${song.title}</div>
+                        <div class="theme-text-main text-xs font-extrabold text-white truncate">${song.title}</div>
                         <div class="text-[10px] text-slate-400 truncate font-mono mt-0.5">${song.rawJianpu || ''} (${song.notes.length} 音)</div>
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
@@ -3091,7 +3314,7 @@
                     <div data-select-id="${prof.id}" class="select-prof-area flex items-center gap-3 min-w-0 flex-1 cursor-pointer">
                         <span class="text-2xl">${prof.avatar || '🦊'}</span>
                         <div class="min-w-0">
-                            <div class="font-bold text-sm text-white truncate">${prof.name}</div>
+                            <div class="theme-text-main font-bold text-sm text-white truncate">${prof.name}</div>
                             <div class="text-[11px] text-amber-400 font-semibold">Lv.${prof.level || 1} · ${prof.xp || 0} XP</div>
                         </div>
                     </div>
@@ -3155,11 +3378,11 @@
                 ACHIEVEMENTS_DEF.forEach(ach => {
                     const hasIt = unlockedBadges.includes(ach.id);
                     const badgeCard = document.createElement('div');
-                    badgeCard.className = `p-2.5 rounded-xl border text-left transition ${hasIt ? 'bg-amber-500/10 border-amber-500/40' : 'bg-slate-950/60 border-slate-800 opacity-45 grayscale'}`;
+                    badgeCard.className = `p-2.5 rounded-xl border text-left transition ${hasIt ? 'bg-amber-500/10 border-amber-500/40' : 'theme-locked bg-slate-950/60 border-slate-800 opacity-45 grayscale'}`;
                     badgeCard.innerHTML = `
                         <div class="flex items-center gap-1.5">
                             <span class="text-lg">${ach.icon}</span>
-                            <span class="text-xs font-extrabold text-white truncate">${ach.title}</span>
+                            <span class="theme-text-main text-xs font-extrabold text-white truncate">${ach.title}</span>
                         </div>
                         <div class="text-[10px] text-slate-400 mt-1 leading-snug">${ach.desc}</div>
                     `;
@@ -3344,7 +3567,7 @@
         document.addEventListener('touchend', (e) => {
             const now = Date.now();
             if (now - lastGlobalTouchEnd <= 320) {
-                if (!e.target.closest('.overflow-y-auto, input, textarea, select')) {
+                if (!e.target.closest('.overflow-y-auto, .control-panel, .toggle-pill, #sheetViewport, summary, input, textarea, select')) {
                     e.preventDefault();
                 }
             }
@@ -3367,6 +3590,7 @@
             loadFromLocalStorage();
             applyTheme(state.theme);
             buildVirtualKeyboard();
+            setupPracticeControls();
             resizeSheetCanvas();
             updateProfileHeaderUI();
             loadSong('stage1_middleC');
