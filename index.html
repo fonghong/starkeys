@@ -219,7 +219,7 @@
                     <div class="w-10 h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700 shrink-0">
                         <div id="miniMicLevelBar" class="h-full bg-emerald-400 w-0 transition-all duration-75"></div>
                     </div>
-                    <span id="detectedPitchText" class="text-[10px] font-mono text-slate-300 max-w-[62px] truncate">🎛️校準</span>
+                    <span id="detectedPitchText" class="w-[62px] shrink-0 text-[10px] font-mono text-slate-300 truncate">🎛️校準</span>
                 </button>
 
                 <button type="button" id="toggleMicBtn" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-xl shadow flex items-center gap-1 transition shrink-0">
@@ -2857,14 +2857,18 @@
                         const isDone = state.noteStates[idx] === 'correct';
                         const dur = noteItem.dur || 1;
 
+                        const noteHalfWidth = Math.max(9, lineSpacing * 0.82);
+                        const noteHalfHeight = lineSpacing * 0.5;
+                        const stemX = x + noteHalfWidth;
+
                         if (dur > 0.5) {
                             const barWidth = Math.min(noteSpacing * 0.82, dur * 34);
                             ctx.fillStyle = isDone ? 'rgba(16, 185, 129, 0.28)' : (isTarget ? (isLeft ? 'rgba(168, 85, 247, 0.38)' : 'rgba(59, 130, 246, 0.38)') : 'rgba(148, 163, 184, 0.18)');
                             ctx.beginPath();
                             if (typeof ctx.roundRect === 'function') {
-                                ctx.roundRect(x + 6, y - 7, barWidth, 14, 6);
+                                ctx.roundRect(stemX - 2, y - 5, barWidth, 10, 5);
                             } else {
-                                ctx.rect(x + 6, y - 7, barWidth, 14);
+                                ctx.rect(stemX - 2, y - 5, barWidth, 10);
                             }
                             ctx.fill();
                         }
@@ -2873,8 +2877,8 @@
                             ctx.strokeStyle = isTarget ? '#2563eb' : (isLight ? '#0f172a' : '#cbd5e1');
                             ctx.lineWidth = 2;
                             ctx.beginPath();
-                            ctx.moveTo(x - 18, y);
-                            ctx.lineTo(x + 18, y);
+                            ctx.moveTo(x - noteHalfWidth - 3, y);
+                            ctx.lineTo(x + noteHalfWidth + 3, y);
                             ctx.stroke();
                         }
 
@@ -2892,41 +2896,41 @@
                         }
 
                         ctx.strokeStyle = borderColor;
-                        ctx.lineWidth = 2.2;
+                        ctx.lineWidth = 1.8;
                         ctx.beginPath();
-                        ctx.moveTo(x + 11, y);
-                        ctx.lineTo(x + 11, y - 26);
+                        ctx.moveTo(stemX, y);
+                        ctx.lineTo(stemX, y - 26);
                         ctx.stroke();
                         if (dur <= 0.5) {
                             ctx.beginPath();
-                            ctx.moveTo(x + 11, y - 26);
-                            ctx.quadraticCurveTo(x + 22, y - 21, x + 18, y - 12);
+                            ctx.moveTo(stemX, y - 26);
+                            ctx.quadraticCurveTo(stemX + 11, y - 21, stemX + 7, y - 12);
                             ctx.stroke();
                         }
 
                         if (keyInfo.isBlack) {
                             ctx.fillStyle = '#f59e0b';
-                            ctx.font = 'bold 14px Inter, sans-serif';
-                            ctx.fillText('♯', x - 20, y);
+                            ctx.font = 'bold 12px Inter, sans-serif';
+                            ctx.fillText('♯', x - noteHalfWidth - 8, y);
                         }
 
                         ctx.beginPath();
-                        ctx.arc(x, y, 12, 0, Math.PI * 2);
+                        ctx.ellipse(x, y, noteHalfWidth, noteHalfHeight, -0.2, 0, Math.PI * 2);
                         ctx.fillStyle = fillColor;
                         ctx.fill();
-                        ctx.lineWidth = dur >= 2 ? 3.2 : (isTarget ? 2.8 : 1.8);
+                        ctx.lineWidth = dur >= 2 ? 2.2 : (isTarget ? 2 : 1.4);
                         ctx.strokeStyle = borderColor;
                         ctx.stroke();
 
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = 'bold 11px Inter, sans-serif';
+                        ctx.font = 'bold 8px Inter, sans-serif';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         ctx.fillText(state.practiceMode === 'sight' ? '♪' : keyInfo.jianpu, x, y + 0.5);
 
-                        const fingerY = y - 34;
+                        const fingerY = y - 32;
                         ctx.beginPath();
-                        ctx.arc(x + 11, fingerY, 8.5, 0, Math.PI * 2);
+                        ctx.arc(stemX, fingerY, 7, 0, Math.PI * 2);
                         ctx.fillStyle = isLeft ? '#9333ea' : (isTarget ? '#f59e0b' : '#1e293b');
                         ctx.fill();
                         ctx.lineWidth = 1.5;
@@ -2934,8 +2938,8 @@
                         ctx.stroke();
 
                         ctx.fillStyle = isLeft ? '#ffffff' : (isTarget ? '#0f172a' : '#fbbf24');
-                        ctx.font = 'bold 9px Inter, sans-serif';
-                        ctx.fillText(isLeft ? `L${noteItem.finger}` : noteItem.finger, x + 11, fingerY + 0.5);
+                        ctx.font = 'bold 8px Inter, sans-serif';
+                        ctx.fillText(isLeft ? `L${noteItem.finger}` : noteItem.finger, stemX, fingerY + 0.5);
 
                         const textBaseY = bassBottomY + 14;
                         ctx.fillStyle = isTarget ? (isLeft ? '#a855f7' : '#2563eb') : (isDone ? '#059669' : (isLight ? '#334155' : '#cbd5e1'));
