@@ -191,9 +191,9 @@
                     <span id="practiceModeText">跟彈模式</span>
                 </button>
 
-                <button type="button" id="handPracticeBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-blue-400 border border-blue-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換：雙手合奏 / 只練右手 / 只練左手">
+                <button type="button" id="handPracticeBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-blue-400 border border-blue-500/40 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換會重新開始：自己彈全部音 / 只練右手 / 只練左手">
                     <span>👐</span>
-                    <span id="handPracticeText">雙手合奏</span>
+                    <span id="handPracticeText">自己彈全部音</span>
                 </button>
 
                 <button type="button" id="tempoSelectBtn" class="theme-surface flex items-center gap-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-500 dark:text-amber-300 border border-slate-700 font-bold text-[11px] px-2 py-1.5 rounded-xl transition shrink-0" title="切換練習與示範速度">
@@ -262,9 +262,10 @@
                             <span id="feedbackBadge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">準備彈奏</span>
                             <span id="lyricHint" class="theme-text-sub text-[11px] text-slate-400 truncate">對準藍色琴鍵彈出音符</span>
                         </div>
-                        <h2 id="mainInstructionText" class="theme-text-main text-xs sm:text-sm font-extrabold text-white truncate mt-0.5">
-                            請用 <span class="text-amber-500">右手第 1 指 (拇指)</span> 彈 <span class="text-blue-500">C4 (簡譜 1)</span>
+                        <h2 id="mainInstructionText" class="theme-text-main text-xs sm:text-sm font-extrabold text-white mt-0.5">
+                            建議用 <span class="text-amber-500">右手第 1 指 (拇指)</span> 彈 <span class="text-blue-500">C4 (簡譜 1)</span>
                         </h2>
+                        <p id="techniqueHint" class="theme-text-sub text-[11px] text-slate-300 whitespace-normal mt-1 leading-relaxed"></p>
                     </div>
                 </div>
 
@@ -286,8 +287,8 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2 text-[11px]">
-                        <span class="theme-text-main">準確率: <strong id="accuracyValue" class="text-emerald-500 dark:text-emerald-400">100%</strong></span>
-                        <span id="rhythmTimingBadge" class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">PERFECT</span>
+                        <span class="theme-text-main">準確率: <strong id="accuracyValue" class="text-emerald-500 dark:text-emerald-400">—</strong></span>
+                        <span id="rhythmTimingBadge" class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">跟拍練習（只評音高）</span>
                         <button type="button" id="quickMicTuneBtn" class="theme-surface flex items-center gap-1 text-[10px] bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-lg font-bold transition" title="打開收音測試及調校靈敏度">
                             <span>🎛️ Mic 設定</span>
                         </button>
@@ -329,13 +330,13 @@
         </div>
     </main>
 
-    <!-- 底部：3 個八度虛擬鋼琴鍵盤 (C3 低音區 ~ E5 高音區) -->
+    <!-- 底部：虛擬鋼琴鍵盤 (C3 低音區 ~ G5 高音區) -->
     <section class="bg-slate-900 border-t border-slate-800 pt-1.5 pb-2 px-2 sm:px-4 shrink-0 select-none">
         <div class="max-w-7xl mx-auto">
             <div class="flex items-center justify-between gap-2 mb-1 px-1 flex-wrap">
                 <div class="flex items-center gap-2 text-[10px] sm:text-[11px] text-slate-400 truncate">
                     <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span>C3~B3 左手低音(𝄢)</span>
-                    <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span>C4~E5 右手高音(𝄞)</span>
+                    <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span>C4~G5 右手高音(𝄞)</span>
                     <span class="hidden lg:inline text-slate-500">| 觸控點擊、真琴 Mic 收音、鍵盤 (Z~M / A~L) 或 USB MIDI</span>
                 </div>
                 <div class="flex items-center gap-2 text-[11px] shrink-0">
@@ -408,8 +409,8 @@
         <div class="theme-modal bg-slate-900 border border-slate-700 rounded-3xl max-w-4xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden">
             <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950/50">
                 <div>
-                    <h3 class="text-base sm:text-lg font-extrabold text-white">🗺️ 星光琴院闖關地圖（入門 ➔ 初中階 12 關）</h3>
-                    <p class="text-xs text-slate-400">達成 80% 準確率即可過關，亦可以隨時撳右邊「跳級解鎖」自由選練</p>
+                    <h3 class="text-base sm:text-lg font-extrabold text-white">🗺️ 星光琴院闖關地圖（5–8 歲入門 · 24 關）</h3>
+                    <p class="text-xs text-slate-400">每次 5–10 分鐘；親手彈完整首、音高準確率達 80% 過關。指法只供參考，長短拍／實際用指要家長或老師核對；左右手係逐音接力，唔係同時合奏。可跳級自由練習。</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button id="unlockAllStagesBtn" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold px-3 py-1.5 rounded-xl transition">
@@ -461,10 +462,14 @@
                             <div id="sheetPagesPreviewList" class="hidden flex items-center gap-2 overflow-x-auto py-1"></div>
                             <div id="sheetOcrActionsRow" class="hidden flex flex-wrap items-center gap-2 pt-1">
                                 <button type="button" id="runAiOcrBtn" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold py-1.5 px-3 rounded-xl shadow transition">✨ AI 智能識譜 (多頁合併)</button>
-                                <button type="button" id="runLocalLogicOcrBtn" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-bold py-1.5 px-3 rounded-xl transition">⚙️ 本地 Logic 掃描 (免AI後備)</button>
+                                <button type="button" id="runLocalLogicOcrBtn" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-bold py-1.5 px-3 rounded-xl transition">⚙️ 本地五線譜辨識 (免上傳)</button>
                             </div>
-                            <div id="sheetOcrStatusText" class="text-[11px] text-slate-400">可拍多頁五線譜或數字譜，若無 AI 連線可自動或手動切換至「本地 Logic 掃描」。</div>
-                            <canvas id="localOcrDebugCanvas" class="hidden w-full max-h-36 object-contain rounded-lg border border-slate-700 bg-slate-950"></canvas>
+                            <p class="text-[11px] text-slate-400">本地：清晰、正面的 C 大調單旋律高音五線譜；不支援數字譜、低音譜表及多聲部。休止符、附點、升降記號須人工校對。</p>
+                            <div id="sheetOcrStatusText" role="status" aria-live="polite" class="text-[11px] text-slate-400">加入圖片後可逐頁辨識。藍線標示譜表，綠圈標示音符；結果是待校對初稿，不會在失敗時填入範例歌曲。</div>
+                            <select id="localOcrPageSelect" aria-label="選擇辨識校對頁面" class="hidden w-full text-xs rounded-lg bg-slate-800 text-slate-200 p-2"></select>
+                            <div class="max-h-96 overflow-auto">
+                                <canvas id="localOcrDebugCanvas" aria-label="五線譜及音符辨識標記" class="hidden w-full h-auto rounded-lg border border-slate-700 bg-white"></canvas>
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-between">
@@ -488,9 +493,9 @@
 
                         <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 text-[11px] text-slate-400 space-y-1">
                             <div class="font-bold text-slate-200">💡 入門至初中階簡譜語法指南：</div>
-                            <div>• <strong>基本音與八度</strong>：<code class="text-emerald-300">1 ~ 7</code> 為中音 C4~B4；加點 <code class="text-purple-300">1. ~ 7.</code> 為低音區 C3~B3；加撇 <code class="text-emerald-300">1' ~ 3'</code> 為高音 C5~E5</div>
+                            <div>• <strong>基本音與八度</strong>：<code class="text-emerald-300">1 ~ 7</code> 為中音 C4~B4；加點 <code class="text-purple-300">1. ~ 7.</code> 為低音區 C3~B3；加撇 <code class="text-emerald-300">1' ~ 5'</code> 為高音 C5~G5</div>
                             <div>• <strong>黑鍵升號與指法</strong>：<code class="text-amber-300">#4</code> 代表 F#4；加冒號 <code class="text-amber-300">3:3</code> 指定右手第3指；加 <code class="text-purple-300">L1.:5</code> 代表左手第5指彈低音 C3</div>
-                            <div>• <strong>拍子長度</strong>：尾隨 <code class="text-blue-300">-</code> 代表長音 2 拍（如 <code class="text-blue-300">5-</code>），尾隨 <code class="text-blue-300">/2</code> 代表快音半拍（如 <code class="text-blue-300">3/2</code>）</div>
+                            <div>• <strong>拍子長度</strong>：尾隨 <code class="text-blue-300">-</code> 為 2 拍（如 <code class="text-blue-300">5-</code>），<code class="text-blue-300">--</code> 為 4 拍（如 <code class="text-blue-300">1'--</code>），<code class="text-blue-300">/2</code> 為半拍（如 <code class="text-blue-300">3/2</code>）</div>
                         </div>
                     </div>
 
@@ -600,7 +605,8 @@
         </div>
     </div>
 
-    <!-- Modal 6：Mic 收音視覺化診斷與 iPad 譜架補償校準中心 -->
+    <script src="microphone-auto.js"></script>
+    <!-- Modal 6：Mic 收音視覺化診斷與校準中心 -->
     <div id="micSetupModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-3 sm:p-4">
         <div class="theme-modal bg-slate-900 border-2 border-slate-700 rounded-3xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
             <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950/60">
@@ -609,7 +615,7 @@
                         <span>🎛️ Mic 收音診斷及校準中心</span>
                         <span id="modalMicLiveBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold">未開啟收音</span>
                     </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">針對 iPad 背部/側邊咪被譜架遮擋、音量過細或環境雜音進行即時視覺化調校</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Auto 先聽安靜背景，再小幅調整；全部收音只在本機處理，不會上傳。</p>
                 </div>
                 <button type="button" id="closeMicSetupBtn" class="text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800 border border-slate-700">✕</button>
             </div>
@@ -626,6 +632,16 @@
                     <button type="button" id="modalToggleMicBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2 rounded-xl shadow transition">
                         🎙️ 立即開啟 Mic 測試
                     </button>
+                </div>
+
+                <div class="bg-blue-950/40 border border-blue-500/30 rounded-xl p-3 space-y-2">
+                    <label for="micModeSelect" class="text-xs font-bold text-blue-200">收音模式</label>
+                    <select id="micModeSelect" class="bg-slate-900 text-white border border-slate-600 rounded-lg px-2 py-1 text-sm">
+                        <option value="auto" selected>Auto 自動（建議）</option>
+                        <option value="manual">手動調校</option>
+                    </select>
+                    <p id="micAutoStatus" role="status" aria-live="polite" class="text-xs text-blue-200">Auto：開 Mic 後請先安靜，等候「可以彈琴」。</p>
+                    <p class="text-[11px] text-slate-400">Auto 保留手動滑桿數值；放大不會改善訊噪比，也無法修復被譜架遮擋的咪。請露出咪孔、靠近琴，避免示範音或說話。</p>
                 </div>
 
                 <!-- 核心視覺化區：音量門檻條 + 聲波圖 + 即時認音卡 -->
@@ -668,7 +684,7 @@
                         </div>
                         <div id="modalDetectedFreqText" class="text-[11px] font-mono text-slate-400">頻率: -- Hz | 純度: --%</div>
                         <div id="modalVoiceFilterBadge" class="mt-1.5 px-2.5 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400">
-                            🛡️ 防人聲/雜音過濾器：運作中
+                            🛡️ 音高純度檢查：待機
                         </div>
                         <div id="modalTargetCompareText" class="text-[11px] text-slate-300 mt-2 pt-2 border-t border-slate-800 w-full">
                             當前關卡目標音：<strong id="modalExpectedNoteText" class="text-blue-400">C4 (簡譜 1)</strong>
@@ -676,19 +692,19 @@
                     </div>
                 </div>
 
-                <!-- 調校滑桿區：靈敏度 + iPad 後置咪訊號放大器 (Pre-Amp Boost) + 防人聲純度門檻 -->
+                <!-- 手動靈敏度、數碼增益與週期性門檻 -->
                 <div class="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-3.5 space-y-3">
                     <div class="flex items-center justify-between flex-wrap gap-2">
-                        <span class="text-xs font-extrabold text-indigo-300">🛠️ iPad 收音強化 & 🛡️ 防人聲/背景音過濾設定</span>
+                        <span class="text-xs font-extrabold text-indigo-300">🛠️ 手動設定（Auto 時保留但不套用）</span>
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <button type="button" id="calibrateNoiseBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow transition">
-                                🔇 自動偵測環境底噪 (1秒)
+                                🔇 重新校準（請先安靜）
                             </button>
                             <button type="button" id="presetIpadStandBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow transition">
-                                📱 iPad 放譜架模式
+                                📱 手動高靈敏模式
                             </button>
                             <button type="button" id="presetNoisyRoomBtn" class="bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow transition">
-                                🛡️ 強效防人聲模式
+                                🛡️ 手動嚴格模式
                             </button>
                         </div>
                     </div>
@@ -707,7 +723,7 @@
                             </div>
                         </div>
 
-                        <!-- Slider 2: iPad 背部咪 Pre-Amp 訊號放大 -->
+                        <!-- Slider 2: 數碼增益，不改善訊噪比或硬件收音 -->
                         <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
                             <div class="flex justify-between text-xs font-bold mb-1">
                                 <span class="text-slate-200">🚀 咪高峰音量放大</span>
@@ -716,21 +732,21 @@
                             <input id="micGainBoostSlider" type="range" min="1" max="5" step="0.5" value="2.5" class="w-full accent-emerald-500 cursor-pointer">
                             <div class="flex justify-between text-[10px] text-slate-500 mt-1">
                                 <span>1.0x (原音)</span>
-                                <span>5.0x (譜架補償)</span>
+                                <span>5.0x (數碼放大)</span>
                             </div>
                         </div>
 
-                        <!-- Slider 3: 防人聲及背景雜音過濾強度 (Harmonic Clarity & Pitch Stability) -->
+                        <!-- Slider 3: 週期性與穩定度檢查，不能識別聲音來源 -->
                         <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
                             <div class="flex justify-between text-xs font-bold mb-1">
-                                <span class="text-slate-200">🛡️ 防人聲/背景音過濾</span>
-                                <span id="voiceFilterLabelVal" class="text-amber-400">中 (78%純度)</span>
+                                <span class="text-slate-200">🛡️ 音高純度門檻</span>
+                                <span id="voiceFilterLabelVal" class="text-amber-400">中 (77%純度)</span>
                             </div>
                             <input id="voiceFilterStrengthSlider" type="range" min="1" max="3" step="1" value="2" class="w-full accent-amber-500 cursor-pointer">
                             <div class="flex justify-between text-[10px] text-slate-500 mt-1">
                                 <span>1 (寬鬆)</span>
                                 <span>2 (標準)</span>
-                                <span>3 (嚴格防講嘢)</span>
+                                <span>3 (嚴格)</span>
                             </div>
                         </div>
                     </div>
@@ -738,14 +754,16 @@
 
                 <!-- 實體擺位小貼士 -->
                 <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 text-[11px] text-slate-400 space-y-1">
-                    <div class="font-bold text-slate-200">💡 點樣防止人聲講嘢、冷氣或背景聲被誤認做琴音？</div>
-                    <div>1. <strong>撳「🔇 自動偵測環境底噪 (1秒)」</strong>：唔好彈琴 1 秒鐘，系統會自動量度你間房嘅冷氣/背景聲大細，自動將黃色門檻線設喺背景噪音之上！</div>
-                    <div>2. <strong>開啟「🛡️ 強效防人聲模式」</strong>：人講嘢嗰陣音高會不斷滑動（無固定頻率）而且諧波純度低；開啟嚴格過濾後，只有頻率穩定、諧波純度高於 84% 嘅真實鋼琴聲先會被計分！</div>
+                    <div class="font-bold text-slate-200">💡 請先安靜，再彈單音</div>
+                    <div>開 Mic 或重新校準時，保持安靜約 1–2 秒；校準期間不計音。若背景太吵或一直彈琴，請安靜後再按「重新校準」。</div>
+                    <div>純度與穩定度只能減少誤判，不能消除人聲；唱歌、喇叭或其他樂器仍可能被認作琴音。若音量爆音，請把裝置移遠；若太細聲，先調整咪孔擺位。</div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="local-sheet-recognition.js"></script>
+    <script src="piano-curriculum.js"></script>
     <script>
         // 全局應用狀態
         const state = {
@@ -756,6 +774,7 @@
                     id: 'kid_default',
                     name: '樂樂',
                     avatar: '🦊',
+                    curriculumVersion: PianoCurriculum.VERSION,
                     xp: 0,
                     level: 1,
                     unlockedStageOrder: 1,
@@ -810,14 +829,14 @@
             { id: 'first_pass', icon: '🐣', title: '初試啼聲', desc: '完成人生第一首鋼琴練習' },
             { id: 'combo_15', icon: '🔥', title: '連擊達人', desc: '單曲達成 15 Combo 無斷連擊' },
             { id: 'perfect_100', icon: '💎', title: '零失誤大師', desc: '以 100% 準確率完成任何關卡' },
-            { id: 'left_hand_hero', icon: '🤚', title: '左手低音王', desc: '通過第 7 關左手低音區特訓' },
-            { id: 'both_hands', icon: '👐', title: '雙手協調家', desc: '通過第 8 關雙手交替合奏' },
+            { id: 'left_hand_hero', icon: '🤚', title: '左手低音王', desc: '通過左手低音區特訓' },
+            { id: 'both_hands', icon: '👐', title: '雙手協調家', desc: '通過小蜜蜂左右手接力' },
             { id: 'black_key_hunter', icon: '♯', title: '黑鍵獵人', desc: '成功挑戰黑鍵升降音名曲' },
             { id: 'sight_reader', icon: '👁️', title: '盲彈視奏家', desc: '喺「視奏模式」下過關一次' },
-            { id: 'classical_master', icon: '👑', title: '殿堂演奏家', desc: '通過第 12 關《致愛麗絲》考核' }
+            { id: 'classical_master', icon: '👑', title: '殿堂演奏家', desc: '通過《致愛麗絲》移位短節選' }
         ];
 
-        // 3 個八度鋼琴鍵盤定義：C3 (MIDI 48) 至 E5 (MIDI 76)
+        // 鋼琴鍵盤定義：C3 (MIDI 48) 至 G5 (MIDI 79)
         const PIANO_KEYS = [
             { midi: 48, note: 'C3', jianpu: '1.', solfege: 'Do.', isBlack: false, shortcut: 'Z', range: 'L' },
             { midi: 49, note: 'C#3', jianpu: '#1.', solfege: 'Do#.', isBlack: true, shortcut: '', range: 'L' },
@@ -849,7 +868,10 @@
             { midi: 73, note: 'C#5', jianpu: "#1'", solfege: 'Do#+', isBlack: true, shortcut: '', range: 'R' },
             { midi: 74, note: 'D5', jianpu: "2'", solfege: 'Re+', isBlack: false, shortcut: 'L', range: 'R' },
             { midi: 75, note: 'D#5', jianpu: "#2'", solfege: 'Re#+', isBlack: true, shortcut: '', range: 'R' },
-            { midi: 76, note: 'E5', jianpu: "3'", solfege: 'Mi+', isBlack: false, shortcut: ';', range: 'R' }
+            { midi: 76, note: 'E5', jianpu: "3'", solfege: 'Mi+', isBlack: false, shortcut: ';', range: 'R' },
+            { midi: 77, note: 'F5', jianpu: "4'", solfege: 'Fa+', isBlack: false, shortcut: '', range: 'R' },
+            { midi: 78, note: 'F#5', jianpu: "#4'", solfege: 'Fa#+', isBlack: true, shortcut: '', range: 'R' },
+            { midi: 79, note: 'G5', jianpu: "5'", solfege: 'Sol+', isBlack: false, shortcut: '', range: 'R' }
         ];
 
         const MIDI_MAP = {};
@@ -859,7 +881,7 @@
         const DIATONIC_STEP_FROM_C4 = {
             48: -7, 49: -7, 50: -6, 51: -6, 52: -5, 53: -4, 54: -4, 55: -3, 56: -3, 57: -2, 58: -2, 59: -1,
             60: 0, 61: 0, 62: 1, 63: 1, 64: 2, 65: 3, 66: 3, 67: 4, 68: 4, 69: 5, 70: 5, 71: 6,
-            72: 7, 73: 7, 74: 8, 75: 8, 76: 9
+            72: 7, 73: 7, 74: 8, 75: 8, 76: 9, 77: 10, 78: 10, 79: 11
         };
 
         const FINGER_NAMES = {
@@ -870,7 +892,7 @@
             5: '第 5 指 (尾指)'
         };
 
-        // 4 大階段 12 關由入門至初中階課程
+        // 保留舊課程 ID；由 PianoCurriculum 編排成 6 階段、24 關。
         const SONGS = {
             stage1_middleC: {
                 order: 1, isCampaign: true, tier: 'Stage 1：零基礎入門',
@@ -937,7 +959,7 @@
             stage4_odeToJoy: {
                 order: 4, isCampaign: true, tier: 'Stage 2：進階手位與穿指',
                 title: "第 4 關：貝多芬《歡樂頌》流暢連奏",
-                goal: "🎯 Legato 連奏：一至五指平均發力，保持拍子穩定",
+                goal: "🎯 Legato 連奏：輕鬆接住下一音，手腕放鬆，唔使逐隻指用力",
                 xpReward: 80,
                 notes: [
                     { midi: 64, finger: 3, hand: 'R', dur: 1, lyric: "青" },
@@ -959,13 +981,13 @@
             },
             stage5_twinkleStar: {
                 order: 5, isCampaign: true, tier: 'Stage 2：進階手位與穿指',
-                title: "第 5 關：小星星 (五度擴指跳躍)",
-                goal: "🎯 擴指練習：由 C4 (1指) 擴張跳去 G4 (4指)、A4 (5指)",
+                title: "第 5 關：小星星 (移位節選)",
+                goal: "🎯 C4 彈完搬到 D4–A4 手位，最後搬返 C4；唔使撐大隻手",
                 xpReward: 85,
                 notes: [
                     { midi: 60, finger: 1, hand: 'R', dur: 1, lyric: "一" },
                     { midi: 60, finger: 1, hand: 'R', dur: 1, lyric: "閃" },
-                    { midi: 67, finger: 4, hand: 'R', dur: 1, lyric: "一" },
+                    { midi: 67, finger: 4, hand: 'R', dur: 1, lyric: "一", cue: '先放開 C4，拇指移到 D4 上方，4 指彈 G4' },
                     { midi: 67, finger: 4, hand: 'R', dur: 1, lyric: "閃" },
                     { midi: 69, finger: 5, hand: 'R', dur: 1, lyric: "小" },
                     { midi: 69, finger: 5, hand: 'R', dur: 1, lyric: "星" },
@@ -975,8 +997,8 @@
                     { midi: 64, finger: 2, hand: 'R', dur: 1, lyric: "都" },
                     { midi: 64, finger: 2, hand: 'R', dur: 1, lyric: "是" },
                     { midi: 62, finger: 1, hand: 'R', dur: 1, lyric: "小" },
-                    { midi: 62, finger: 2, hand: 'R', dur: 1, lyric: "星" },
-                    { midi: 60, finger: 1, hand: 'R', dur: 2, lyric: "星" }
+                    { midi: 62, finger: 1, hand: 'R', dur: 1, lyric: "星" },
+                    { midi: 60, finger: 1, hand: 'R', dur: 2, lyric: "星", cue: '放開 D4，整隻手移返 C4，拇指輕輕落鍵' }
                 ]
             },
             stage6_cMajorScale: {
@@ -1024,7 +1046,7 @@
             },
             stage8_bothHandsBee: {
                 order: 8, isCampaign: true, tier: 'Stage 3：初階左手與雙手協調',
-                title: "第 8 關：雙手交替合奏《小蜜蜂》",
+                title: "第 8 關：左右手接力《小蜜蜂》",
                 goal: "🎯 左右手對話：紫色音符用左手彈低音伴奏，藍色用右手彈主旋律！",
                 xpReward: 115,
                 notes: [
@@ -1049,7 +1071,7 @@
             },
             stage9_blackKeyMinuet: {
                 order: 9, isCampaign: true, tier: 'Stage 3：初階左手與雙手協調',
-                title: "第 9 關：黑鍵初體驗 — 巴哈《G大調小步舞曲》",
+                title: "第 9 關：佩措爾德《G大調小步舞曲》(簡化節選)",
                 goal: "🎯 認識黑鍵升號 (♯)：注意 F#4 (#4) 係彈中間三粒黑鍵最左邊嗰粒！",
                 xpReward: 125,
                 notes: [
@@ -1061,44 +1083,44 @@
                     { midi: 74, finger: 5, hand: 'R', dur: 1, lyric: "Re'" },
                     { midi: 67, finger: 1, hand: 'R', dur: 1, lyric: "Sol" },
                     { midi: 67, finger: 1, hand: 'R', dur: 1, lyric: "Sol" },
-                    { midi: 76, finger: 5, hand: 'R', dur: 1, lyric: "Mi'" },
+                    { midi: 76, finger: 5, hand: 'R', dur: 1, lyric: "Mi'", cue: '放開上一句，整手移到 A4–E5 手位' },
                     { midi: 72, finger: 3, hand: 'R', dur: 0.5, lyric: "Do'" },
                     { midi: 74, finger: 4, hand: 'R', dur: 0.5, lyric: "Re'" },
                     { midi: 71, finger: 2, hand: 'R', dur: 1, lyric: "Ti" },
-                    { midi: 69, finger: 3, hand: 'R', dur: 1, lyric: "La" },
-                    { midi: 66, finger: 2, hand: 'R', dur: 1, lyric: "#Fa(黑鍵)" },
+                    { midi: 69, finger: 1, hand: 'R', dur: 1, lyric: "La" },
+                    { midi: 66, finger: 2, hand: 'R', dur: 1, lyric: "#Fa(黑鍵)", cue: '放開 A4，整手移到 E4–B4 手位，2 指彈 F#4' },
                     { midi: 67, finger: 3, hand: 'R', dur: 2, lyric: "Sol" }
                 ]
             },
             stage10_canonInD: {
                 order: 10, isCampaign: true, tier: 'Stage 4：初中階殿堂名曲',
-                title: "第 10 關：帕海貝爾《卡農 Canon》(雙手和弦低音+旋律)",
-                goal: "🎯 初中階經典：左手彈 C-G-Am-F 低音根音，右手彈優雅主旋律",
+                title: "第 10 關：卡農和聲練習 (C大調、雙手交替簡化版)",
+                goal: "🎯 低音 C–G–A–E–F–C–F–G；右手移到低音 G 手位",
                 xpReward: 140,
                 notes: [
                     { midi: 48, finger: 5, hand: 'L', dur: 1, lyric: "[左]C低音" },
                     { midi: 64, finger: 3, hand: 'R', dur: 2, lyric: "Mi" },
                     { midi: 55, finger: 1, hand: 'L', dur: 1, lyric: "[左]G低音" },
                     { midi: 62, finger: 2, hand: 'R', dur: 2, lyric: "Re" },
-                    { midi: 57, finger: 2, hand: 'L', dur: 1, lyric: "[左]Am低音" },
+                    { midi: 57, finger: 1, hand: 'L', dur: 1, lyric: "[左]A低音", cue: '左手放開 G3，整手右移到 D3–A3，拇指彈 A3' },
                     { midi: 60, finger: 1, hand: 'R', dur: 2, lyric: "Do" },
-                    { midi: 52, finger: 3, hand: 'L', dur: 1, lyric: "[左]Em低音" },
-                    { midi: 59, finger: 2, hand: 'R', dur: 2, lyric: "低Ti." },
-                    { midi: 53, finger: 4, hand: 'L', dur: 1, lyric: "[左]F低音" },
-                    { midi: 57, finger: 1, hand: 'R', dur: 2, lyric: "低La." },
-                    { midi: 48, finger: 5, hand: 'L', dur: 1, lyric: "[左]C低音" },
+                    { midi: 52, finger: 4, hand: 'L', dur: 1, lyric: "[左]E低音" },
+                    { midi: 59, finger: 3, hand: 'R', dur: 2, lyric: "低Ti.", cue: '右手放開 C4，搬到 G3–D4 手位，3 指彈 B3' },
+                    { midi: 53, finger: 3, hand: 'L', dur: 1, lyric: "[左]F低音" },
+                    { midi: 57, finger: 2, hand: 'R', dur: 2, lyric: "低La." },
+                    { midi: 48, finger: 5, hand: 'L', dur: 1, lyric: "[左]C低音", cue: '左手移返 C3–G3 手位，5 指彈 C3' },
                     { midi: 55, finger: 1, hand: 'R', dur: 2, lyric: "低Sol." },
-                    { midi: 53, finger: 4, hand: 'L', dur: 1, lyric: "[左]F低音" },
+                    { midi: 53, finger: 2, hand: 'L', dur: 1, lyric: "[左]F低音" },
                     { midi: 57, finger: 2, hand: 'R', dur: 1, lyric: "低La." },
                     { midi: 55, finger: 1, hand: 'L', dur: 1, lyric: "[左]G低音" },
                     { midi: 59, finger: 3, hand: 'R', dur: 1, lyric: "低Ti." },
-                    { midi: 60, finger: 1, hand: 'R', dur: 2, lyric: "Do!" }
+                    { midi: 60, finger: 4, hand: 'R', dur: 2, lyric: "Do!" }
                 ]
             },
             stage11_bachPrelude: {
                 order: 11, isCampaign: true, tier: 'Stage 4：初中階殿堂名曲',
-                title: "第 11 關：巴哈《C大調前奏曲》BWV 846 (分解和弦琶音)",
-                goal: "🎯 雙手分解琶音：左手彈低音，右手流暢彈出和弦分解音",
+                title: "第 11 關：前奏曲風格分解音 (入門改編練習)",
+                goal: "🎯 逐手交替彈分解音；第二句左手移到 D3–A3，唔使撐六度",
                 xpReward: 150,
                 notes: [
                     { midi: 48, finger: 5, hand: 'L', dur: 0.5, lyric: "C3" },
@@ -1110,14 +1132,14 @@
                     { midi: 64, finger: 3, hand: 'R', dur: 1, lyric: "E4" },
 
                     { midi: 48, finger: 5, hand: 'L', dur: 0.5, lyric: "C3" },
-                    { midi: 50, finger: 4, hand: 'L', dur: 0.5, lyric: "D3" },
+                    { midi: 50, finger: 5, hand: 'L', dur: 0.5, lyric: "D3", cue: '放開 C3，左手移到 D3–A3，5 指再落 D3；可以停低搬手' },
                     { midi: 57, finger: 1, hand: 'L', dur: 0.5, lyric: "A3" },
                     { midi: 62, finger: 2, hand: 'R', dur: 0.5, lyric: "D4" },
                     { midi: 65, finger: 4, hand: 'R', dur: 0.5, lyric: "F4" },
                     { midi: 62, finger: 2, hand: 'R', dur: 0.5, lyric: "D4" },
                     { midi: 65, finger: 4, hand: 'R', dur: 1, lyric: "F4" },
 
-                    { midi: 48, finger: 5, hand: 'L', dur: 1, lyric: "C3" },
+                    { midi: 48, finger: 5, hand: 'L', dur: 1, lyric: "C3", cue: '左手移返 C3–G3，5 指放 C3' },
                     { midi: 60, finger: 1, hand: 'R', dur: 1, lyric: "C4" },
                     { midi: 64, finger: 3, hand: 'R', dur: 1, lyric: "E4" },
                     { midi: 67, finger: 5, hand: 'R', dur: 2, lyric: "G4" }
@@ -1125,29 +1147,29 @@
             },
             stage12_furElise: {
                 order: 12, isCampaign: true, tier: 'Stage 4：初中階殿堂名曲',
-                title: "第 12 關：貝多芬《致愛麗絲 Für Elise》初中階終極考核",
-                goal: "🎯 殿堂級挑戰：右手 E5 - D#5 黑鍵半音交替 + 左手低音跨度伴奏！",
+                title: "第 12 關：貝多芬《致愛麗絲》(移位短節選)",
+                goal: "🎯 3–2 指彈 E5–D#5；分句移位，左右手逐粒接力",
                 xpReward: 180,
                 notes: [
-                    { midi: 76, finger: 5, hand: 'R', dur: 0.5, lyric: "Mi'" },
-                    { midi: 75, finger: 4, hand: 'R', dur: 0.5, lyric: "#Re'(黑)" },
-                    { midi: 76, finger: 5, hand: 'R', dur: 0.5, lyric: "Mi'" },
-                    { midi: 75, finger: 4, hand: 'R', dur: 0.5, lyric: "#Re'(黑)" },
-                    { midi: 76, finger: 5, hand: 'R', dur: 0.5, lyric: "Mi'" },
-                    { midi: 71, finger: 2, hand: 'R', dur: 0.5, lyric: "Ti" },
-                    { midi: 74, finger: 4, hand: 'R', dur: 0.5, lyric: "Re'" },
+                    { midi: 76, finger: 3, hand: 'R', dur: 0.5, lyric: "Mi'" },
+                    { midi: 75, finger: 2, hand: 'R', dur: 0.5, lyric: "#Re'(黑)" },
+                    { midi: 76, finger: 3, hand: 'R', dur: 0.5, lyric: "Mi'" },
+                    { midi: 75, finger: 2, hand: 'R', dur: 0.5, lyric: "#Re'(黑)" },
+                    { midi: 76, finger: 3, hand: 'R', dur: 0.5, lyric: "Mi'" },
+                    { midi: 71, finger: 1, hand: 'R', dur: 0.5, lyric: "Ti" },
+                    { midi: 74, finger: 4, hand: 'R', dur: 0.5, lyric: "Re'", cue: '右手放開 B4，移到 A4–E5 手位，4 指彈 D5' },
                     { midi: 72, finger: 3, hand: 'R', dur: 0.5, lyric: "Do'" },
                     { midi: 69, finger: 1, hand: 'R', dur: 1, lyric: "La" },
-                    { midi: 57, finger: 5, hand: 'L', dur: 1, lyric: "[左]低La." },
-                    { midi: 60, finger: 1, hand: 'R', dur: 0.5, lyric: "Do" },
-                    { midi: 64, finger: 2, hand: 'R', dur: 0.5, lyric: "Mi" },
-                    { midi: 69, finger: 4, hand: 'R', dur: 0.5, lyric: "La" },
-                    { midi: 71, finger: 5, hand: 'R', dur: 1, lyric: "Ti" },
-                    { midi: 52, finger: 5, hand: 'L', dur: 1, lyric: "[左]低Mi." },
-                    { midi: 64, finger: 1, hand: 'R', dur: 0.5, lyric: "Mi" },
-                    { midi: 68, finger: 2, hand: 'R', dur: 0.5, lyric: "#Sol(黑)" },
-                    { midi: 71, finger: 3, hand: 'R', dur: 0.5, lyric: "Ti" },
-                    { midi: 72, finger: 4, hand: 'R', dur: 2, lyric: "Do'!" }
+                    { midi: 57, finger: 5, hand: 'L', dur: 1, lyric: "[左]低La.", cue: '左手 5 指放 A3；右手趁呢拍搬到 C4' },
+                    { midi: 60, finger: 1, hand: 'R', dur: 0.5, lyric: "Do", cue: '右手拇指已搬到 C4，手腕保持放鬆' },
+                    { midi: 64, finger: 3, hand: 'R', dur: 0.5, lyric: "Mi" },
+                    { midi: 69, finger: 1, hand: 'R', dur: 0.5, lyric: "La", cue: '放開 E4，移到 A4–E5 手位，拇指落 A4；可以停低搬手' },
+                    { midi: 71, finger: 2, hand: 'R', dur: 1, lyric: "Ti" },
+                    { midi: 52, finger: 5, hand: 'L', dur: 1, lyric: "[左]低Mi.", cue: '左手整手移到 E3；右手準備 E4 拇指' },
+                    { midi: 64, finger: 1, hand: 'R', dur: 0.5, lyric: "Mi", cue: '右手移到 E4，拇指落鍵' },
+                    { midi: 68, finger: 3, hand: 'R', dur: 0.5, lyric: "#Sol(黑)" },
+                    { midi: 71, finger: 5, hand: 'R', dur: 0.5, lyric: "Ti" },
+                    { midi: 72, finger: 5, hand: 'R', dur: 2, lyric: "Do'!", cue: '放開 B4，整手移右一格，用 5 指彈 C5；呢度可以分開彈' }
                 ]
             }
         };
@@ -1156,6 +1178,8 @@
             dojo_c_scale: {
                 order: 99, isDojo: true, category: '音階與穿指', title: "🏃 C大調雙向音階 (穿指與跨指標準功)",
                 goal: "🎯 右手 1-2-3 穿 1-2-3-4-5 上行及下行", xpReward: 80,
+                setup: '右手 C4 拇指起步，C5 用 5 指',
+                tip: '先完成音階闖關，再練半拍版；手掌跟住穿指細移動，唔好扭手腕。',
                 notes: [
                     { midi: 60, finger: 1, hand: 'R', dur: 0.5, lyric: "Do" }, { midi: 62, finger: 2, hand: 'R', dur: 0.5, lyric: "Re" },
                     { midi: 64, finger: 3, hand: 'R', dur: 0.5, lyric: "Mi" }, { midi: 65, finger: 1, hand: 'R', dur: 0.5, lyric: "Fa(穿)" },
@@ -1170,6 +1194,8 @@
             dojo_g_scale: {
                 order: 99, isDojo: true, category: '音階與穿指', title: "🌟 G大調音階 (含黑鍵 F#4 特訓)",
                 goal: "🎯 習慣第 4 指彈黑鍵 #Fa (F#4) 嘅手位感", xpReward: 95,
+                setup: '右手 G3 拇指起步，3 指 B3 後拇指穿到 C4',
+                tip: '呢段低音仍由右手彈；拇指輕輕穿過，手掌跟住向右移。',
                 notes: [
                     { midi: 55, finger: 1, hand: 'R', dur: 0.5, lyric: "Sol." }, { midi: 57, finger: 2, hand: 'R', dur: 0.5, lyric: "La." },
                     { midi: 59, finger: 3, hand: 'R', dur: 0.5, lyric: "Ti." }, { midi: 60, finger: 1, hand: 'R', dur: 0.5, lyric: "Do(穿)" },
@@ -1179,17 +1205,21 @@
             },
             dojo_triads_prog: {
                 order: 99, isDojo: true, category: '流行和弦進行', title: "🎹 流行歌萬能四和弦 (C - G - Am - F 分解琶音)",
-                goal: "🎯 雙手配合：左手彈低音根音，右手彈 1-3-5 分解三和弦", xpReward: 110,
+                goal: "🎯 選修：先放開再換手位；右手用原位三和弦分解音，左右手輪流彈", xpReward: 110,
+                setup: '左手根音用 5 指整手搬位；右手每組用 1–3–5 指',
+                tip: '每組只跨五度，唔使撐六度；換組時可以停一停。',
                 notes: [
-                    { midi: 48, finger: 5, hand: 'L', dur: 1, lyric: "[C和弦]C3" }, { midi: 60, finger: 1, hand: 'R', dur: 0.5, lyric: "Do" }, { midi: 64, finger: 3, hand: 'R', dur: 0.5, lyric: "Mi" }, { midi: 67, finger: 5, hand: 'R', dur: 1, lyric: "Sol" },
-                    { midi: 55, finger: 1, hand: 'L', dur: 1, lyric: "[G和弦]G3" }, { midi: 59, finger: 1, hand: 'R', dur: 0.5, lyric: "Ti." }, { midi: 62, finger: 2, hand: 'R', dur: 0.5, lyric: "Re" }, { midi: 67, finger: 5, hand: 'R', dur: 1, lyric: "Sol" },
-                    { midi: 57, finger: 2, hand: 'L', dur: 1, lyric: "[Am和弦]A3" }, { midi: 60, finger: 1, hand: 'R', dur: 0.5, lyric: "Do" }, { midi: 64, finger: 3, hand: 'R', dur: 0.5, lyric: "Mi" }, { midi: 69, finger: 5, hand: 'R', dur: 1, lyric: "La" },
-                    { midi: 53, finger: 4, hand: 'L', dur: 1, lyric: "[F和弦]F3" }, { midi: 60, finger: 1, hand: 'R', dur: 0.5, lyric: "Do" }, { midi: 65, finger: 3, hand: 'R', dur: 0.5, lyric: "Fa" }, { midi: 69, finger: 5, hand: 'R', dur: 2, lyric: "La" }
+                    { midi: 48, finger: 5, hand: 'L', dur: 1, lyric: "[C]C3" }, { midi: 60, finger: 1, hand: 'R', dur: 0.5, cue: '右手 C4–G4 手位' }, { midi: 64, finger: 3, hand: 'R', dur: 0.5 }, { midi: 67, finger: 5, hand: 'R', dur: 1 },
+                    { midi: 55, finger: 5, hand: 'L', dur: 1, cue: '左手整手移到 G3，5 指落鍵' }, { midi: 67, finger: 1, hand: 'R', dur: 0.5, cue: '右手移到 G4–D5 手位，拇指彈 G4' }, { midi: 71, finger: 3, hand: 'R', dur: 0.5 }, { midi: 74, finger: 5, hand: 'R', dur: 1 },
+                    { midi: 57, finger: 5, hand: 'L', dur: 1, cue: '左手整手移到 A3，5 指落鍵' }, { midi: 69, finger: 1, hand: 'R', dur: 0.5, cue: '右手搬到 A4–E5 手位' }, { midi: 72, finger: 3, hand: 'R', dur: 0.5 }, { midi: 76, finger: 5, hand: 'R', dur: 1 },
+                    { midi: 53, finger: 5, hand: 'L', dur: 1, cue: '左手整手移到 F3，5 指落鍵' }, { midi: 65, finger: 1, hand: 'R', dur: 0.5, cue: '右手搬到 F4–C5 手位' }, { midi: 69, finger: 3, hand: 'R', dur: 0.5 }, { midi: 72, finger: 5, hand: 'R', dur: 2 }
                 ]
             },
             dojo_alberti_bass: {
                 order: 99, isDojo: true, category: '左手伴奏型態', title: "🎻 莫札特阿爾貝蒂低音 (Alberti Bass 左手伴奏特訓)",
-                goal: "🎯 古典奏鳴曲必備：左手 Do-Sol-Mi-Sol (5-1-3-1指) 穩定伴奏", xpReward: 105,
+                goal: "🎯 左手 Do-Sol-Mi-Sol (5-1-3-1指)，之後右手接句", xpReward: 105,
+                setup: '左手 C3–G3、右手 C4–G4；逐音接力練習',
+                tip: '先慢練左手四粒音，再加入右手；唔要求同時彈兩手。',
                 notes: [
                     { midi: 48, finger: 5, hand: 'L', dur: 0.5, lyric: "Do." }, { midi: 55, finger: 1, hand: 'L', dur: 0.5, lyric: "Sol." },
                     { midi: 52, finger: 3, hand: 'L', dur: 0.5, lyric: "Mi." }, { midi: 55, finger: 1, hand: 'L', dur: 0.5, lyric: "Sol." },
@@ -1200,21 +1230,25 @@
                 ]
             },
             dojo_hanon_1: {
-                order: 99, isDojo: true, category: '手指獨立性', title: "💪 哈農手指操第 1 首 (Hanon No.1 擴指與獨立性)",
-                goal: "🎯 鍛鍊第 4、5 弱指力量與跨度", xpReward: 100,
+                order: 99, isDojo: true, category: '手指協調', title: "🌱 五指移位操 (取代擴指操)",
+                goal: "🎯 選修：C、D 兩個五指手位，輕鬆均勻，唔練撐手力量", xpReward: 100,
+                setup: '右手 C4–G4，第二句整手移到 D4–A4',
+                tip: '每句放鬆再開始，唔使抬高手指；唔舒服就停。',
                 notes: [
-                    { midi: 60, finger: 1, hand: 'R', dur: 0.5, lyric: "Do" }, { midi: 64, finger: 2, hand: 'R', dur: 0.5, lyric: "Mi(擴)" },
-                    { midi: 65, finger: 3, hand: 'R', dur: 0.5, lyric: "Fa" }, { midi: 67, finger: 4, hand: 'R', dur: 0.5, lyric: "Sol" },
-                    { midi: 69, finger: 5, hand: 'R', dur: 0.5, lyric: "La" }, { midi: 67, finger: 4, hand: 'R', dur: 0.5, lyric: "Sol" },
-                    { midi: 65, finger: 3, hand: 'R', dur: 0.5, lyric: "Fa" }, { midi: 64, finger: 2, hand: 'R', dur: 0.5, lyric: "Mi" },
-                    { midi: 62, finger: 1, hand: 'R', dur: 0.5, lyric: "Re" }, { midi: 65, finger: 2, hand: 'R', dur: 0.5, lyric: "Fa(擴)" },
-                    { midi: 67, finger: 3, hand: 'R', dur: 0.5, lyric: "Sol" }, { midi: 69, finger: 4, hand: 'R', dur: 0.5, lyric: "La" },
-                    { midi: 71, finger: 5, hand: 'R', dur: 0.5, lyric: "Ti" }, { midi: 69, finger: 4, hand: 'R', dur: 0.5, lyric: "La" },
-                    { midi: 67, finger: 3, hand: 'R', dur: 0.5, lyric: "Sol" }, { midi: 65, finger: 2, hand: 'R', dur: 0.5, lyric: "Fa" },
-                    { midi: 64, finger: 1, hand: 'R', dur: 2, lyric: "Mi" }
+                    { midi: 60, finger: 1, hand: 'R', dur: 0.5 }, { midi: 62, finger: 2, hand: 'R', dur: 0.5 },
+                    { midi: 64, finger: 3, hand: 'R', dur: 0.5 }, { midi: 65, finger: 4, hand: 'R', dur: 0.5 },
+                    { midi: 67, finger: 5, hand: 'R', dur: 0.5 }, { midi: 65, finger: 4, hand: 'R', dur: 0.5 },
+                    { midi: 64, finger: 3, hand: 'R', dur: 0.5 }, { midi: 62, finger: 2, hand: 'R', dur: 1 },
+                    { midi: 62, finger: 1, hand: 'R', dur: 0.5, cue: '句子完先放開 D4，整手右移，拇指接 D4；唔係按住換指' }, { midi: 64, finger: 2, hand: 'R', dur: 0.5 },
+                    { midi: 65, finger: 3, hand: 'R', dur: 0.5 }, { midi: 67, finger: 4, hand: 'R', dur: 0.5 },
+                    { midi: 69, finger: 5, hand: 'R', dur: 0.5 }, { midi: 67, finger: 4, hand: 'R', dur: 0.5 },
+                    { midi: 65, finger: 3, hand: 'R', dur: 0.5 }, { midi: 64, finger: 2, hand: 'R', dur: 0.5 },
+                    { midi: 62, finger: 1, hand: 'R', dur: 2 }
                 ]
             }
         };
+
+        PianoCurriculum.extend(SONGS, DOJO_DRILLS);
 
         // 解析簡譜字串為音符陣列
         function parseJianpuString(rawStr) {
@@ -1234,7 +1268,8 @@
                 '#6': { midi: 70, f: 4, h: 'R' }, '7': { midi: 71, f: 5, h: 'R' },
                 "1'": { midi: 72, f: 5, h: 'R' }, "#1'": { midi: 73, f: 4, h: 'R' },
                 "2'": { midi: 74, f: 5, h: 'R' }, "#2'": { midi: 75, f: 4, h: 'R' },
-                "3'": { midi: 76, f: 5, h: 'R' }
+                "3'": { midi: 76, f: 5, h: 'R' }, "4'": { midi: 77, f: 5, h: 'R' },
+                "#4'": { midi: 78, f: 4, h: 'R' }, "5'": { midi: 79, f: 5, h: 'R' }
             };
             const parsed = [];
             tokens.forEach(tok => {
@@ -1254,6 +1289,9 @@
                 let notePart = notePartRaw;
                 if (notePart.endsWith('/2')) {
                     dur = 0.5;
+                    notePart = notePart.slice(0, -2);
+                } else if (notePart.endsWith('--')) {
+                    dur = 4;
                     notePart = notePart.slice(0, -2);
                 } else if (notePart.endsWith('-')) {
                     dur = 2;
@@ -1278,7 +1316,7 @@
             return parsed;
         }
 
-        // 內置 6 首全首經典曲庫
+        // 舊版曲庫基準，下方套用新版指法並保留用戶修改的版本。
         const BUILTIN_CUSTOM_PRESETS = {
             custom_preset_birthday: {
                 order: 99, isCampaign: false, title: "🎵 生日快樂歌 (全首 G大調含黑鍵)",
@@ -1322,11 +1360,14 @@
             song.notes = parseJianpuString(song.rawJianpu);
         });
 
+        // Only untouched saved presets are replaced; keep this snapshot to recognise legacy copies.
+        const LEGACY_BUILTIN_PRESETS = JSON.parse(JSON.stringify(BUILTIN_CUSTOM_PRESETS));
+        PianoCurriculum.reviewPresets(BUILTIN_CUSTOM_PRESETS, SONGS);
         Object.assign(SONGS, BUILTIN_CUSTOM_PRESETS, DOJO_DRILLS);
 
         function getTransposedMidi(baseMidi) {
             const shifted = baseMidi + (state.transposeSemitones || 0);
-            return Math.max(48, Math.min(76, shifted));
+            return Math.max(48, Math.min(79, shifted));
         }
 
         // 圖片多頁上傳與雙引擎識譜 (AI + 本地 Canvas 演算法 Fallback)
@@ -1360,6 +1401,13 @@
             const actionsRow = document.getElementById('sheetOcrActionsRow');
             const clearBtn = document.getElementById('clearSheetPagesBtn');
             if (!listEl) return;
+            localSheetResults = [];
+            document.getElementById('localOcrDebugCanvas').classList.add('hidden');
+            document.getElementById('localOcrPageSelect').classList.add('hidden');
+            document.getElementById('localOcrPageSelect').replaceChildren();
+            document.getElementById('sheetOcrStatusText').textContent = state.uploadedSheetPages.length
+                ? '圖片列表已更新，請開始辨識；原有簡譜不會清除。' : '';
+            updateSheetRecognitionButtons();
 
             if (state.uploadedSheetPages.length === 0) {
                 listEl.classList.add('hidden');
@@ -1394,86 +1442,121 @@
             });
         }
 
-        // 本地 Canvas 電腦視覺五線譜黑點掃描演算法 (免 AI 後備方案)
-        function runLocalLogicSheetRecognition() {
-            const statusEl = document.getElementById('sheetOcrStatusText');
-            const debugCanvas = document.getElementById('localOcrDebugCanvas');
-            if (state.uploadedSheetPages.length === 0) return;
+        let localSheetResults = [];
+        let localSheetRecognitionRunning = false;
+        let aiSheetRecognitionRunning = false;
 
-            statusEl.textContent = '⚙️ 正在使用本地 Canvas 視覺演算法分析五線譜線距與音符黑點座標...';
-            const allDetectedTokens = [];
-            const scaleMap = ['1.', '2.', '3.', '4.', '5.', '6.', '7.', '1', '2', '3', '4', '5', '6', '7', "1'", "2'", "3'"];
+        function updateSheetRecognitionButtons() {
+            const disabled = localSheetRecognitionRunning || aiSheetRecognitionRunning || !state.uploadedSheetPages.length;
+            document.getElementById('runLocalLogicOcrBtn').disabled = disabled;
+            document.getElementById('runAiOcrBtn').disabled = disabled;
+        }
 
-            state.uploadedSheetPages.forEach((page, pageIdx) => {
-                const c = pageIdx === 0 && debugCanvas ? debugCanvas : document.createElement('canvas');
-                const w = 480;
-                const h = Math.max(200, Math.round((page.height / page.width) * w));
-                c.width = w;
-                c.height = h;
-                const cCtx = c.getContext('2d');
-                cCtx.drawImage(page.imgElement, 0, 0, w, h);
-
-                const imgData = cCtx.getImageData(0, 0, w, h);
-                const data = imgData.data;
-
-                // 計算每一行嘅深色像素密度搵出五線譜區域
-                let sumLum = 0;
-                for (let i = 0; i < data.length; i += 4) {
-                    sumLum += (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+        function renderLocalSheetDebug(pageIndex = 0) {
+            const canvas = document.getElementById('localOcrDebugCanvas');
+            const entry = localSheetResults[pageIndex];
+            if (!entry) return;
+            canvas.width = entry.width;
+            canvas.height = entry.height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(entry.page.imgElement, 0, 0, canvas.width, canvas.height);
+            for (const staff of entry.result.staves) {
+                ctx.strokeStyle = '#2563eb80';
+                ctx.lineWidth = 1;
+                for (const line of staff.lines) {
+                    ctx.beginPath();
+                    ctx.moveTo(staff.left, line.y);
+                    ctx.lineTo(staff.right, line.y);
+                    ctx.stroke();
                 }
-                const avgLum = sumLum / (w * h);
-                const darkThreshold = Math.min(155, avgLum * 0.72);
-
-                // 將畫面分成橫向區塊 (Staves) 並由左至右掃描音符密集黑點 (Notehead Blobs)
-                const numCols = 16;
-                const colWidth = Math.floor((w - 60) / numCols);
-                for (let col = 0; col < numCols; col++) {
-                    const startX = 40 + col * colWidth;
-                    let bestY = -1;
-                    let maxDarkCount = 0;
-
-                    for (let y = Math.floor(h * 0.12); y < Math.floor(h * 0.88); y += 4) {
-                        let darkCount = 0;
-                        for (let dy = -3; dy <= 3; dy++) {
-                            for (let dx = 0; dx < colWidth * 0.65; dx += 2) {
-                                const px = ((y + dy) * w + (startX + dx)) * 4;
-                                const lum = data[px] * 0.3 + data[px + 1] * 0.59 + data[px + 2] * 0.11;
-                                if (lum < darkThreshold) darkCount++;
-                            }
-                        }
-                        if (darkCount > maxDarkCount && darkCount > 12) {
-                            maxDarkCount = darkCount;
-                            bestY = y;
-                        }
-                    }
-
-                    if (bestY !== -1) {
-                        const normY = 1 - ((bestY - h * 0.12) / (h * 0.76));
-                        const idx = Math.max(0, Math.min(scaleMap.length - 1, Math.round(normY * (scaleMap.length - 1))));
-                        allDetectedTokens.push(scaleMap[idx]);
-
-                        if (pageIdx === 0 && debugCanvas) {
-                            cCtx.strokeStyle = '#10b981';
-                            cCtx.lineWidth = 2;
-                            cCtx.beginPath();
-                            cCtx.arc(startX + colWidth * 0.3, bestY, 7, 0, Math.PI * 2);
-                            cCtx.stroke();
-                        }
-                    }
+                for (const note of staff.notes) {
+                    ctx.strokeStyle = note.token ? '#059669' : '#dc2626';
+                    ctx.fillStyle = ctx.strokeStyle;
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.arc(note.x, note.y, staff.gap * 0.8, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.font = `${Math.max(9, staff.gap)}px sans-serif`;
+                    ctx.fillText(note.token || '?', note.x - staff.gap / 2, note.y - staff.gap);
                 }
-            });
-
-            if (debugCanvas) debugCanvas.classList.remove('hidden');
-            const finalStr = allDetectedTokens.length >= 4 ? allDetectedTokens.join(' ') : '1:1 2:2 3:3 5:5 6:5 5:4- 3:3 2:2 1:1-';
-            document.getElementById('customSongNotesInput').value = finalStr;
-            if (!document.getElementById('customSongTitleInput').value.trim()) {
-                document.getElementById('customSongTitleInput').value = `相片識譜 (${state.uploadedSheetPages.length}頁)`;
             }
-            statusEl.textContent = `✅ 本地 Logic 已從 ${state.uploadedSheetPages.length} 頁相片掃描出 ${allDetectedTokens.length} 個音符座標（綠色圈標示），你可直接修改或開始彈奏！`;
+            canvas.classList.remove('hidden');
+        }
+
+        async function runLocalLogicSheetRecognition() {
+            if (!state.uploadedSheetPages.length || localSheetRecognitionRunning || aiSheetRecognitionRunning) return;
+            const statusEl = document.getElementById('sheetOcrStatusText');
+            const selector = document.getElementById('localOcrPageSelect');
+            const pages = [...state.uploadedSheetPages];
+            localSheetRecognitionRunning = true;
+            updateSheetRecognitionButtons();
+            localSheetResults = [];
+            selector.replaceChildren();
+            selector.classList.add('hidden');
+            document.getElementById('localOcrDebugCanvas').classList.add('hidden');
+            try {
+                for (const [index, page] of pages.entries()) {
+                    statusEl.textContent = `⏳ 本地分析第 ${index + 1}/${pages.length} 頁：定位五線譜、符頭及符桿…（不會上傳圖片）`;
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                    const canvas = document.createElement('canvas');
+                    const sourceWidth = page.imgElement.naturalWidth || page.width;
+                    const sourceHeight = page.imgElement.naturalHeight || page.height;
+                    const scale = Math.min(1, 1800 / Math.max(sourceWidth, sourceHeight));
+                    canvas.width = Math.round(sourceWidth * scale);
+                    canvas.height = Math.round(sourceHeight * scale);
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(page.imgElement, 0, 0, canvas.width, canvas.height);
+                    const result = LocalSheetRecognition.recognize(ctx.getImageData(0, 0, canvas.width, canvas.height));
+                    localSheetResults.push({ page, result, width: canvas.width, height: canvas.height });
+                }
+                if (pages.length !== state.uploadedSheetPages.length || pages.some((p, i) => p !== state.uploadedSheetPages[i])) {
+                    localSheetResults = [];
+                    statusEl.textContent = '圖片列表已更改，請重新辨識；原有簡譜已保留。';
+                    return;
+                }
+                for (const [index, entry] of localSheetResults.entries()) {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `第 ${index + 1} 頁：${entry.result.staves.length} 行 / ${entry.result.notes.length} 個音符`;
+                    selector.append(option);
+                }
+                selector.classList.remove('hidden');
+                renderLocalSheetDebug();
+                const failed = localSheetResults.flatMap((entry, i) => entry.result.tokens.length ? [] : [i + 1]);
+                const unsupported = localSheetResults.reduce((sum, entry) => sum + entry.result.unsupported, 0);
+                if (failed.length || unsupported) {
+                    statusEl.textContent = `⚠️ 未匯入，原有簡譜已保留。${failed.length ? `第 ${failed.join('、')} 頁未找到可辨識音符，請用清晰、正面、完整的高音譜表。` : ''}${unsupported ? `有 ${unsupported} 個音符超出 C3–G5（紅圈），請校對。` : ''}`;
+                    return;
+                }
+                document.getElementById('customSongNotesInput').value = localSheetResults
+                    .flatMap(entry => entry.result.staves.map(staff => staff.notes.map(note => note.token).join(' ')))
+                    .join('\n');
+                const title = document.getElementById('customSongTitleInput');
+                if (!title.value.trim()) title.value = `相片識譜 (${pages.length}頁)`;
+                const count = localSheetResults.reduce((sum, entry) => sum + entry.result.tokens.length, 0);
+                statusEl.textContent = `✅ 已產生 ${pages.length} 頁、${count} 個音符的待校對初稿（綠圈）。按 C 大調高音譜表讀取；休止符、附點、升降記號及多聲部未處理，請對照原譜修改，節奏不保證完整。`;
+            } catch (err) {
+                localSheetResults = [];
+                selector.replaceChildren();
+                selector.classList.add('hidden');
+                document.getElementById('localOcrDebugCanvas').classList.add('hidden');
+                statusEl.textContent = '⚠️ 本地辨識未完成，原有簡譜已保留。請換用清晰、完整的五線譜圖片再試。';
+            } finally {
+                localSheetRecognitionRunning = false;
+                updateSheetRecognitionButtons();
+            }
         }
 
         async function runAiMultiPageOcr() {
-            if (state.uploadedSheetPages.length === 0) return;
+            if (!state.uploadedSheetPages.length || localSheetRecognitionRunning || aiSheetRecognitionRunning) return;
+            const pages = [...state.uploadedSheetPages];
+            const pagesChanged = () => pages.length !== state.uploadedSheetPages.length || pages.some((page, i) => page !== state.uploadedSheetPages[i]);
+            aiSheetRecognitionRunning = true;
+            updateSheetRecognitionButtons();
             const statusEl = document.getElementById('sheetOcrStatusText');
             statusEl.textContent = `⏳ 正在透過 AI 分析全部 ${state.uploadedSheetPages.length} 頁樂譜...`;
 
@@ -1482,7 +1565,7 @@
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
                 const parts = [
                     {
-                        text: "You are an expert piano music teacher. Read all attached sheet music or numbered musical notation pages in order. Convert the melody into space-separated jianpu tokens supported by our app: '1.' to '7.' for C3-B3, '1' to '7' for C4-B4, \"1'\" to \"3'\" for C5-E5, prefix '#' for sharps (e.g. '#4'), suffix '-' for 2-beat notes, suffix '/2' for eighth notes, and ':1' to ':5' for recommended finger. Return ONLY valid JSON: {\"title\": \"Song Title\", \"jianpu\": \"1:1 2:2 3:3 ...\"}"
+                        text: "You are an expert piano music teacher. Read all attached sheet music or numbered musical notation pages in order. Convert the melody into space-separated jianpu tokens supported by our app: '1.' to '7.' for C3-B3, '1' to '7' for C4-B4, \"1'\" to \"5'\" for C5-G5, prefix '#' for sharps (e.g. '#4'), suffix '-' for 2-beat notes, suffix '--' for 4-beat notes, suffix '/2' for eighth notes, and ':1' to ':5' for recommended finger. Return ONLY valid JSON: {\"title\": \"Song Title\", \"jianpu\": \"1:1 2:2 3:3 ...\"}"
                     }
                 ];
                 state.uploadedSheetPages.forEach(p => {
@@ -1503,6 +1586,10 @@
                 const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!text) throw new Error('Empty AI output');
                 const parsed = JSON.parse(text);
+                if (pagesChanged()) {
+                    statusEl.textContent = '圖片列表已更改，請重新辨識；原有簡譜已保留。';
+                    return;
+                }
                 if (parsed.jianpu) {
                     document.getElementById('customSongNotesInput').value = parsed.jianpu;
                     if (parsed.title) document.getElementById('customSongTitleInput').value = parsed.title;
@@ -1511,17 +1598,93 @@
                     throw new Error('No jianpu field');
                 }
             } catch (err) {
-                // 自動無縫切換至本地 Logic 後備演算法
-                runLocalLogicSheetRecognition();
+                if (pagesChanged()) {
+                    statusEl.textContent = '圖片列表已更改，請重新辨識；原有簡譜已保留。';
+                    return;
+                }
+                aiSheetRecognitionRunning = false;
+                await runLocalLogicSheetRecognition();
+            } finally {
+                aiSheetRecognitionRunning = false;
+                updateSheetRecognitionButtons();
             }
         }
 
-        // Mic 收音、前置放大器 (Pre-Amp Gain Boost) 與即時視覺化診斷系統
+        // Mic 收音、Auto 校準與即時視覺化診斷系統
         let micAudioCtx = null;
         let analyserNode = null;
-        let micPreAmpGainNode = null;
+        let micManualNoiseFloor = 0;
         let micStream = null;
         let pitchBuffer = null;
+        let rawMicAnalyser = null;
+        let rawMicBuffer = null;
+        let micNodes = [];
+        let micFrameId = null;
+        let micSession = 0;
+        let micStarting = false;
+        const micAuto = new MicrophoneAuto.Controller();
+
+        function resetMicNoteTracking() {
+            state.pitchHistoryWindow = [];
+            state.silenceFrames = 0;
+            state.sameNoteReleased = true;
+            state.heldMidiNote = null;
+            state.heldNotePeakRms = 0;
+            state.previousRms = 0;
+            state.lastNoteTriggerTime = performance.now();
+        }
+
+        function updateMicAutoUI() {
+            const auto = micAuto.mode === 'auto';
+            for (const id of ['micSensitivity', 'micGainBoostSlider', 'voiceFilterStrengthSlider']) {
+                document.getElementById(id).disabled = auto;
+            }
+            document.getElementById('micModeSelect').value = micAuto.mode;
+            const labels = {
+                off: '開 Mic 後請先安靜。',
+                calibrating: '請先安靜約 1–2 秒，現在不計音…',
+                retry: '未能量度安靜背景。請停止彈奏/說話、檢查咪孔，再按重新校準。',
+                ready: '可以彈琴；請彈單音。'
+            };
+            const detail = auto && micAuto.phase === 'ready'
+                ? ` 門檻 ${micAuto.threshold.toFixed(3)}（原訊號），顯示放大 ${micAuto.gain.toFixed(1)}x；純度 77%。` : '';
+            const text = `${auto ? 'Auto' : '手動'}：${labels[micAuto.phase]}${detail}`;
+            const status = document.getElementById('micAutoStatus');
+            if (status.textContent !== text) status.textContent = text;
+        }
+
+        function beginMicCalibration() {
+            if (micAuto.mode === 'manual') micManualNoiseFloor = 0;
+            micAuto.begin(performance.now());
+            state.ambientNoiseFloor = 0;
+            resetMicNoteTracking();
+            document.getElementById('modalDetectedNoteBig').textContent = '--';
+            document.getElementById('modalDetectedJianpuBig').textContent = '校準中，暫不計音';
+            updateMicAutoUI();
+        }
+
+        function stopMicCapture() {
+            ++micSession;
+            micStarting = false;
+            state.isMicListening = false;
+            if (micFrameId !== null) cancelAnimationFrame(micFrameId);
+            micFrameId = null;
+            if (micStream) micStream.getTracks().forEach(t => t.stop());
+            micStream = null;
+            micNodes.forEach(node => node.disconnect());
+            micNodes = [];
+            analyserNode = rawMicAnalyser = null;
+            micManualNoiseFloor = 0;
+            pitchBuffer = rawMicBuffer = null;
+            micAuto.stop();
+            state.ambientNoiseFloor = 0;
+            resetMicNoteTracking();
+            document.getElementById('modalDetectedNoteBig').textContent = '--';
+            document.getElementById('modalDetectedJianpuBig').textContent = '未偵測到音高';
+            document.getElementById('modalDetectedFreqText').textContent = '頻率: -- Hz | 純度: --%';
+            updateMicAutoUI();
+            updateMicButtonsUI();
+        }
 
         async function refreshAudioInputDevices() {
             const selectEl = document.getElementById('micDeviceSelect');
@@ -1543,21 +1706,21 @@
         }
 
         function getActiveRmsThreshold() {
+            if (micAuto.mode === 'auto') return micAuto.threshold;
             const sens = Number(document.getElementById('micSensitivity')?.value) || 6;
             const baseThreshold = Math.max(0.004, 0.046 - (sens * 0.0041));
-            // 若已量度環境底噪，確保門檻最少高於底噪 1.65 倍
-            return Math.max(baseThreshold, (state.ambientNoiseFloor || 0) * 1.65);
+            return Math.max(baseThreshold / (state.micGainBoost || 2.5), micAuto.noiseFloor * 1.65);
         }
 
         function getRequiredClarityThreshold() {
-            const lvl = Number(state.voiceFilterLevel) || 2;
+            const lvl = micAuto.mode === 'auto' ? 2 : (Number(state.voiceFilterLevel) || 2);
             if (lvl === 1) return 0.68;
             if (lvl === 3) return 0.84;
             return 0.77;
         }
 
-        // 升級版鋼琴專用音高與諧波純度分析 (過濾人聲、氣音與背景雜訊)
-        function autoCorrelatePitch(buf, sampleRate) {
+        // Periodicity rejects some noise but cannot identify a piano versus a voice.
+        function autoCorrelatePitch(buf, sampleRate, evidenceOnly = false) {
             const SIZE = buf.length;
             let rms = 0;
             let zeroCrossings = 0;
@@ -1569,7 +1732,8 @@
                 }
             }
             rms = Math.sqrt(rms / SIZE);
-            const minRms = getActiveRmsThreshold();
+            // Evidence analysis ignores the note gate to protect soft sustained tones from noise learning.
+            const minRms = evidenceOnly ? 0.000001 : getActiveRmsThreshold();
 
             if (rms < minRms) {
                 return { freq: -1, rms, minRms, clarity: 0, rejectReason: 'low_volume' };
@@ -1592,7 +1756,7 @@
             const newSize = slice.length;
             if (newSize < 64) return { freq: -1, rms, minRms, clarity: 0, rejectReason: 'short_slice' };
 
-            // 搜尋 110Hz (A2) 至 1100Hz (C#6) 對應嘅 Lag 範圍，直接忽略鋼琴以外頻率
+            // Search only the supported practice register, 110–1100 Hz.
             const minLag = Math.max(4, Math.floor(sampleRate / 1100));
             const maxLag = Math.min(newSize - 2, Math.ceil(sampleRate / 110));
 
@@ -1624,7 +1788,7 @@
             if (maxpos <= 0) return { freq: -1, rms, minRms, clarity: 0, rejectReason: 'no_peak' };
 
             // 計算歸一化諧波純度 (Normalized Harmonic Clarity: 0.0 ~ 1.0)
-            // 真實鋼琴弦振動具有極高週期規律性 (Clarity >= 0.77)，而人聲講嘢或環境雜音通常 < 0.72
+            // Voices and other instruments may also be highly periodic.
             const overlapLen = newSize - maxpos;
             let normFactor = energy0 * (overlapLen / newSize);
             const clarity = normFactor > 0 ? Math.min(1, maxval / normFactor) : 0;
@@ -1651,7 +1815,8 @@
         function renderMicDiagnosticVisualizer(buf, rms, minRms, detectedKeyInfo, freq, clarity = 0, rejectReason = null) {
             // 1. 頂部迷你音量條
             const miniBar = document.getElementById('miniMicLevelBar');
-            const visualPct = Math.min(100, Math.round((rms / 0.08) * 100));
+            const displayGain = micAuto.mode === 'auto' ? micAuto.gain : (state.micGainBoost || 2.5);
+            const visualPct = Math.min(100, Math.round((rms * displayGain / 0.08) * 100));
             if (miniBar) {
                 miniBar.style.width = `${visualPct}%`;
                 miniBar.className = rms >= minRms ? 'h-full bg-emerald-400 transition-all duration-75' : 'h-full bg-amber-400/70 transition-all duration-75';
@@ -1667,39 +1832,39 @@
             const diagHint = document.getElementById('micDiagnosticHint');
             const voiceBadge = document.getElementById('modalVoiceFilterBadge');
 
-            const thresholdPct = Math.min(90, Math.max(5, Math.round((minRms / 0.08) * 100)));
+            const thresholdPct = Math.min(100, Math.max(0, Math.round((minRms * displayGain / 0.08) * 100)));
             if (marker) marker.style.left = `${thresholdPct}%`;
             if (volBar) volBar.style.width = `${visualPct}%`;
-            if (rmsText) rmsText.textContent = `訊號強度: ${rms.toFixed(4)} (門檻: ${minRms.toFixed(4)})`;
+            if (rmsText) rmsText.textContent = `原訊號: ${rms.toFixed(4)} (原門檻: ${minRms.toFixed(4)})`;
 
             if (voiceBadge) {
                 if (rejectReason === 'low_clarity_voice_or_noise' || rejectReason === 'high_zcr_noise') {
-                    voiceBadge.textContent = `🛡️ 已攔截人聲/雜音 (純度僅 ${Math.round(clarity * 100)}%，非鋼琴波形)`;
+                    voiceBadge.textContent = `🛡️ 純度不足 (${Math.round(clarity * 100)}%)，暫不計音`;
                     voiceBadge.className = 'mt-1.5 px-2.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[10px] font-bold text-amber-300';
                 } else if (rejectReason === 'unstable_voice_glide') {
-                    voiceBadge.textContent = '🗣️ 已攔截人聲講嘢 (偵測到語調滑動，非固定琴音)';
+                    voiceBadge.textContent = '音高未穩定，暫不計音';
                     voiceBadge.className = 'mt-1.5 px-2.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[10px] font-bold text-amber-300';
                 } else if (freq > 0) {
-                    voiceBadge.textContent = `🎹 確認為純淨鋼琴音 (諧波純度 ${Math.round(clarity * 100)}%)`;
+                    voiceBadge.textContent = `音高訊號純度 ${Math.round(clarity * 100)}%（不能辨別聲音來源）`;
                     voiceBadge.className = 'mt-1.5 px-2.5 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-bold text-emerald-300';
                 } else {
-                    voiceBadge.textContent = '🛡️ 防人聲/雜音過濾器：運作中';
+                    voiceBadge.textContent = '🛡️ 音高純度檢查（不能消除人聲）';
                     voiceBadge.className = 'mt-1.5 px-2.5 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400';
                 }
             }
 
             if (diagHint) {
                 if (rms < 0.002) {
-                    diagHint.textContent = '🔇 幾乎無聲：請試彈琴鍵，或拉高下方「咪高峰音量放大」';
+                    diagHint.textContent = '🔇 幾乎無聲：請露出咪孔、靠近琴再試';
                     diagHint.className = 'text-[11px] font-bold text-slate-400';
                 } else if (rms < minRms) {
-                    diagHint.textContent = '⚠️ 有細微背景聲但未過黃線（不會誤觸發）';
+                    diagHint.textContent = '未過音量門檻，暫不計音';
                     diagHint.className = 'text-[11px] font-bold text-amber-400';
                 } else if (rejectReason) {
-                    diagHint.textContent = '🛡️ 音量過咗黃線，但系統識別為「人聲或環境雜音」已自動過濾！';
+                    diagHint.textContent = '暫不計音：請查看上方收音狀態';
                     diagHint.className = 'text-[11px] font-bold text-purple-400';
                 } else {
-                    diagHint.textContent = '✅ 鋼琴訊號超清晰！已通過純度驗證';
+                    diagHint.textContent = '✅ 已通過音量及純度門檻';
                     diagHint.className = 'text-[11px] font-bold text-emerald-400';
                 }
             }
@@ -1714,8 +1879,10 @@
                     jianpuBig.className = 'text-sm font-extrabold px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 mb-2';
                 }
                 if (freqTxt) freqTxt.textContent = `頻率: ${freq.toFixed(1)} Hz | 純度: ${Math.round(clarity * 100)}%`;
-            } else if (rejectReason && rms >= minRms) {
-                if ( freqTxt ) freqTxt.textContent = `純度: ${Math.round(clarity * 100)}% (已作為雜音濾除)`;
+            } else {
+                if (noteBig) noteBig.textContent = '--';
+                if (jianpuBig) jianpuBig.textContent = '暫未確認音高';
+                if (freqTxt) freqTxt.textContent = `純度: ${Math.round(clarity * 100)}%（暫不計音）`;
             }
 
             // 畫即時聲波圖
@@ -1752,9 +1919,41 @@
         function detectPitchLoop() {
             if (!state.isMicListening || !analyserNode) return;
             analyserNode.getFloatTimeDomainData(pitchBuffer);
-            let { freq, rms, minRms, clarity, rejectReason } = autoCorrelatePitch(pitchBuffer, micAudioCtx.sampleRate);
+            rawMicAnalyser.getFloatTimeDomainData(rawMicBuffer);
+            const evidence = autoCorrelatePitch(pitchBuffer, micAudioCtx.sampleRate, true);
+            let { freq, rms, clarity, rejectReason } = evidence;
+            const minRms = getActiveRmsThreshold();
             const pitchText = document.getElementById('detectedPitchText');
             let detectedKeyInfo = null;
+            const now = performance.now();
+            const playback = state.isDemoPlaying || state.metronomeActive;
+            let decision;
+            if (playback) {
+                // Speaker playback cannot be distinguished reliably from the player's piano.
+                if (micAuto.phase === 'calibrating') micAuto.begin(now);
+                micAuto.lastTime = null;
+                micAuto.toneMs = 0;
+                micAuto.holdUntil = now + 800;
+                decision = { blocked: true, reason: 'playback' };
+            } else {
+                decision = micAuto.observe({ ...evidence, peak: MicrophoneAuto.levels(pitchBuffer).peak,
+                    rawPeak: MicrophoneAuto.levels(rawMicBuffer).peak }, now);
+            }
+            state.ambientNoiseFloor = micAuto.noiseFloor;
+            updateMicAutoUI();
+            if (decision.blocked) {
+                resetMicNoteTracking();
+                const messages = { calibrating: '請先安靜…', retry: '請重新校準', clipping: '爆音：請把裝置移遠', playback: '請先停止示範/節拍器', invalid_signal: '訊號異常：請重新校準' };
+                pitchText.textContent = messages[decision.reason] || '聽緊…';
+                document.getElementById('micAutoStatus').textContent = pitchText.textContent;
+                document.getElementById('modalDetectedNoteBig').textContent = '--';
+                document.getElementById('modalDetectedJianpuBig').textContent = '暫不計音';
+                document.getElementById('modalDetectedFreqText').textContent = '頻率: -- Hz | 純度: --%';
+                renderMicDiagnosticVisualizer(pitchBuffer, rms, minRms, null, -1, clarity, decision.reason);
+                micFrameId = requestAnimationFrame(detectPitchLoop);
+                return;
+            }
+            if (rms < minRms) { freq = -1; rejectReason = 'low_volume'; }
 
             if (freq === -1 || freq < 115 || freq > 1020) {
                 state.pitchHistoryWindow = [];
@@ -1775,16 +1974,15 @@
                 const detectedMidi = Math.round(exactMidiFloat);
                 const centsOff = Math.abs((exactMidiFloat - detectedMidi) * 100);
 
-                // 第 2 關：人聲語調滑動攔截 (Pitch Stability & Tuning Check)
-                // 鋼琴音準固定，而人講嘢音高每 Frame 都會飄移；必須連續 2 個 Frame 穩定喺同一個半音內先至通過
+                // Stability/tuning checks do not use the lesson target or identify the sound source.
                 state.pitchHistoryWindow.push(exactMidiFloat);
                 if (state.pitchHistoryWindow.length > 3) state.pitchHistoryWindow.shift();
 
-                const requiredFrames = state.voiceFilterLevel >= 2 ? 2 : 1;
+                const requiredFrames = micAuto.mode === 'auto' || state.voiceFilterLevel >= 2 ? 2 : 1;
                 let isStablePianoPitch = state.pitchHistoryWindow.length >= requiredFrames;
                 if (isStablePianoPitch && state.pitchHistoryWindow.length >= 2) {
                     const prevFloat = state.pitchHistoryWindow[state.pitchHistoryWindow.length - 2];
-                    // 如果相鄰兩個 Frame 音高飄移超過 0.42 個半音 (42 cents)，代表係人聲講嘢滑音
+                    // Reject adjacent-frame drift greater than 42 cents.
                     if (Math.abs(exactMidiFloat - prevFloat) > 0.42 || centsOff > 42) {
                         isStablePianoPitch = false;
                         rejectReason = 'unstable_voice_glide';
@@ -1803,17 +2001,18 @@
                         state.lastNoteTriggerTime = now;
                         state.heldMidiNote = detectedMidi;
                         state.heldNotePeakRms = rms;
+                        state.sameNoteReleased = false;
                         handleUserPlayedNote(detectedMidi, 'mic');
                     } else if (rms > state.heldNotePeakRms) {
                         state.heldNotePeakRms = rms;
                     }
                 } else if (!isStablePianoPitch) {
-                    pitchText.textContent = '🗣️濾人聲';
+                    pitchText.textContent = '音高未穩定';
                 }
             }
             renderMicDiagnosticVisualizer(pitchBuffer, rms, minRms, detectedKeyInfo, freq, clarity, rejectReason);
             state.previousRms = rms;
-            requestAnimationFrame(detectPitchLoop);
+            micFrameId = requestAnimationFrame(detectPitchLoop);
         }
 
         function updateMicButtonsUI() {
@@ -1854,74 +2053,77 @@
         }
 
         async function toggleMicrophone(forceRestart = false) {
-            if (state.isMicListening && !forceRestart) {
-                state.isMicListening = false;
-                if (micStream) micStream.getTracks().forEach(t => t.stop());
-                updateMicButtonsUI();
+            if ((state.isMicListening || micStarting) && !forceRestart) {
+                stopMicCapture();
                 return;
             }
-
-            if (micStream) micStream.getTracks().forEach(t => t.stop());
-
+            stopMicCapture();
+            const session = micSession;
+            micStarting = true;
+            document.getElementById('micAutoStatus').textContent = '正在開 Mic… 再按開關可取消。';
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 if (!micAudioCtx) micAudioCtx = new AudioCtx();
                 if (micAudioCtx.state === 'suspended') await micAudioCtx.resume();
-
-                const devConstraint = (state.selectedMicDeviceId && state.selectedMicDeviceId !== 'default')
-                    ? { exact: state.selectedMicDeviceId }
-                    : undefined;
-
-                let stream = null;
+                if (session !== micSession) return;
+                const selected = state.selectedMicDeviceId;
+                const devConstraint = selected && selected !== 'default' ? { exact: selected } : undefined;
+                let stream;
                 try {
-                    stream = await navigator.mediaDevices.getUserMedia({
-                        audio: {
-                            deviceId: devConstraint,
-                            echoCancellation: false,
-                            noiseSuppression: false,
-                            autoGainControl: false
-                        }
-                    });
-                } catch (e1) {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: {
+                        deviceId: devConstraint, echoCancellation: false,
+                        noiseSuppression: false, autoGainControl: false
+                    } });
+                } catch (error) {
+                    if (session !== micSession) return;
+                    // Never silently switch a specifically selected microphone or retry permission denial.
+                    if (devConstraint || !['OverconstrainedError', 'NotSupportedError'].includes(error.name)) throw error;
                     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 }
-
+                if (session !== micSession) { stream.getTracks().forEach(t => t.stop()); return; }
                 micStream = stream;
-                await refreshAudioInputDevices();
-
-                const source = micAudioCtx.createMediaStreamSource(micStream);
-
-                // 1. 高通濾波器：切走 105Hz 以下冷氣機、風扇、行路與檯面低頻轟鳴聲
+                // Enumeration must not hold up the capture lifecycle.
+                refreshAudioInputDevices();
+                const source = micAudioCtx.createMediaStreamSource(stream);
+                micNodes.push(source);
                 const highpass = micAudioCtx.createBiquadFilter();
+                micNodes.push(highpass);
                 highpass.type = 'highpass';
                 highpass.frequency.setValueAtTime(105, micAudioCtx.currentTime);
-
-                // 2. 低通濾波器：切走 1250Hz 以上人聲唇齒音 (s/t/k) 及背景高頻雜訊，鎖定 C3(130Hz)~E5(659Hz) 鋼琴基頻區
                 const lowpass = micAudioCtx.createBiquadFilter();
+                micNodes.push(lowpass);
                 lowpass.type = 'lowpass';
                 lowpass.frequency.setValueAtTime(1250, micAudioCtx.currentTime);
-
-                // 3. 前置放大器 GainNode：專治 iPad 背部咪喺譜架上面收音太細聲嘅問題
-                micPreAmpGainNode = micAudioCtx.createGain();
-                micPreAmpGainNode.gain.setValueAtTime(state.micGainBoost || 2.5, micAudioCtx.currentTime);
-
                 analyserNode = micAudioCtx.createAnalyser();
+                micNodes.push(analyserNode);
                 analyserNode.fftSize = 2048;
                 pitchBuffer = new Float32Array(analyserNode.fftSize);
-
+                rawMicAnalyser = micAudioCtx.createAnalyser();
+                micNodes.push(rawMicAnalyser);
+                rawMicAnalyser.fftSize = 2048;
+                rawMicBuffer = new Float32Array(rawMicAnalyser.fftSize);
+                // Raw input detects hardware clipping; filtered analysis is always BEFORE digital gain.
+                // Gain is applied to display and manual gate mathematically, never to noise evidence.
+                source.connect(rawMicAnalyser);
                 source.connect(highpass);
                 highpass.connect(lowpass);
-                lowpass.connect(micPreAmpGainNode);
-                micPreAmpGainNode.connect(analyserNode);
-
+                lowpass.connect(analyserNode);
+                stream.getTracks().forEach(track => track.addEventListener('ended', () => {
+                    if (session === micSession) stopMicCapture();
+                }));
                 state.isMicListening = true;
+                micStarting = false;
+                beginMicCalibration();
                 updateMicButtonsUI();
                 detectPitchLoop();
             } catch (err) {
-                document.getElementById('detectedPitchText').textContent = '無Mic權限';
+                if (session !== micSession) return;
+                stopMicCapture();
+                document.getElementById('detectedPitchText').textContent = 'Mic 未能開啟';
+                document.getElementById('micAutoStatus').textContent = 'Mic 未能開啟：請檢查權限、裝置及安全連線，再試一次。';
                 const diagHint = document.getElementById('micDiagnosticHint');
                 if (diagHint) {
-                    diagHint.textContent = '❌ 瀏覽器未允許麥克風權限，請檢查 Safari 網址列左側「大小/網站設定」允許麥克風';
+                    diagHint.textContent = '❌ 請檢查 Safari 網站的麥克風權限及所選收音裝置';
                     diagHint.className = 'text-[11px] font-bold text-red-400';
                 }
             }
@@ -1973,7 +2175,10 @@
                 const savedProfiles = localStorage.getItem(LOCAL_STORAGE_PROFILES_KEY);
                 if (savedProfiles) {
                     const parsed = JSON.parse(savedProfiles);
-                    if (parsed && Object.keys(parsed).length > 0) state.profiles = parsed;
+                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                        const valid = Object.fromEntries(Object.entries(parsed).filter(([, profile]) => profile && typeof profile === 'object' && !Array.isArray(profile)));
+                        if (Object.keys(valid).length) state.profiles = valid;
+                    }
                 }
                 const savedActiveId = localStorage.getItem(LOCAL_STORAGE_ACTIVE_PROFILE_KEY);
                 if (savedActiveId && state.profiles[savedActiveId]) state.activeProfileId = savedActiveId;
@@ -1982,12 +2187,22 @@
                 if (savedCustomSongs) {
                     const parsedSongs = JSON.parse(savedCustomSongs);
                     Object.entries(parsedSongs).forEach(([k, v]) => {
-                        if (v && v.notes && v.notes.length > 0) SONGS[k] = v;
+                        if (SONGS[k]?.isCampaign || SONGS[k]?.isDojo) return;
+                        if (!v || !Array.isArray(v.notes) || !v.notes.length) return;
+                        if (PianoCurriculum.isUnmodifiedPreset(v, LEGACY_BUILTIN_PRESETS[k])) return;
+                        const reviewed = BUILTIN_CUSTOM_PRESETS[k];
+                        if (PianoCurriculum.isUnmodifiedPreset(v, reviewed)) return;
+                        const custom = { ...v, isCampaign: false, isDojo: false, order: 99 };
+                        if (reviewed) { delete custom.setup; delete custom.tip; }
+                        SONGS[k] = custom;
                     });
                 }
             } catch (e) {
                 console.warn('LocalStorage load failed:', e);
             }
+            Object.values(state.profiles).forEach(profile => PianoCurriculum.migrateProfile(profile, SONGS));
+            if (!state.profiles[state.activeProfileId]) state.activeProfileId = Object.keys(state.profiles)[0];
+            saveToLocalStorage();
         }
 
         function applyTheme(themeName) {
@@ -2045,7 +2260,7 @@
             saveToLocalStorage();
         }
 
-        // 建立 3 個八度虛擬鋼琴鍵盤 (C3 ~ E5)
+        // 建立虛擬鋼琴鍵盤 (C3 ~ G5)
         const keyboardContainer = document.getElementById('pianoKeyboard');
         const keyElements = {};
 
@@ -2213,6 +2428,10 @@
             osc.stop(now + 0.05);
         }
 
+        function getPracticeBeatMs() {
+            return Math.round((SONGS[state.currentSongKey].beatMs || 650) / state.tempoMultiplier);
+        }
+
         let metronomeInterval = null;
         let metroBeatCount = 0;
         function toggleMetronome() {
@@ -2220,7 +2439,7 @@
             const dot = document.getElementById('metronomeDot');
             if (state.metronomeActive) {
                 dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping';
-                const intervalMs = Math.round(650 / state.tempoMultiplier);
+                const intervalMs = getPracticeBeatMs();
                 metroBeatCount = 0;
                 playMetronomeTick(true);
                 metronomeInterval = setInterval(() => {
@@ -2242,29 +2461,30 @@
         }
 
         function checkAndAutoPlayOtherHand() {
+            clearTimeout(state.autoHandTimer);
             if (state.handMode === 'both' || state.isDemoPlaying) return;
             const song = SONGS[state.currentSongKey];
             if (!song || state.currentNoteIndex >= song.notes.length) return;
-
             const currentNote = song.notes[state.currentNoteIndex];
             if (currentNote.hand && currentNote.hand !== state.handMode) {
+                const runId = state.practiceRunId;
+                const noteIndex = state.currentNoteIndex;
                 const autoMidi = getTransposedMidi(currentNote.midi);
-                const durSec = Math.max(0.35, ((currentNote.dur || 1) * 0.48) / state.tempoMultiplier);
-                setTimeout(() => {
-                    if (state.currentNoteIndex < song.notes.length && song.notes[state.currentNoteIndex] === currentNote) {
-                        playPianoTone(autoMidi, durSec);
-                        state.noteStates[state.currentNoteIndex] = 'correct';
-                        state.correctMidiNote = autoMidi;
-                        state.currentNoteIndex++;
-                        updateInstructionUI('CORRECT', autoMidi, autoMidi);
-                        updateKeyboardHighlights();
-                        if (state.currentNoteIndex >= song.notes.length) {
-                            setTimeout(finishStageAndEvaluate, 400);
-                        } else {
-                            checkAndAutoPlayOtherHand();
-                        }
+                const stepMs = (currentNote.dur || 1) * getPracticeBeatMs();
+                playPianoTone(autoMidi, stepMs / 1000);
+                state.autoHandTimer = setTimeout(() => {
+                    if (runId !== state.practiceRunId || state.isDemoPlaying || state.handMode === 'both' || state.currentNoteIndex !== noteIndex) return;
+                    state.noteStates[state.currentNoteIndex] = 'correct';
+                    state.correctMidiNote = autoMidi;
+                    state.currentNoteIndex++;
+                    updateInstructionUI('INIT');
+                    updateKeyboardHighlights();
+                    if (state.currentNoteIndex >= song.notes.length) finishStageAndEvaluate();
+                    else {
+                        checkAndAutoPlayOtherHand();
+                        restartFlowModeTimer();
                     }
-                }, Math.round(280 / state.tempoMultiplier));
+                }, stepMs);
             }
         }
 
@@ -2274,14 +2494,17 @@
             const song = SONGS[state.currentSongKey];
             if (!song || state.currentNoteIndex >= song.notes.length) return;
             const curNote = song.notes[state.currentNoteIndex];
-            const waitMs = Math.round(((curNote.dur || 1) * 950) / state.tempoMultiplier);
+            const waitMs = Math.round((curNote.dur || 1) * getPracticeBeatMs());
             state.lastExpectedTime = performance.now();
+            const runId = state.practiceRunId;
+            const noteIndex = state.currentNoteIndex;
 
             state.flowTimer = setTimeout(() => {
+                if (runId !== state.practiceRunId || noteIndex !== state.currentNoteIndex) return;
                 if (state.practiceMode === 'flow' && state.currentNoteIndex < song.notes.length) {
                     const timingEl = document.getElementById('rhythmTimingBadge');
                     if (timingEl) {
-                        timingEl.textContent = 'LATE / 慢咗';
+                        timingEl.textContent = '跟拍提示：試吓下一音';
                         timingEl.className = 'px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold';
                     }
                     restartFlowModeTimer();
@@ -2290,11 +2513,12 @@
         }
 
         function handleUserPlayedNote(playedMidi, source = 'mic') {
+            if (state.isDemoPlaying || state.stageEvaluated) return;
             const song = SONGS[state.currentSongKey];
             if (!song || state.currentNoteIndex >= song.notes.length) return;
             const expectedNote = song.notes[state.currentNoteIndex];
             const expectedActualMidi = getTransposedMidi(expectedNote.midi);
-            const noteDurSec = Math.max(0.35, (expectedNote.dur || 1) * 0.5);
+            const noteDurSec = (expectedNote.dur || 1) * getPracticeBeatMs() / 1000;
             if (source !== 'mic') playPianoTone(playedMidi, noteDurSec);
 
             state.totalAttempts++;
@@ -2305,19 +2529,13 @@
                 if (state.combo > state.maxCombo) state.maxCombo = state.combo;
 
                 const timingEl = document.getElementById('rhythmTimingBadge');
-                const now = performance.now();
-                const delta = state.lastExpectedTime ? Math.abs(now - state.lastExpectedTime) : 100;
-                const isPerfect = delta < 900;
                 if (timingEl) {
-                    timingEl.textContent = isPerfect ? 'PERFECT ✨' : 'GOOD 👍';
-                    timingEl.className = isPerfect
-                        ? 'px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold'
-                        : 'px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/40 text-[10px] font-bold';
+                    timingEl.textContent = '音高正確 ✓';
+                    timingEl.className = 'px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold';
                 }
-                state.lastExpectedTime = now;
 
                 const comboMultiplier = Math.min(4, 1 + Math.floor(state.combo / 4) * 0.5);
-                state.currentScore += Math.round((isPerfect ? 110 : 90) * comboMultiplier);
+                state.currentScore += Math.round(100 * comboMultiplier);
 
                 state.noteStates[state.currentNoteIndex] = 'correct';
                 state.wrongMidiNote = null;
@@ -2346,7 +2564,10 @@
 
                 if (state.currentNoteIndex >= song.notes.length) {
                     clearTimeout(state.flowTimer);
-                    setTimeout(finishStageAndEvaluate, 400);
+                    const runId = state.practiceRunId;
+                    setTimeout(() => {
+                        if (runId === state.practiceRunId) finishStageAndEvaluate();
+                    }, 400);
                 } else {
                     checkAndAutoPlayOtherHand();
                 }
@@ -2389,7 +2610,7 @@
             document.getElementById('progressBar').style.width = `${(state.currentNoteIndex / total) * 100}%`;
             const acc = state.totalAttempts > 0 ? Math.round((state.correctHits / state.totalAttempts) * 100) : 100;
             const accEl = document.getElementById('accuracyValue');
-            accEl.textContent = `${acc}%`;
+            accEl.textContent = state.totalAttempts > 0 ? `${acc}%` : '—';
             accEl.className = acc >= 80 ? 'text-emerald-400' : 'text-red-400';
 
             const badgeBox = document.getElementById('targetJianpuBadge');
@@ -2429,22 +2650,27 @@
             } else {
                 badge.className = 'px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30';
                 badge.textContent = state.practiceMode === 'sight' ? '👁️ 視奏盲彈考核' : '準備彈奏';
-                hint.textContent = song.goal || `唱名提示：「${currentTarget.lyric}」`;
+                hint.textContent = state.practiceMode === 'sight' ? '先睇譜，再慢慢彈。' : song.goal || `唱名提示：「${currentTarget.lyric}」`;
             }
             const handColorClass = isLeft ? 'text-purple-400' : 'text-blue-400';
             if (state.practiceMode === 'sight') {
                 mainText.innerHTML = `👁️ 請睇雙行五線譜位置，用<span class="${handColorClass}">${isLeft ? '左手' : '右手'} ${FINGER_NAMES[currentTarget.finger]}</span> 彈出音符`;
             } else {
-                mainText.innerHTML = `請用<span class="${handColorClass}">${isLeft ? '左手' : '右手'} ${FINGER_NAMES[currentTarget.finger]}</span> 彈 <span class="${handColorClass}">${targetKeyInfo.note} (簡譜 ${targetKeyInfo.jianpu})</span>`;
+                mainText.innerHTML = `建議用<span class="${handColorClass}">${isLeft ? '左手' : '右手'} ${FINGER_NAMES[currentTarget.finger]}</span> 彈 <span class="${handColorClass}">${targetKeyInfo.note} (簡譜 ${targetKeyInfo.jianpu})</span>`;
             }
+            const technique = document.getElementById('techniqueHint');
+            technique.textContent = state.practiceMode === 'sight'
+                ? '手腕放鬆，唔舒服就停；程式只評音高，唔會驗證指法或長短拍。'
+                : state.transposeSemitones ? '移調中：原曲手位同指法可能唔適用，請老師重新安排；練原指法請移調返 0。'
+                : [currentTarget.cue || (state.currentNoteIndex === 0 ? song.setup : ''), song.tip || '自訂／匯入曲目指法只供參考，請老師按手形核對；唔好硬撐。'].filter(Boolean).join(' · ');
         }
 
         function finishStageAndEvaluate() {
             const song = SONGS[state.currentSongKey];
-            const acc = state.totalAttempts > 0 ? Math.round((state.correctHits / state.totalAttempts) * 100) : 100;
-            const passed = acc >= 80;
-            const stars = acc >= 95 ? 3 : (acc >= 88 ? 2 : (acc >= 80 ? 1 : 0));
-            const xpEarned = passed ? (song.xpReward || 60) + stars * 15 : 15;
+            if (state.isDemoPlaying || state.stageEvaluated || state.currentNoteIndex < song.notes.length) return;
+            state.stageEvaluated = true;
+            const { accuracy: acc, complete, passed, stars } = PianoCurriculum.evaluatePerformance(song.notes.length, state.correctHits, state.totalAttempts);
+            const xpEarned = passed ? (song.xpReward || 60) + stars * 15 : state.correctHits > 0 ? 15 : 0;
 
             playVictoryFanfare(passed);
 
@@ -2457,11 +2683,11 @@
             profile.stageProgress[state.currentSongKey] = {
                 stars: Math.max(prevBest.stars, stars),
                 highScore: Math.max(prevBest.highScore, state.currentScore),
-                bestAcc: Math.max(prevBest.bestAcc, acc)
+                bestAcc: Math.max(prevBest.bestAcc, complete ? acc : 0)
             };
 
             if (passed && song.isCampaign && song.order >= (profile.unlockedStageOrder || 1)) {
-                profile.unlockedStageOrder = Math.min(12, song.order + 1);
+                profile.unlockedStageOrder = Math.min(PianoCurriculum.count, song.order + 1);
             }
 
             if (!profile.history) profile.history = [];
@@ -2493,8 +2719,10 @@
 
             document.getElementById('modalEmoji').textContent = passed ? (stars === 3 ? '🏆' : '🎉') : '💪';
             document.getElementById('modalStarsRow').textContent = passed ? '⭐'.repeat(stars) + '☆'.repeat(3 - stars) : '☆☆☆';
-            document.getElementById('modalTitle').textContent = passed ? '恭喜過關！表現出色！' : '差少少！達到 80% 準確率即可過關';
-            document.getElementById('modalSubtitle').textContent = passed ? `成功獲得 ${stars} 粒星，繼續挑戰更高難度！` : '建議開啟「🐢 0.6x 慢速」或練熟下面常錯嘅音符再挑戰！';
+            document.getElementById('modalTitle').textContent = passed ? '恭喜過關！表現出色！' : complete ? '再練一次，音高準確率達 80% 就過關' : '分手／循環練習完成！';
+            document.getElementById('modalSubtitle').textContent = passed ? `成功獲得 ${stars} 粒星！指法同拍子請家長或老師一齊留意。` : complete ? '可以先用 0.6x 慢速，再試一次。' : '闖關請重新開始，用「自己彈全部音」模式彈齊每粒音；自動伴奏唔計過關。';
+            const nextKey = PianoCurriculum.nextLessonKey(SONGS, state.currentSongKey, profile.unlockedStageOrder);
+            document.getElementById('nextStageBtn').textContent = nextKey ? '下一關 →' : '返回闖關地圖';
             document.getElementById('finalScoreText').textContent = state.currentScore.toLocaleString();
             document.getElementById('finalAccuracyText').textContent = `${acc}%`;
             document.getElementById('finalXpEarnedText').textContent = `+${xpEarned} XP`;
@@ -2832,7 +3060,7 @@
                 order: 99,
                 isCampaign: false,
                 title: cleanTitle,
-                goal: "🎯 自訂簡譜練習（80% 準確率過關）",
+                goal: "🎯 自己彈完整首，音高準確率達 80% 過關",
                 rawJianpu: rawNotes,
                 xpReward: 80,
                 notes: parsedNotes
@@ -2964,10 +3192,24 @@
             });
         }
 
-        function loadSong(songKey) {
+        function loadSong(songKey, startPractice = true) {
             if (!SONGS[songKey]) songKey = 'stage1_middleC';
+            const profile = state.profiles[state.activeProfileId];
+            if (SONGS[songKey].isCampaign && SONGS[songKey].order > (profile.unlockedStageOrder || 1)) songKey = 'stage1_middleC';
             clearTimeout(state.flowTimer);
+            clearTimeout(state.autoHandTimer);
+            clearTimeout(state.correctTimer);
+            clearTimeout(state.wrongTimer);
+            clearTimeout(demoTimeout);
+            state.practiceRunId = (state.practiceRunId || 0) + 1;
+            state.stageEvaluated = false;
+            state.isDemoPlaying = false;
+            document.getElementById('demoBtnText').textContent = '示範';
             state.currentSongKey = songKey;
+            if (state.metronomeActive) {
+                toggleMetronome();
+                toggleMetronome();
+            }
             state.currentNoteIndex = 0;
             state.smoothScrollIndex = 0;
             state.totalAttempts = 0;
@@ -2992,10 +3234,17 @@
             document.getElementById('currentSongTitleText').textContent = song.title;
             const goalBadge = document.getElementById('stageBadgeGoal');
             if (goalBadge) goalBadge.textContent = song.goal || '🎯 入門至初中階';
+            const timingBadge = document.getElementById('rhythmTimingBadge');
+            if (timingBadge) {
+                timingBadge.textContent = '跟拍練習（只評音高）';
+                timingBadge.className = 'px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold';
+            }
             updateInstructionUI('INIT');
             updateKeyboardHighlights();
-            checkAndAutoPlayOtherHand();
-            restartFlowModeTimer();
+            if (startPractice) {
+                checkAndAutoPlayOtherHand();
+                restartFlowModeTimer();
+            }
         }
 
         const SHORTCUT_TO_MIDI = {};
@@ -3033,29 +3282,30 @@
 
         let demoTimeout = null;
         function toggleDemoPlay() {
-            const btnText = document.getElementById('demoBtnText');
             if (state.isDemoPlaying) {
-                state.isDemoPlaying = false;
-                clearTimeout(demoTimeout);
-                btnText.textContent = '示範';
+                loadSong(state.currentSongKey);
                 return;
             }
-            const song = SONGS[state.currentSongKey];
-            if (state.currentNoteIndex >= song.notes.length) loadSong(state.currentSongKey);
+            loadSong(state.currentSongKey, false);
             state.isDemoPlaying = true;
-            btnText.textContent = '停止';
-
+            clearTimeout(state.autoHandTimer);
+            clearTimeout(state.flowTimer);
+            document.getElementById('demoBtnText').textContent = '停止';
+            const runId = state.practiceRunId;
             const playNextDemoStep = () => {
-                if (!state.isDemoPlaying) return;
-                const currentSong = SONGS[state.currentSongKey];
-                if (state.currentNoteIndex >= currentSong.notes.length) {
-                    state.isDemoPlaying = false;
-                    btnText.textContent = '示範';
+                if (!state.isDemoPlaying || runId !== state.practiceRunId) return;
+                const song = SONGS[state.currentSongKey];
+                if (state.currentNoteIndex >= song.notes.length) {
+                    loadSong(state.currentSongKey);
                     return;
                 }
-                const noteObj = currentSong.notes[state.currentNoteIndex];
-                handleUserPlayedNote(getTransposedMidi(noteObj.midi), 'demo');
-                const stepMs = Math.round(((noteObj.dur || 1) * 520) / state.tempoMultiplier);
+                const note = song.notes[state.currentNoteIndex];
+                const stepMs = (note.dur || 1) * getPracticeBeatMs();
+                playPianoTone(getTransposedMidi(note.midi), stepMs / 1000);
+                state.noteStates[state.currentNoteIndex] = 'correct';
+                updateInstructionUI('INIT');
+                updateKeyboardHighlights();
+                state.currentNoteIndex++;
                 demoTimeout = setTimeout(playNextDemoStep, stepMs);
             };
             playNextDemoStep();
@@ -3136,64 +3386,56 @@
                 const vfVal = Number(voiceFilterInput?.value || 2);
                 state.micGainBoost = bVal;
                 state.voiceFilterLevel = vfVal;
-                if (micPreAmpGainNode && micAudioCtx) {
-                    micPreAmpGainNode.gain.setValueAtTime(bVal, micAudioCtx.currentTime);
-                }
                 const sDesc = sVal >= 8 ? '極高靈敏' : (sVal >= 5 ? '標準' : '防雜音');
                 document.getElementById('micSensLabelVal').textContent = `${sVal} (${sDesc})`;
                 document.getElementById('micBoostLabelVal').textContent = `${bVal.toFixed(1)}x 放大`;
-                const vfLabels = { 1: '寬鬆 (68%純度)', 2: '中 (77%純度)', 3: '嚴格防人聲 (84%)' };
+                const vfLabels = { 1: '寬鬆 (68%純度)', 2: '中 (77%純度)', 3: '嚴格 (84%純度)' };
                 const vfEl = document.getElementById('voiceFilterLabelVal');
                 if (vfEl) vfEl.textContent = vfLabels[vfVal] || '中 (77%純度)';
             };
+            const setMicMode = (mode) => {
+                if (micAuto.mode === 'manual') micManualNoiseFloor = micAuto.noiseFloor;
+                micAuto.setMode(mode, performance.now());
+                if (micAuto.mode === 'manual') micAuto.noiseFloor = micManualNoiseFloor;
+                state.ambientNoiseFloor = micAuto.noiseFloor;
+                resetMicNoteTracking();
+                updateMicSlidersUI();
+                updateMicAutoUI();
+            };
+            document.getElementById('micModeSelect').addEventListener('change', e => setMicMode(e.target.value));
+            updateMicSlidersUI();
+            updateMicAutoUI();
             sensInput.addEventListener('input', updateMicSlidersUI);
             boostInput.addEventListener('input', updateMicSlidersUI);
             voiceFilterInput?.addEventListener('input', updateMicSlidersUI);
 
             bindSafariButton('presetIpadStandBtn', () => {
+                setMicMode('manual');
                 sensInput.value = 8;
                 boostInput.value = 4.0;
                 if (voiceFilterInput) voiceFilterInput.value = 2;
                 updateMicSlidersUI();
             });
             bindSafariButton('presetNoisyRoomBtn', () => {
+                setMicMode('manual');
                 sensInput.value = 5;
                 boostInput.value = 2.5;
                 if (voiceFilterInput) voiceFilterInput.value = 3;
                 updateMicSlidersUI();
             });
 
-            // 1 秒自動環境底噪取樣校準
             bindSafariButton('calibrateNoiseBtn', () => {
-                if (!state.isMicListening || !analyserNode) {
-                    toggleMicrophone(false);
+                if (!state.isMicListening) {
+                    if (!micStarting) toggleMicrophone(false);
                     return;
                 }
-                const btn = document.getElementById('calibrateNoiseBtn');
-                const origText = btn.textContent;
-                btn.textContent = '⏳ 取樣環境噪音中 (請保持安靜)...';
-                let maxBgRms = 0;
-                let samples = 0;
-                const sampleTimer = setInterval(() => {
-                    if (!analyserNode || !pitchBuffer) return;
-                    analyserNode.getFloatTimeDomainData(pitchBuffer);
-                    let r = 0;
-                    for (let i = 0; i < pitchBuffer.length; i++) r += pitchBuffer[i] * pitchBuffer[i];
-                    r = Math.sqrt(r / pitchBuffer.length);
-                    if (r > maxBgRms) maxBgRms = r;
-                    samples++;
-                    if (samples >= 16) {
-                        clearInterval(sampleTimer);
-                        state.ambientNoiseFloor = maxBgRms;
-                        btn.textContent = `✅ 已鎖定底噪 (${maxBgRms.toFixed(3)})`;
-                        setTimeout(() => { btn.textContent = origText; }, 2500);
-                    }
-                }, 60);
+                beginMicCalibration();
             });
 
             document.getElementById('micDeviceSelect')?.addEventListener('change', (e) => {
                 state.selectedMicDeviceId = e.target.value;
-                if (state.isMicListening) toggleMicrophone(true);
+                if (state.isMicListening || micStarting) toggleMicrophone(true);
+                else { micAuto.stop(); resetMicNoteTracking(); updateMicAutoUI(); }
             });
 
             bindSafariButton('resetSongBtn', () => loadSong(state.currentSongKey));
@@ -3222,11 +3464,11 @@
 
             bindSafariButton('handPracticeBtn', () => {
                 const hands = ['both', 'R', 'L'];
-                const handLabels = { both: '雙手合奏', R: '只練右手(R)', L: '只練左手(L)' };
+                const handLabels = { both: '自己彈全部音', R: '只練右手(R)', L: '只練左手(L)' };
                 const nextIdx = (hands.indexOf(state.handMode) + 1) % hands.length;
                 state.handMode = hands[nextIdx];
                 document.getElementById('handPracticeText').textContent = handLabels[state.handMode];
-                checkAndAutoPlayOtherHand();
+                loadSong(state.currentSongKey);
             });
 
             const updateTransposeUI = () => {
@@ -3240,8 +3482,7 @@
                 } else {
                     badge.classList.add('hidden');
                 }
-                updateInstructionUI('INIT');
-                updateKeyboardHighlights();
+                loadSong(state.currentSongKey);
             };
             bindSafariButton('transposeDownBtn', () => {
                 if (state.transposeSemitones > -12) {
@@ -3277,6 +3518,9 @@
             });
             bindSafariButton('runAiOcrBtn', runAiMultiPageOcr);
             bindSafariButton('runLocalLogicOcrBtn', runLocalLogicSheetRecognition);
+            document.getElementById('localOcrPageSelect').addEventListener('change', event => {
+                renderLocalSheetDebug(Number(event.target.value));
+            });
 
             bindSafariButton('tempoSelectBtn', () => {
                 const speeds = [1.0, 0.6, 0.8];
@@ -3284,10 +3528,7 @@
                 const nextIdx = (speeds.indexOf(state.tempoMultiplier) + 1) % speeds.length;
                 state.tempoMultiplier = speeds[nextIdx];
                 document.getElementById('tempoBtnText').textContent = labels[state.tempoMultiplier];
-                if (state.metronomeActive) {
-                    toggleMetronome();
-                    toggleMetronome();
-                }
+                loadSong(state.currentSongKey);
             });
 
             bindSafariButton('loopToggleBtn', () => {
@@ -3299,10 +3540,15 @@
 
             bindSafariButton('replayStageBtn', () => loadSong(state.currentSongKey));
             bindSafariButton('nextStageBtn', () => {
-                const cur = SONGS[state.currentSongKey];
-                const nextEntry = Object.entries(SONGS).find(([, s]) => s.isCampaign && s.order === (cur.order || 1) + 1);
-                if (nextEntry) loadSong(nextEntry[0]);
-                else loadSong(state.currentSongKey);
+                const profile = state.profiles[state.activeProfileId];
+                const nextKey = PianoCurriculum.nextLessonKey(SONGS, state.currentSongKey, profile.unlockedStageOrder);
+                if (nextKey) loadSong(nextKey);
+                else {
+                    document.getElementById('completeModal').classList.add('hidden');
+                    renderCourseMapModal();
+                    document.getElementById('courseMapModal').classList.remove('hidden');
+                    document.getElementById('courseMapModal').classList.add('flex');
+                }
             });
 
             bindSafariButton('openCourseMapBtn', () => {
@@ -3315,7 +3561,7 @@
             bindSafariButton('unlockAllStagesBtn', () => {
                 const prof = state.profiles[state.activeProfileId];
                 if (prof) {
-                    prof.unlockedStageOrder = 12;
+                    prof.unlockedStageOrder = PianoCurriculum.count;
                     saveToLocalStorage();
                     renderCourseMapModal();
                 }
@@ -3372,9 +3618,11 @@
                 prof.xp = 0;
                 prof.level = 1;
                 prof.unlockedStageOrder = 1;
+                prof.curriculumVersion = PianoCurriculum.VERSION;
                 prof.stageProgress = {};
                 prof.history = [];
                 prof.badges = [];
+                if (state.activeProfileId === state.editingProfileId) loadSong('stage1_middleC');
                 saveProfileToCloud(prof);
                 updateProfileHeaderUI();
                 document.getElementById('editProfilePanel').classList.add('hidden');
@@ -3387,6 +3635,7 @@
                 delete state.profiles[state.editingProfileId];
                 if (state.activeProfileId === state.editingProfileId) {
                     state.activeProfileId = Object.keys(state.profiles)[0];
+                    loadSong('stage1_middleC');
                 }
                 saveToLocalStorage();
                 updateProfileHeaderUI();
@@ -3404,6 +3653,7 @@
                     id,
                     name,
                     avatar,
+                    curriculumVersion: PianoCurriculum.VERSION,
                     xp: 0,
                     level: 1,
                     unlockedStageOrder: 1,
@@ -3413,6 +3663,7 @@
                 };
                 state.profiles[id] = newProf;
                 state.activeProfileId = id;
+                loadSong('stage1_middleC');
                 nameInput.value = '';
                 saveProfileToCloud(newProf);
                 updateProfileHeaderUI();
