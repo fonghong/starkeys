@@ -136,6 +136,24 @@ test('current note and lyric appear to the right of the blue playhead', () => {
     assert.ok(next.every(label => label.align === 'center'));
 });
 
+test('rest symbols use their staff without a notehead, and lyrics sit below note names', () => {
+    const h = harness([
+        { hand: 'R', midi: 60, lyric: '小', finger: 1 },
+        { hand: 'L', midi: null, isRest: true, dur: 4, lyric: '停' },
+        { hand: 'R', midi: null, isRest: true, dur: 2 },
+        { hand: 'R', midi: null, isRest: true, dur: 1 },
+        { hand: 'R', midi: null, isRest: true, dur: 0.5 }
+    ]);
+    h.context.renderSheetMusicLoop();
+    const noteName = h.labels.find(label => label.text === 'C4');
+    const lyric = h.labels.find(label => label.text === '小');
+    assert.equal(lyric.x, noteName.x);
+    assert.ok(h.labels.some(label => label.text === '停'));
+    assert.equal(h.labels.filter(label => label.text === '休止').length, 4);
+    assert.equal(h.draws.length, 2, 'rests do not draw noteheads or fingering circles');
+    assert.ok(h.strokes.length > 0);
+});
+
 test('grand staff stays vertically centered when it fits and retains scrollable zoom layout', () => {
     const h = harness([{ hand: 'R', midi: 60 }, { hand: 'L', midi: 48 }]);
     const original = h.context.buildSheetLayout([{ hand: 'R', step: 0 }, { hand: 'L', step: -7 }]);

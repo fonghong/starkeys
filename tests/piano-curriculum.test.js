@@ -38,7 +38,7 @@ function harness() {
     vm.runInContext(html.slice(html.indexOf('        const LOCAL_STORAGE_THEME_KEY'), html.indexOf('        function applyTheme')), context);
     vm.runInContext('let demoTimeout = null; let metronomeInterval = null; let metroBeatCount = 0;\n' + [
         'getTransposedMidi', 'getPracticeBeatMs', 'toggleMetronome', 'loadSong', 'toggleDemoPlay',
-        'checkAndAutoPlayOtherHand', 'restartFlowModeTimer', 'handleUserPlayedNote', 'finishStageAndEvaluate'
+        'advancePracticeIndex', 'checkAndAutoPlayOtherHand', 'restartFlowModeTimer', 'handleUserPlayedNote', 'finishStageAndEvaluate'
     ].map(extract).join('\n'), context);
     context.saveProfileToCloud = () => context.saveToLocalStorage();
     const songs = vm.runInContext('SONGS', context);
@@ -157,12 +157,25 @@ test('reviewed fingerings use consistent five-finger positions with explicit rel
     assert.deepEqual(plain(songs.step_leftScale.notes.slice(0, 8).map(n => n.finger)), [5,4,3,2,1,3,2,1]);
     assert.deepEqual(plain(songs.stage6_cMajorScale.notes.slice(0, 8).map(n => n.finger)), [1,2,3,1,2,3,4,5]);
 });
-test('all six reviewed presets round-trip through the actual parser, including low right-hand notes and durations', () => {
+test('20 built-in melodies round-trip through the parser with inline lyrics and right-hand low notes', () => {
     const h = harness();
     const presets = Object.values(h.evaluate('BUILTIN_CUSTOM_PRESETS'));
-    assert.equal(presets.length, 6);
+    assert.equal(presets.length, 20);
     const musical = notes => plain(notes.map(({ midi, finger, hand, dur }) => ({ midi, finger, hand, dur })));
-    for (const song of presets) assert.deepEqual(musical(h.context.parseJianpuString(song.rawJianpu)), musical(song.notes), song.title);
+    for (const song of presets) {
+        const parsed = h.context.parseJianpuString(song.rawJianpu);
+        assert.deepEqual(musical(parsed), musical(song.notes), song.title);
+        if (song !== h.songs.custom_preset_canon_full && song !== h.songs.custom_preset_elise_full) {
+            song.notes.forEach((note, i) => {
+                if (note.lyric !== undefined) assert.equal(parsed[i].lyric, note.lyric, song.title);
+            });
+        }
+    }
+    assert.equal(presets.filter(song => ![h.songs.custom_preset_canon_full, h.songs.custom_preset_elise_full, h.songs.custom_preset_brahms_lullaby].includes(song) && song.notes.some(note => note.lyric)).length, 17);
+    assert.ok(h.songs.custom_preset_brahms_lullaby.notes.every(note => !note.lyric));
+    for (const key of ['custom_preset_yankee_doodle', 'custom_preset_auld_lang_syne', 'custom_preset_amazing_grace', 'custom_preset_deck_halls']) {
+        assert.ok(h.songs[key].notes.every(note => note.hand === 'R'), key);
+    }
     assert.equal(h.songs.custom_preset_twinkle_full.notes.length, 42);
     assert.equal(h.songs.custom_preset_birthday.notes[0].hand, 'R');
     assert.equal(h.songs.custom_preset_birthday.notes[0].midi, 55);
@@ -230,6 +243,41 @@ test('actual storage upgrades untouched presets, protects lessons, preserves edi
     h.context.loadFromLocalStorage();
     assert.deepEqual(plain(h.songs.custom_preset_birthday), before);
 });
+test('previously reviewed saved melodies gain lyrics while edited copies remain unchanged', () => {
+    const h = harness();
+    const previous = plain(h.evaluate('PREVIOUS_REVIEWED_PRESETS'));
+    const edited = { ...previous.custom_preset_twinkle_full, title: 'My own star song' };
+    h.storage.set('starkeys_custom_songs_v2', JSON.stringify({
+        custom_preset_birthday: previous.custom_preset_birthday,
+        custom_preset_twinkle_full: edited
+    }));
+    h.context.loadFromLocalStorage();
+    assert.equal(h.songs.custom_preset_birthday.notes[0].lyric, 'Hap-');
+    assert.match(h.songs.custom_preset_birthday.rawJianpu, /\(Hap-\)/);
+    assert.equal(h.songs.custom_preset_twinkle_full.title, edited.title);
+    assert.deepEqual(plain(h.songs.custom_preset_twinkle_full.notes), edited.notes);
+    assert.equal(Object.values(h.songs).filter(song => !song.isCampaign && !song.isDojo).length, 20);
+});
+test('saved melodies without syllable markers upgrade while edited lyrics remain intact', () => {
+    const h = harness();
+    const previous = plain(h.evaluate('PREVIOUS_LYRICS_PRESETS'));
+    const edited = { ...previous.custom_preset_twinkle_full, title: 'My star song' };
+    h.storage.set('starkeys_custom_songs_v2', JSON.stringify({
+        custom_preset_birthday: previous.custom_preset_birthday,
+        custom_preset_twinkle_full: edited
+    }));
+    h.context.loadFromLocalStorage();
+    assert.equal(h.songs.custom_preset_birthday.notes[0].lyric, 'Hap-');
+    assert.match(h.songs.custom_preset_birthday.rawJianpu, /\(birth-\)/);
+    assert.deepEqual(plain(h.songs.custom_preset_twinkle_full.notes), edited.notes);
+    assert.equal(h.songs.custom_preset_twinkle_full.title, edited.title);
+    for (const [key, lyric] of [
+        ['custom_preset_twinkle_full', 'Twin-'],
+        ['custom_preset_london_full', 'Lon-'],
+        ['custom_preset_frere_jacques', 'Frè-'],
+        ['custom_preset_row_boat', 'gen-']
+    ]) assert.ok(h.songs[key].notes.some(note => note.lyric === lyric), key);
+});
 test('demo starts without unintended accompaniment, cannot score, and resets without rewards', () => {
     const h = harness();
     h.context.loadSong('step_handDialogue', false);
@@ -250,6 +298,62 @@ test('demo starts without unintended accompaniment, cannot score, and resets wit
     stale();
     assert.equal(h.state.currentNoteIndex, 0);
 });
+test('rests wait without sound or scoring, and only pitched notes count toward completion', () => {
+    const h = harness();
+    h.songs.custom_rest = { title: '休止測試', notes: plain(h.context.parseJianpuString('0/2 R1:1(小) L0-- R2:2(綿)')) };
+    h.context.loadSong('custom_rest');
+    const beat = h.context.getPracticeBeatMs();
+    const firstRest = h.state.autoHandTimer;
+    assert.equal(h.timers.get(firstRest).ms, beat / 2);
+    assert.equal(h.tones.length, 0);
+    h.context.handleUserPlayedNote(60, 'mic');
+    assert.equal(h.state.totalAttempts, 0);
+    h.run(firstRest);
+    assert.equal(h.state.currentNoteIndex, 1);
+    h.context.handleUserPlayedNote(60, 'mic');
+    assert.equal(h.state.correctHits, 1);
+    const longRest = h.state.autoHandTimer;
+    assert.equal(h.timers.get(longRest).ms, beat * 4);
+    h.context.handleUserPlayedNote(62, 'mic');
+    assert.equal(h.state.totalAttempts, 1);
+    h.run(longRest);
+    assert.equal(h.state.currentNoteIndex, 3);
+    h.context.handleUserPlayedNote(62, 'mic');
+    assert.equal(h.state.correctHits, 2);
+    assert.equal(h.state.totalAttempts, 2);
+    h.context.finishStageAndEvaluate();
+    assert.equal(h.profile.stageProgress.custom_rest.stars, 3);
+    assert.equal(h.tones.length, 0);
+
+    h.context.loadSong('custom_rest', false);
+    h.context.toggleDemoPlay();
+    assert.equal(h.tones.length, 0);
+    assert.equal(h.timers.get(h.evaluate('demoTimeout')).ms, beat / 2);
+    for (let i = 0; h.state.isDemoPlaying && i < 10; i++) h.run(h.evaluate('demoTimeout'));
+    assert.equal(h.tones.length, 2);
+    assert.equal(h.profile.history.length, 1);
+});
+
+test('rest timers ignore stale callbacks and do not produce flow reminders or all-rest rewards', () => {
+    const h = harness();
+    h.songs.custom_only_rest = { title: '全休止', notes: plain(h.context.parseJianpuString('0-')) };
+    h.state.practiceMode = 'flow';
+    h.context.loadSong('custom_only_rest');
+    const stale = h.timers.get(h.state.autoHandTimer).fn;
+    assert.equal(h.state.flowTimer, undefined);
+    h.context.restartFlowModeTimer();
+    assert.equal(h.state.flowTimer, undefined);
+    h.context.loadSong('stage1_middleC');
+    stale();
+    assert.equal(h.state.currentNoteIndex, 0);
+    h.context.loadSong('custom_only_rest');
+    h.run(h.state.autoHandTimer);
+    assert.equal(h.state.currentNoteIndex, 1);
+    assert.equal(h.state.totalAttempts, 0);
+    assert.equal(h.profile.stageProgress.custom_only_rest.stars, 0);
+    assert.equal(h.profile.xp, 0);
+});
+
 test('actual completion unlocks above 12, caps at 24, ignores duplicate completion and assisted best accuracy', () => {
     const h = harness();
     h.profile.unlockedStageOrder = 13;

@@ -550,12 +550,12 @@
             </div>
 
             <div class="p-4 sm:p-5 overflow-y-auto grid grid-cols-1 md:grid-cols-12 gap-4 flex-1">
-                <div class="md:col-span-5 flex flex-col gap-2.5 bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800">
+                <div class="md:col-span-5 md:min-h-0 flex flex-col gap-2.5 bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">📂 已儲存曲庫 (自動儲喺瀏覽器)</span>
                         <button id="newCustomSongResetBtn" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-0.5 rounded-lg border border-slate-700">+ 新增空白簡譜</button>
                     </div>
-                    <div id="savedCustomSongsList" class="space-y-2 max-h-64 md:max-h-80 overflow-y-auto pr-1 flex-1">
+                    <div id="savedCustomSongsList" class="space-y-2 max-h-64 md:max-h-none md:min-h-0 overflow-y-auto pr-1 flex-1">
                     </div>
                 </div>
 
@@ -610,10 +610,12 @@
                             <div>• <strong>基本音與八度</strong>：<code class="text-emerald-300">1 ~ 7</code> 為中音 C4~B4；加點 <code class="text-purple-300">1. ~ 7.</code> 為低音區 C3~B3；加撇 <code class="text-emerald-300">1' ~ 5'</code> 為高音 C5~G5</div>
                             <div>• <strong>黑鍵升號與指法</strong>：<code class="text-amber-300">#4</code> 代表 F#4；加冒號 <code class="text-amber-300">3:3</code> 指定右手第3指；加 <code class="text-purple-300">L1.:5</code> 代表左手第5指彈低音 C3</div>
                             <div>• <strong>拍子長度</strong>：尾隨 <code class="text-blue-300">-</code> 為 2 拍（如 <code class="text-blue-300">5-</code>），<code class="text-blue-300">--</code> 為 4 拍（如 <code class="text-blue-300">1'--</code>），<code class="text-blue-300">/2</code> 為半拍（如 <code class="text-blue-300">3/2</code>）</div>
+                            <div>• <strong>休止與歌詞</strong>：<code class="text-blue-300">0 0- 0-- 0/2</code> 分別休止 1、2、4、半拍；音符後加括號標記歌詞，如 <code class="text-emerald-300">R1:1(小) R2:2(綿) R3-:3(羊)</code>。休止符可用 <code class="text-blue-300">L0</code> 放在左手譜表。</div>
                         </div>
                     </div>
 
-                    <div class="flex gap-2 pt-1">
+                    <div class="flex gap-2 pt-1 flex-wrap">
+                        <button type="button" id="deleteCustomSongBtn" class="hidden bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 font-bold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm">🗑️ 刪除此曲</button>
                         <button id="saveOnlyCustomSongBtn" class="bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 font-bold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm">
                             💾 儲存到曲庫
                         </button>
@@ -929,6 +931,7 @@
             lastNoteTriggerTime: 0,
             previousRms: 0,
             editingCustomSongKey: null,
+            deletedCustomPresetKeys: [],
             editingProfileId: null,
             isImmersiveFallback: false,
             micGainBoost: 2.5,
@@ -1388,8 +1391,10 @@
             const parsed = [];
             tokens.forEach(tok => {
                 if (!tok) return;
+                const annotation = tok.match(/^(.*?)\(([^()]*)\)$/);
+                const lyric = annotation ? annotation[2] : null;
                 let handOverride = null;
-                let workTok = tok;
+                let workTok = annotation ? annotation[1] : tok;
                 if (workTok.startsWith('L') || workTok.startsWith('l')) {
                     handOverride = 'L';
                     workTok = workTok.slice(1);
@@ -1412,6 +1417,10 @@
                     notePart = notePart.slice(0, -1);
                 }
 
+                if (notePart === '0') {
+                    parsed.push({ isRest: true, midi: null, finger: null, hand: handOverride || 'R', dur, lyric: lyric || '' });
+                    return;
+                }
                 const base = mapToken[notePart];
                 if (base) {
                     const fingerNum = parseInt(fingerPart, 10);
@@ -1423,11 +1432,20 @@
                         finger: finalFinger,
                         hand: finalHand,
                         dur,
-                        lyric: kInfo ? kInfo.solfege : notePart
+                        lyric: lyric !== null ? lyric : (kInfo ? kInfo.solfege : notePart)
                     });
                 }
             });
             return parsed;
+        }
+
+        function melodyPreset(title, goal, rawJianpu) {
+            return {
+                order: 99, isCampaign: false, title: `🎵 ${title}`, goal, rawJianpu,
+                setup: '右手單音旋律；高低音跨手位時先放開琴鍵，再整手移位',
+                tip: '入門單音短編，唔係原曲全首；按手形調整指法，移位可停一停。',
+                beatMs: 950, xpReward: 85
+            };
         }
 
         // 舊版曲庫基準，下方套用新版指法並保留用戶修改的版本。
@@ -1467,16 +1485,69 @@
                 goal: "🎯 完整 32 音連左手低音根音烘托",
                 rawJianpu: "L1.:5 3:3 3:3 4:4 5:5 L5.:1 5:5 4:4 3:3 2:2 L1.:5 1:1 1:1 2:2 3:3 L5.:1 3:3 2:2 2:2- L1.:5 3:3 3:3 4:4 5:5 L5.:1 5:5 4:4 3:3 2:2 L1.:5 1:1 1:1 2:2 3:3 L5.:1 2:2 1:1 1:1-",
                 xpReward: 100
-            }
+            },
+            custom_preset_frere_jacques: melodyPreset('兩隻老虎／Frère Jacques（主題短編）', '🎯 五指手位，練習重複樂句',
+                '1:1(Frè-) 2:2(re) 3:3(Jac-) 1:1(ques) 1:1(Frè-) 2:2(re) 3:3(Jac-) 1:1(ques) 3:3(Dor-) 4:4(mez-) 5-:5(vous) 3:3(Dor-) 4:4(mez-) 5-:5(vous)'),
+            custom_preset_row_boat: melodyPreset('划小船 Row Row Row Your Boat（主題短編）', '🎯 由同音連彈走到五指上行',
+                '1:1(Row) 1:1(row) 1:1(row) 2:2(your) 3-:3(boat) 3:3(gen-) 2:2(tly) 3:3(down) 4:4(the) 5-:5(stream)'),
+            custom_preset_hot_cross_buns: melodyPreset('熱十字麵包 Hot Cross Buns', '🎯 三音下行與同音連彈',
+                '3:3(Hot) 2:2(cross) 1-:1(buns) 3:3(Hot) 2:2(cross) 1-:1(buns) 1:1(One) 1:1(a) 1:1(pen-) 1:1(ny) 2:2(two) 2:2(a) 2:2(pen-) 2:2(ny) 3:3(Hot) 2:2(cross) 1-:1(buns)'),
+            custom_preset_three_blind_mice: melodyPreset('三隻盲鼠 Three Blind Mice（主題短編）', '🎯 三音下行後跨至高音',
+                '3:3(Three) 2:2(blind) 1-:1(mice) 3:3(three) 2:2(blind) 1-:1(mice) 5:5(See) 4:4(how) 3:3(they) 4:4(run) 5-:5()'),
+            custom_preset_old_macdonald: melodyPreset('老麥當勞 Old MacDonald（主題短編）', '🎯 短句跳音與穩定拍子',
+                '5:5(Old) 5:5(Mac-) 5:5(Don-) 2:2(ald) 3:3(had) 3:3(a) 2-:2(farm) 7:5(E) 7:5(I) 6:4(E) 6:4(I) 5-:3(O)'),
+            custom_preset_yankee_doodle: melodyPreset('洋基歌 Yankee Doodle（主題短編）', '🎯 相鄰音與跨指回到主音',
+                '1:1(Yan-) 1:1(kee) 2:2(Doo-) 3:3(dle) 1:1(went) 3:3(to) 2-:2(town) 1:1(Ri-) 1:1(ding) 2:2(on) 3:3(a) 1:1(po-) R7.:2(ny) 1-:1()'),
+            custom_preset_auld_lang_syne: melodyPreset('友誼地久天長 Auld Lang Syne（主題短編）', '🎯 弱起拍與分句移位',
+                'R5.:1(Should) 1:2(auld) 1:2(ac-) 1:2(quain-) 3:4(tance) 2:3(be) 1:2(for-) 2-:3(got)'),
+            custom_preset_amazing_grace: melodyPreset('奇異恩典 Amazing Grace（主題短編）', '🎯 長音呼吸與柔和連奏',
+                'R5.:1(A-) 1:2(ma-) 3-:4(zing) 1:2(grace) 3:4(how) 2:3(sweet) 1:2(the) R6.:2(sound) R5.-:1()'),
+            custom_preset_silent_night: melodyPreset('平安夜 Silent Night（主題短編）', '🎯 高音句前先放開再移手',
+                `5:5(Si-) 6:5(lent) 5:4(night) 3-:2() 5:4(ho-) 6:5(ly) 5:4(night) 3-:2() 2':5(All) 2':5(is) 7-:3(calm)`),
+            custom_preset_we_wish: melodyPreset('祝你聖誕快樂 We Wish You a Merry Christmas（主題短編）', '🎯 高音 C5 附近移位練習',
+                `5:1(We) 1':4(wish) 1':4(you) 2':5(a) 1':4(mer-) 7:3(ry) 6:2(Christ-) 5-:1(mas)`),
+            custom_preset_deck_halls: melodyPreset('裝飾大廳 Deck the Halls（主題短編）', '🎯 由 F4 逐級走到 B3',
+                '4:4(Deck) 3:3(the) 2:2(halls) 1:1(with) R7.:1(boughs) 1:2(of) 2:3(hol-) R7.-:1(ly)'),
+            custom_preset_saints: melodyPreset('聖者進行曲 When the Saints Go Marching In（主題短編）', '🎯 輕快重複樂句',
+                '1:1(Oh) 3:3(when) 4:4(the) 5-:5(saints) 1:1(go) 3:3(march-) 4:4(ing) 5-:5(in)'),
+            custom_preset_brahms_lullaby: melodyPreset('布拉姆斯搖籃曲（器樂主題短編）', '🎯 柔和重複音；呢首器樂編曲無歌詞',
+                `5:1() 5:1() 7:3() 5:1() 5:1() 7:3() 5:1() 7:3() 3':5() 2':4() 1'-:3()`),
+            custom_preset_lightly_row: melodyPreset('小蜜蜂 Lightly Row（主題短編）', '🎯 五指手位練習高低音轉換',
+                '5:5(小) 3:3(蜜) 3:3(蜂) 4:4(嗡) 2:2(嗡) 2:2(嗡) 1:1(飛) 2:2(到) 3:3(花) 4:4(園) 5:5(採) 5:5(花) 5-:5(蜜)')
         };
 
         Object.values(BUILTIN_CUSTOM_PRESETS).forEach(song => {
             song.notes = parseJianpuString(song.rawJianpu);
         });
-
         // Only untouched saved presets are replaced; keep this snapshot to recognise legacy copies.
         const LEGACY_BUILTIN_PRESETS = JSON.parse(JSON.stringify(BUILTIN_CUSTOM_PRESETS));
         PianoCurriculum.reviewPresets(BUILTIN_CUSTOM_PRESETS, SONGS);
+        const PREVIOUS_REVIEWED_PRESETS = JSON.parse(JSON.stringify(BUILTIN_CUSTOM_PRESETS));
+        const presetLyrics = {
+            custom_preset_birthday: 'Hap- py birth- day to you Hap- py birth- day to you Hap- py birth- day dear dear friend Hap- py birth- day to you',
+            custom_preset_twinkle_full: 'Twin- kle twin- kle lit- tle star How I won- der what you are Up a- bove the world so high Like a dia- mond in the sky Twin- kle twin- kle lit- tle star How I won- der what you are',
+            custom_preset_london_full: 'Lon- don bridge is fall- ing down fall- ing down fall- ing down Lon- don bridge is fall- ing down my fair la- dy',
+            custom_preset_ode_full: '青 天 高 高 白 雲 飄 飄 太 陽 出 山 天 下 明 青 天 高 高 白 雲 飄 飄 太 陽 出 山 天 下 明'
+        };
+        Object.entries(presetLyrics).forEach(([key, words]) => {
+            const song = BUILTIN_CUSTOM_PRESETS[key];
+            const lyrics = words.split(' ');
+            const tokens = song.rawJianpu.split(' ');
+            let lyricIndex = 0;
+            song.notes.forEach((note, index) => {
+                if (note.hand !== 'R') { note.lyric = ''; tokens[index] += '()'; return; }
+                note.lyric = lyrics[lyricIndex++];
+                tokens[index] += `(${note.lyric})`;
+            });
+            song.rawJianpu = tokens.join(' ');
+        });
+        // Recognise saved copies from before syllable-continuation markers were added.
+        const PREVIOUS_LYRICS_PRESETS = JSON.parse(JSON.stringify(BUILTIN_CUSTOM_PRESETS));
+        Object.keys(presetLyrics).forEach(key => {
+            const song = PREVIOUS_LYRICS_PRESETS[key];
+            song.notes.forEach(note => { if (note.lyric) note.lyric = note.lyric.replace(/-$/, ''); });
+            song.rawJianpu = song.rawJianpu.replace(/\(([^()]*)\)/g, (_, lyric) => `(${lyric.replace(/-$/, '')})`);
+        });
         Object.assign(SONGS, BUILTIN_CUSTOM_PRESETS, DOJO_DRILLS);
 
         function getTransposedMidi(baseMidi) {
@@ -2250,9 +2321,11 @@
             const song = SONGS[state.currentSongKey];
             const curNote = song?.notes?.[state.currentNoteIndex];
             if (curNote) {
-                const k = MIDI_MAP[getTransposedMidi(curNote.midi)] || MIDI_MAP[60];
                 const expEl = document.getElementById('modalExpectedNoteText');
-                if (expEl) expEl.textContent = `${k.note} (簡譜 ${k.jianpu})`;
+                if (expEl) {
+                    const k = curNote.isRest ? null : (MIDI_MAP[getTransposedMidi(curNote.midi)] || MIDI_MAP[60]);
+                    expEl.textContent = k ? `${k.note} (簡譜 ${k.jianpu})` : '休止';
+                }
             }
             refreshAudioInputDevices();
             const modal = document.getElementById('micSetupModal');
@@ -2268,6 +2341,7 @@
         const LOCAL_STORAGE_PROFILES_KEY = 'starkeys_profiles_v2';
         const LOCAL_STORAGE_ACTIVE_PROFILE_KEY = 'starkeys_active_profile_v2';
         const LOCAL_STORAGE_CUSTOM_SONGS_KEY = 'starkeys_custom_songs_v2';
+        const LOCAL_STORAGE_DELETED_PRESETS_KEY = 'starkeys_deleted_custom_presets_v2';
 
         function saveToLocalStorage() {
             try {
@@ -2279,6 +2353,7 @@
                     if (!v.isCampaign && !v.isDojo) customSongsOnly[k] = v;
                 });
                 localStorage.setItem(LOCAL_STORAGE_CUSTOM_SONGS_KEY, JSON.stringify(customSongsOnly));
+                localStorage.setItem(LOCAL_STORAGE_DELETED_PRESETS_KEY, JSON.stringify(state.deletedCustomPresetKeys));
             } catch (e) {
                 console.warn('LocalStorage save failed:', e);
             }
@@ -2300,6 +2375,10 @@
                 const savedActiveId = localStorage.getItem(LOCAL_STORAGE_ACTIVE_PROFILE_KEY);
                 if (savedActiveId && state.profiles[savedActiveId]) state.activeProfileId = savedActiveId;
 
+                const deletedPresets = JSON.parse(localStorage.getItem(LOCAL_STORAGE_DELETED_PRESETS_KEY) || '[]');
+                if (Array.isArray(deletedPresets)) {
+                    state.deletedCustomPresetKeys = deletedPresets.filter(key => Object.prototype.hasOwnProperty.call(BUILTIN_CUSTOM_PRESETS, key));
+                }
                 const savedCustomSongs = localStorage.getItem(LOCAL_STORAGE_CUSTOM_SONGS_KEY);
                 if (savedCustomSongs) {
                     const parsedSongs = JSON.parse(savedCustomSongs);
@@ -2307,6 +2386,8 @@
                         if (SONGS[k]?.isCampaign || SONGS[k]?.isDojo) return;
                         if (!v || !Array.isArray(v.notes) || !v.notes.length) return;
                         if (PianoCurriculum.isUnmodifiedPreset(v, LEGACY_BUILTIN_PRESETS[k])) return;
+                        if (PianoCurriculum.isUnmodifiedPreset(v, PREVIOUS_REVIEWED_PRESETS[k])) return;
+                        if (PianoCurriculum.isUnmodifiedPreset(v, PREVIOUS_LYRICS_PRESETS[k])) return;
                         const reviewed = BUILTIN_CUSTOM_PRESETS[k];
                         if (PianoCurriculum.isUnmodifiedPreset(v, reviewed)) return;
                         const custom = { ...v, isCampaign: false, isDojo: false, order: 99 };
@@ -2314,6 +2395,7 @@
                         SONGS[k] = custom;
                     });
                 }
+                state.deletedCustomPresetKeys.forEach(key => { delete SONGS[key]; });
             } catch (e) {
                 console.warn('LocalStorage load failed:', e);
             }
@@ -2507,7 +2589,7 @@
         function updateKeyboardHighlights() {
             const song = SONGS[state.currentSongKey];
             const targetNoteObj = song ? song.notes[state.currentNoteIndex] : null;
-            const targetActualMidi = targetNoteObj ? getTransposedMidi(targetNoteObj.midi) : null;
+            const targetActualMidi = targetNoteObj && !targetNoteObj.isRest ? getTransposedMidi(targetNoteObj.midi) : null;
             const isSightRead = state.practiceMode === 'sight';
 
             PIANO_KEYS.forEach(k => {
@@ -2629,23 +2711,35 @@
             });
         }
 
+        function advancePracticeIndex(song) {
+            state.currentNoteIndex++;
+            if (state.loopPhraseActive) {
+                const loopEnd = Math.min(song.notes.length, state.loopStartIdx + 8);
+                if (state.currentNoteIndex >= loopEnd) {
+                    state.currentNoteIndex = state.loopStartIdx;
+                    for (let i = state.loopStartIdx; i < loopEnd; i++) state.noteStates[i] = 'pending';
+                }
+            }
+        }
+
         function checkAndAutoPlayOtherHand() {
             clearTimeout(state.autoHandTimer);
-            if (state.handMode === 'both' || state.isDemoPlaying) return;
+            if (state.isDemoPlaying) return;
             const song = SONGS[state.currentSongKey];
             if (!song || state.currentNoteIndex >= song.notes.length) return;
             const currentNote = song.notes[state.currentNoteIndex];
-            if (currentNote.hand && currentNote.hand !== state.handMode) {
+            const isRest = currentNote.isRest;
+            if (isRest || (state.handMode !== 'both' && currentNote.hand && currentNote.hand !== state.handMode)) {
                 const runId = state.practiceRunId;
                 const noteIndex = state.currentNoteIndex;
-                const autoMidi = getTransposedMidi(currentNote.midi);
+                const autoMidi = isRest ? null : getTransposedMidi(currentNote.midi);
                 const stepMs = (currentNote.dur || 1) * getPracticeBeatMs();
-                playPianoTone(autoMidi, stepMs / 1000);
+                if (!isRest) playPianoTone(autoMidi, stepMs / 1000);
                 state.autoHandTimer = setTimeout(() => {
-                    if (runId !== state.practiceRunId || state.isDemoPlaying || state.handMode === 'both' || state.currentNoteIndex !== noteIndex) return;
-                    state.noteStates[state.currentNoteIndex] = 'correct';
+                    if (runId !== state.practiceRunId || state.isDemoPlaying || (!isRest && state.handMode === 'both') || state.currentNoteIndex !== noteIndex) return;
+                    state.noteStates[state.currentNoteIndex] = isRest ? 'rest' : 'correct';
                     state.correctMidiNote = autoMidi;
-                    state.currentNoteIndex++;
+                    advancePracticeIndex(song);
                     updateInstructionUI('INIT');
                     updateKeyboardHighlights();
                     if (state.currentNoteIndex >= song.notes.length) finishStageAndEvaluate();
@@ -2663,6 +2757,7 @@
             const song = SONGS[state.currentSongKey];
             if (!song || state.currentNoteIndex >= song.notes.length) return;
             const curNote = song.notes[state.currentNoteIndex];
+            if (curNote.isRest) return;
             const waitMs = Math.round((curNote.dur || 1) * getPracticeBeatMs());
             state.lastExpectedTime = performance.now();
             const runId = state.practiceRunId;
@@ -2686,6 +2781,7 @@
             const song = SONGS[state.currentSongKey];
             if (!song || state.currentNoteIndex >= song.notes.length) return;
             const expectedNote = song.notes[state.currentNoteIndex];
+            if (expectedNote.isRest) return;
             const expectedActualMidi = getTransposedMidi(expectedNote.midi);
             const noteDurSec = (expectedNote.dur || 1) * getPracticeBeatMs() / 1000;
             if (source !== 'mic') playPianoTone(playedMidi, noteDurSec);
@@ -2717,15 +2813,7 @@
                     updateKeyboardHighlights();
                 }, 250);
 
-                state.currentNoteIndex++;
-
-                if (state.loopPhraseActive) {
-                    const loopEnd = Math.min(song.notes.length, state.loopStartIdx + 8);
-                    if (state.currentNoteIndex >= loopEnd) {
-                        state.currentNoteIndex = state.loopStartIdx;
-                        for (let i = state.loopStartIdx; i < loopEnd; i++) state.noteStates[i] = 'pending';
-                    }
-                }
+                advancePracticeIndex(song);
 
                 updateInstructionUI('CORRECT', playedMidi, expectedActualMidi);
                 updateKeyboardHighlights();
@@ -2764,8 +2852,8 @@
             const total = song.notes.length;
             const currentIdx = Math.min(state.currentNoteIndex, total - 1);
             const currentTarget = song.notes[currentIdx];
-            const targetActualMidi = getTransposedMidi(currentTarget.midi);
-            const targetKeyInfo = MIDI_MAP[targetActualMidi] || MIDI_MAP[60];
+            const targetActualMidi = currentTarget.isRest ? null : getTransposedMidi(currentTarget.midi);
+            const targetKeyInfo = currentTarget.isRest ? null : (MIDI_MAP[targetActualMidi] || MIDI_MAP[60]);
             const isLeft = currentTarget.hand === 'L';
 
             document.getElementById('scoreDisplay').textContent = state.currentScore.toLocaleString();
@@ -2785,6 +2873,26 @@
             const badgeBox = document.getElementById('targetJianpuBadge');
             const handTag = document.getElementById('targetHandTag');
             const jianpuNum = document.getElementById('targetJianpuNum');
+
+            if (currentTarget.isRest) {
+                badgeBox.className = 'w-11 h-11 rounded-xl border-2 flex flex-col items-center justify-center shrink-0 bg-slate-600/20 border-slate-500';
+                handTag.textContent = '休止';
+                handTag.className = 'text-[9px] font-bold leading-none text-slate-400';
+                jianpuNum.textContent = '0';
+                jianpuNum.className = 'text-xl font-black leading-tight text-slate-400';
+                document.getElementById('handTypeLabel').textContent = '休止符';
+                document.getElementById('fingerNameDisplay').textContent = '毋須按鍵';
+                document.getElementById('fingerBadgeCircle').textContent = '—';
+                const card = document.getElementById('instructionCard');
+                card.classList.remove('border-emerald-500', 'border-red-500', 'animate-shake');
+                const badge = document.getElementById('feedbackBadge');
+                badge.className = 'px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-500/20 text-slate-300 border border-slate-500/40';
+                badge.textContent = '休止';
+                document.getElementById('lyricHint').textContent = `${currentTarget.lyric ? currentTarget.lyric + ' · ' : ''}安靜 ${currentTarget.dur || 1} 拍`;
+                document.getElementById('mainInstructionText').textContent = '休止符：這拍毋須彈奏';
+                document.getElementById('techniqueHint').textContent = '等候下一個音符；Mic 不會判定此拍。';
+                return;
+            }
 
             badgeBox.className = `w-11 h-11 rounded-xl border-2 flex flex-col items-center justify-center shrink-0 ${isLeft ? 'bg-purple-600/20 border-purple-500' : 'bg-blue-600/20 border-blue-500'}`;
             handTag.className = `text-[9px] font-bold leading-none ${isLeft ? 'text-purple-400' : 'text-blue-400'}`;
@@ -2838,7 +2946,8 @@
             const song = SONGS[state.currentSongKey];
             if (state.isDemoPlaying || state.stageEvaluated || state.currentNoteIndex < song.notes.length) return;
             state.stageEvaluated = true;
-            const { accuracy: acc, complete, passed, stars } = PianoCurriculum.evaluatePerformance(song.notes.length, state.correctHits, state.totalAttempts);
+            const playableCount = song.notes.filter(note => !note.isRest).length;
+            const { accuracy: acc, complete, passed, stars } = PianoCurriculum.evaluatePerformance(playableCount, state.correctHits, state.totalAttempts);
             const xpEarned = passed ? (song.xpReward || 60) + stars * 15 : state.correctHits > 0 ? 15 : 0;
 
             playVictoryFanfare(passed);
@@ -2935,8 +3044,8 @@
                 let min = top - 24;
                 let max = bottom;
                 for (const note of entries) {
-                    const y = -(note.step - (hand === 'L' ? -2 : 2)) * spacing / 2;
-                    min = Math.min(min, y - 50);
+                    const y = note.isRest ? top + 2 * spacing : -(note.step - (hand === 'L' ? -2 : 2)) * spacing / 2;
+                    min = Math.min(min, y - (note.isRest ? 14 : 50));
                     max = Math.max(max, y + 8);
                 }
                 const origin = cursor - min;
@@ -2949,7 +3058,7 @@
             }
             const positions = notes.map(note => {
                 const staff = staves[note.hand === 'L' ? 'L' : 'R'];
-                const y = staff.origin - (note.step - (note.hand === 'L' ? -2 : 2)) * staff.spacing / 2;
+                const y = note.isRest ? staff.top + 2 * staff.spacing : staff.origin - (note.step - (note.hand === 'L' ? -2 : 2)) * staff.spacing / 2;
                 return { y, fingerY: Math.min(y - 42, staff.top - 16), textY: staff.textY };
             });
             return { staves, positions, height: cursor + 8 };
@@ -2977,7 +3086,8 @@
             const notes = SONGS[state.currentSongKey]?.notes;
             sheetLayout = buildSheetLayout((notes || []).map(note => ({
                 hand: note.hand,
-                step: DIATONIC_STEP_FROM_C4[getTransposedMidi(note.midi)] ?? 0
+                isRest: note.isRest,
+                step: note.isRest ? 0 : (DIATONIC_STEP_FROM_C4[getTransposedMidi(note.midi)] ?? 0)
             })));
             sheetLayoutNotes = notes;
             sheetLayoutTranspose = state.transposeSemitones;
@@ -3131,6 +3241,43 @@
                             ctx.moveTo(barX, trebleTopY);
                             ctx.lineTo(barX, bassBottomY);
                             ctx.stroke();
+                        }
+
+                        if (noteItem.isRest) {
+                            const staff = sheetLayout.staves[noteItem.hand === 'L' ? 'L' : 'R'];
+                            const y = staff.top + staff.spacing * 2;
+                            const dur = noteItem.dur || 1;
+                            ctx.fillStyle = state.noteStates[idx] === 'rest' ? '#10b981' : (idx === state.currentNoteIndex ? '#2563eb' : (isLight ? '#334155' : '#cbd5e1'));
+                            ctx.strokeStyle = ctx.fillStyle;
+                            ctx.lineWidth = 2.5;
+                            if (dur === 4) {
+                                ctx.fillRect(x - 9, staff.top + staff.spacing * 3, 18, 5);
+                            } else if (dur === 2) {
+                                ctx.fillRect(x - 9, y - 5, 18, 5);
+                            } else if (dur === 0.5) {
+                                ctx.beginPath();
+                                ctx.arc(x - 5, y - 6, 3, 0, Math.PI * 2);
+                                ctx.fill();
+                                ctx.beginPath();
+                                ctx.moveTo(x - 2, y - 6);
+                                ctx.quadraticCurveTo(x + 14, y - 13, x + 4, y + 14);
+                                ctx.stroke();
+                            } else {
+                                ctx.beginPath();
+                                ctx.moveTo(x - 5, y - 15);
+                                ctx.lineTo(x + 5, y - 6);
+                                ctx.lineTo(x - 3, y + 2);
+                                ctx.lineTo(x + 6, y + 9);
+                                ctx.quadraticCurveTo(x + 1, y + 17, x - 5, y + 14);
+                                ctx.stroke();
+                            }
+                            const labelX = idx === state.currentNoteIndex ? playheadX + 3 : x;
+                            ctx.textAlign = idx === state.currentNoteIndex ? 'left' : 'center';
+                            ctx.font = '600 10px Inter, sans-serif';
+                            ctx.fillText('休止', labelX, sheetLayout.positions[idx].textY);
+                            ctx.fillStyle = isLight ? '#64748b' : '#94a3b8';
+                            ctx.fillText(noteItem.lyric || '', labelX, sheetLayout.positions[idx].textY + 13);
+                            return;
                         }
 
                         const actualMidi = getTransposedMidi(noteItem.midi);
@@ -3338,8 +3485,31 @@
                     document.getElementById('customSongTitleInput').value = song.title.replace(/^🎵\s*/, '');
                     document.getElementById('customSongNotesInput').value = song.rawJianpu || '';
                     document.getElementById('customFormModeBadge').textContent = `✏️ 編輯緊：${song.title}`;
+                    document.getElementById('deleteCustomSongBtn').classList.remove('hidden');
                 });
             });
+        }
+
+        function resetCustomSongForm() {
+            state.editingCustomSongKey = null;
+            document.getElementById('customSongTitleInput').value = '';
+            document.getElementById('customSongNotesInput').value = '';
+            document.getElementById('customFormModeBadge').textContent = '✨ 建立新簡譜';
+            document.getElementById('deleteCustomSongBtn').classList.add('hidden');
+        }
+
+        function deleteCustomSongFromForm() {
+            const key = state.editingCustomSongKey;
+            const song = key && SONGS[key];
+            if (!song || song.isCampaign || song.isDojo || !window.confirm(`確定刪除「${song.title}」？此動作無法還原。`)) return;
+            if (Object.prototype.hasOwnProperty.call(BUILTIN_CUSTOM_PRESETS, key)) {
+                if (!state.deletedCustomPresetKeys.includes(key)) state.deletedCustomPresetKeys.push(key);
+            }
+            delete SONGS[key];
+            if (state.currentSongKey === key) loadSong('stage1_middleC');
+            resetCustomSongForm();
+            saveToLocalStorage();
+            renderSavedCustomSongsList();
         }
 
         function saveCustomSongFromForm(andPlay = false) {
@@ -3595,8 +3765,8 @@
                 }
                 const note = song.notes[state.currentNoteIndex];
                 const stepMs = (note.dur || 1) * getPracticeBeatMs();
-                playPianoTone(getTransposedMidi(note.midi), stepMs / 1000);
-                state.noteStates[state.currentNoteIndex] = 'correct';
+                if (!note.isRest) playPianoTone(getTransposedMidi(note.midi), stepMs / 1000);
+                state.noteStates[state.currentNoteIndex] = note.isRest ? 'rest' : 'correct';
                 updateInstructionUI('INIT');
                 updateKeyboardHighlights();
                 state.currentNoteIndex++;
@@ -3869,12 +4039,8 @@
                 document.getElementById('customSongModal').classList.add('flex');
             });
             bindSafariButton('closeCustomSongBtn', () => document.getElementById('customSongModal').classList.add('hidden'));
-            bindSafariButton('newCustomSongResetBtn', () => {
-                state.editingCustomSongKey = null;
-                document.getElementById('customSongTitleInput').value = '';
-                document.getElementById('customSongNotesInput').value = '';
-                document.getElementById('customFormModeBadge').textContent = '✨ 建立新簡譜';
-            });
+            bindSafariButton('newCustomSongResetBtn', resetCustomSongForm);
+            bindSafariButton('deleteCustomSongBtn', deleteCustomSongFromForm);
 
             bindSafariButton('fillSampleCanonBtn', () => {
                 document.getElementById('customSongTitleInput').value = '帕海貝爾《卡農 Canon》雙手精華';

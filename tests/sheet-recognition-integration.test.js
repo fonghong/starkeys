@@ -107,6 +107,23 @@ test('parser preserves existing hands/fingers and supports G5 and whole-note pla
     assert.deepEqual(plain(vm.runInContext('[77, 78, 79].map(m => [MIDI_MAP[m].midi, DIATONIC_STEP_FROM_C4[m]])', context)), [[77, 10], [78, 10], [79, 11]]);
 });
 
+test('inline lyrics and four rest durations preserve token alignment and hand overrides', () => {
+    const { context } = harness();
+    const notes = plain(context.parseJianpuString('R1:1(小) R2:2(綿) R3-:3(羊) 0 0- L0-- 0/2 1'));
+    assert.deepEqual(notes.slice(0, 3).map(({ midi, dur, finger, lyric }) => ({ midi, dur, finger, lyric })), [
+        { midi: 60, dur: 1, finger: 1, lyric: '小' },
+        { midi: 62, dur: 1, finger: 2, lyric: '綿' },
+        { midi: 64, dur: 2, finger: 3, lyric: '羊' }
+    ]);
+    assert.deepEqual(notes.slice(3, 7).map(({ isRest, midi, dur, hand, finger }) => ({ isRest, midi, dur, hand, finger })), [
+        { isRest: true, midi: null, dur: 1, hand: 'R', finger: null },
+        { isRest: true, midi: null, dur: 2, hand: 'R', finger: null },
+        { isRest: true, midi: null, dur: 4, hand: 'L', finger: null },
+        { isRest: true, midi: null, dur: 0.5, hand: 'R', finger: null }
+    ]);
+    assert.equal(notes[7].lyric, vm.runInContext('MIDI_MAP[60].solfege', context));
+});
+
 test('local multi-page import keeps staff order, original resolution, debug pages and existing title', async () => {
     const h = harness([recognized(['1', '2'], ["5'--"]), recognized(['3/2'])]);
     const run = h.context.runLocalLogicSheetRecognition();
